@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { Habit } from "@/types/habit";
 import { useGardenContext, PlantGrowthStage, PlantType } from "@/context/GardenContext";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Leaf, Flower, Tree, Sprout } from "lucide-react";
+import { Leaf, Flower, Trees, Sprout } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCategoryColor } from "@/lib/utils/habitUtils";
 
@@ -25,13 +24,11 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
   const specialEffects = plant?.specialEffects || [];
   const showAnimations = gardenAnimationsLevel !== "none" && !ecoMode;
   
-  // Calculate growth percentage based on habit streak and growth stage
   const getGrowthPercentage = (): number => {
-    const streakToMaxGrowth = 30; // 30-day streak for 100% growth
+    const streakToMaxGrowth = 30;
     return Math.min(100, Math.round((habit.currentStreak / streakToMaxGrowth) * 100));
   };
   
-  // Trigger growth animation when component mounts
   useEffect(() => {
     if (showAnimations && plant?.lastWatered) {
       const lastWateredDate = new Date(plant.lastWatered);
@@ -39,12 +36,10 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
       const timeDiff = now.getTime() - lastWateredDate.getTime();
       const hoursDiff = timeDiff / (1000 * 60 * 60);
       
-      // If watered in the last hour, show growing animation
       if (hoursDiff < 1) {
         setIsGrowing(true);
         setTimeout(() => setIsGrowing(false), 3000);
         
-        // Show special effects if any
         if (specialEffects.length > 0) {
           setTimeout(() => {
             setShowEffect(true);
@@ -55,7 +50,6 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
     }
   }, [plant?.lastWatered, showAnimations, specialEffects]);
 
-  // Get plant emoji based on type and growth stage
   const getPlantEmoji = (): string => {
     if (growthStage === "seed") return "🌱";
     
@@ -79,7 +73,6 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
     }
   };
   
-  // Get visualization component based on plant type and stage
   const getPlantIcon = () => {
     if (growthStage === "seed") {
       return <Sprout className="h-12 w-12 text-muted-foreground" />;
@@ -89,13 +82,12 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
       case "flower":
         return <Flower className={`h-16 w-16 text-${plantColor}-500`} />;
       case "tree":
-        return <Tree className={`h-16 w-16 text-${plantColor}-500`} />;
+        return <Trees className={`h-16 w-16 text-${plantColor}-500`} />;
       default:
         return <Leaf className={`h-16 w-16 text-${plantColor}-500`} />;
     }
   };
   
-  // Get special effect animation
   const renderSpecialEffect = () => {
     if (showEffect && specialEffects.includes("butterfly")) {
       return (
@@ -122,21 +114,16 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
       highContrastGarden ? "border-2" : "",
       habit.currentStreak > 0 ? "bg-gradient-to-b from-transparent to-muted/20" : ""
     )}>
-      {/* Plant visualization */}
       <div className={cn(
         "mb-4 relative flex justify-center items-center w-full",
         isGrowing ? "animate-subtle-bounce" : ""
       )}>
-        {/* Plant icon */}
         <div className="text-4xl mb-2">
           {getPlantIcon()}
         </div>
-        
-        {/* Special effects (butterflies, birds) */}
         {renderSpecialEffect()}
       </div>
       
-      {/* Habit name and info */}
       <div className="text-center mb-2 w-full">
         <h3 className="font-semibold mb-1">{habit.name}</h3>
         <div className="flex justify-center gap-2">
@@ -145,7 +132,6 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
         </div>
       </div>
       
-      {/* Growth progress */}
       <div className="w-full mt-2">
         <div className="flex justify-between text-xs text-muted-foreground mb-1">
           <span>{growthStage}</span>

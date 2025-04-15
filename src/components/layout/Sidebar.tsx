@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { 
   Home, CalendarCheck2, BarChart2, Medal, 
@@ -22,7 +22,7 @@ interface NavItemProps {
 
 export const Sidebar: React.FC = () => {
   const location = useLocation();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const { isOfflineMode } = useHabits();
   const { isGardenEnabled } = useGardenContext();
   
