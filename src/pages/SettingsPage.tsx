@@ -16,6 +16,7 @@ const SettingsPage: React.FC = () => {
   const [reduceMotion, setReduceMotion] = React.useState(false);
   const [highContrast, setHighContrast] = React.useState(false);
   const [ecoMode, setEcoMode] = React.useState(false);
+  const [enableAnimations, setEnableAnimations] = React.useState(true);
   
   // Notification Settings  
   const [enableNotifications, setEnableNotifications] = React.useState(true);
@@ -24,6 +25,45 @@ const SettingsPage: React.FC = () => {
   // Privacy Settings
   const [shareAnalytics, setShareAnalytics] = React.useState(false);
   const [storeDataLocally, setStoreDataLocally] = React.useState(true);
+
+  // Handle animation toggle
+  const handleAnimationToggle = (checked: boolean) => {
+    setEnableAnimations(checked);
+    
+    // Apply or remove reduced motion class to body
+    if (!checked) {
+      document.body.classList.add('reduce-animations');
+      toast("Animations reduced", {
+        description: "Most animations have been disabled for a calmer experience"
+      });
+    } else {
+      document.body.classList.remove('reduce-animations');
+      toast("Animations enabled", {
+        description: "Subtle animations are now active"
+      });
+    }
+  };
+
+  // Handle eco-mode toggle
+  const handleEcoModeToggle = (checked: boolean) => {
+    setEcoMode(checked);
+    
+    if (checked) {
+      // Apply eco mode - reduce animations further and optimize rendering
+      document.body.classList.add('eco-mode');
+      // If eco mode is on, also reduce animations
+      setEnableAnimations(false);
+      document.body.classList.add('reduce-animations');
+      toast("Eco-Mode enabled", {
+        description: "Reduced animations and background processes to save energy"
+      });
+    } else {
+      document.body.classList.remove('eco-mode');
+      toast("Eco-Mode disabled", {
+        description: "Standard app experience restored"
+      });
+    }
+  };
 
   const handleReset = () => {
     // In a real app, this would clear all user data
@@ -61,9 +101,33 @@ const SettingsPage: React.FC = () => {
     }
   };
 
+  // Apply any saved settings on component mount
+  React.useEffect(() => {
+    if (reduceMotion) {
+      document.body.classList.add('reduce-animations');
+    }
+    
+    if (ecoMode) {
+      document.body.classList.add('eco-mode');
+    }
+    
+    // Check for system preference
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setReduceMotion(true);
+      setEnableAnimations(false);
+      document.body.classList.add('reduce-animations');
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('reduce-animations');
+      document.body.classList.remove('eco-mode');
+    };
+  }, [reduceMotion, ecoMode]);
+
   return (
     <AppLayout>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 animate-fade-in">
         <section>
           <div className="flex items-center gap-2 mb-6">
             <Settings className="h-6 w-6 text-primary" />
@@ -75,9 +139,9 @@ const SettingsPage: React.FC = () => {
         </section>
         
         {/* Accessibility Settings */}
-        <section>
+        <section className="animate-fade-in" style={{ animationDelay: "100ms" }}>
           <h2 className="text-xl font-semibold mb-4">Accessibility</h2>
-          <div className="space-y-4 bg-card rounded-lg border p-4">
+          <div className="space-y-4 bg-card rounded-lg border p-4 transition-all hover:border-primary/30">
             <div className="flex flex-col gap-2">
               <Label htmlFor="font-size">Font Size</Label>
               <div className="flex items-center gap-4">
@@ -93,6 +157,18 @@ const SettingsPage: React.FC = () => {
                 />
                 <span className="text-lg">A</span>
               </div>
+            </div>
+
+            <div className="flex items-center justify-between space-x-2">
+              <div>
+                <Label htmlFor="enable-animations">Enable Animations</Label>
+                <p className="text-sm text-muted-foreground">Toggle subtle UI animations</p>
+              </div>
+              <Switch 
+                id="enable-animations" 
+                checked={enableAnimations}
+                onCheckedChange={handleAnimationToggle}
+              />
             </div>
             
             <div className="flex items-center justify-between space-x-2">
@@ -121,19 +197,19 @@ const SettingsPage: React.FC = () => {
               <Switch 
                 id="eco-mode" 
                 checked={ecoMode}
-                onCheckedChange={setEcoMode}
+                onCheckedChange={handleEcoModeToggle}
               />
             </div>
           </div>
         </section>
         
         {/* Notification Settings */}
-        <section>
+        <section className="animate-fade-in" style={{ animationDelay: "200ms" }}>
           <h2 className="text-xl font-semibold mb-4">
             <Bell className="h-5 w-5 inline mr-2" />
             Notifications
           </h2>
-          <div className="space-y-4 bg-card rounded-lg border p-4">
+          <div className="space-y-4 bg-card rounded-lg border p-4 transition-all hover:border-primary/30">
             <div className="flex items-center justify-between space-x-2">
               <div>
                 <Label htmlFor="notifications">Enable Notifications</Label>
@@ -173,12 +249,12 @@ const SettingsPage: React.FC = () => {
         </section>
         
         {/* Privacy & Data Settings */}
-        <section>
+        <section className="animate-fade-in" style={{ animationDelay: "300ms" }}>
           <h2 className="text-xl font-semibold mb-4">
             <Lock className="h-5 w-5 inline mr-2" />
             Privacy &amp; Data
           </h2>
-          <div className="space-y-4 bg-card rounded-lg border p-4">
+          <div className="space-y-4 bg-card rounded-lg border p-4 transition-all hover:border-primary/30">
             <div className="flex items-center justify-between space-x-2">
               <div>
                 <Label htmlFor="analytics">Share Anonymous Analytics</Label>
@@ -204,11 +280,11 @@ const SettingsPage: React.FC = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
-              <Button variant="outline" onClick={handleExportData}>
+              <Button variant="outline" onClick={handleExportData} className="transition-all hover:bg-primary/5">
                 <Database className="h-4 w-4 mr-2" />
                 Export Your Data
               </Button>
-              <Button variant="outline" className="text-destructive hover:text-destructive" onClick={handleReset}>
+              <Button variant="outline" className="text-destructive hover:text-destructive transition-all hover:bg-destructive/5" onClick={handleReset}>
                 Reset All Data
               </Button>
             </div>
@@ -216,12 +292,12 @@ const SettingsPage: React.FC = () => {
         </section>
         
         {/* About Section */}
-        <section className="mb-8">
+        <section className="mb-8 animate-fade-in" style={{ animationDelay: "400ms" }}>
           <h2 className="text-xl font-semibold mb-4">
             <InfoIcon className="h-5 w-5 inline mr-2" />
             About
           </h2>
-          <div className="space-y-4 bg-card rounded-lg border p-4">
+          <div className="space-y-4 bg-card rounded-lg border p-4 transition-all hover:border-primary/30">
             <div>
               <h3 className="font-medium">HabitFlow</h3>
               <p className="text-sm text-muted-foreground">Version 1.0.0</p>

@@ -105,11 +105,11 @@
 
 @layer components {
   .habit-card {
-    @apply bg-card p-5 rounded-lg border border-border transition-all duration-200;
+    @apply bg-card p-5 rounded-lg border border-border transition-all duration-300;
   }
   
   .habit-card:hover {
-    @apply shadow-md;
+    @apply shadow-md transform scale-[1.01];
   }
   
   .progress-bar {
@@ -121,6 +121,47 @@
   }
   
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all;
   }
+
+  /* Animation utility classes */
+  .animate-enter {
+    @apply transition-all duration-300 transform;
+  }
+
+  .animate-exit {
+    @apply transition-all duration-200 transform;
+  }
+
+  .animate-hover {
+    @apply transition-all duration-200;
+  }
+
+  /* Special effects */
+  .glow-effect {
+    @apply relative after:absolute after:inset-0 after:rounded-lg after:opacity-0 after:transition-opacity after:duration-300 hover:after:opacity-100 after:bg-gradient-to-r after:from-primary/20 after:to-accent/20 after:blur-lg;
+  }
+}
+
+/* Additional keyframes */
+@keyframes pulse-light {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Accessibility - reduced motion */
+@media (prefers-reduced-motion) {
+  *, *::before, *::after {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+}
+
+.animate-pulse-light {
+  animation: pulse-light 2s ease-in-out infinite;
 }

@@ -4,6 +4,7 @@ import { Award, Flame, CheckCircle2, Star, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useHabits } from "@/context/HabitContext";
+import { cn } from "@/lib/utils";
 
 export const UserStats: React.FC = () => {
   const { stats, habits } = useHabits();
@@ -33,9 +34,9 @@ export const UserStats: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <Card>
+      <Card className="animate-fade-in" style={{ animationDelay: "0ms" }}>
         <CardContent className="p-4 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center animate-scale-in">
             <CheckCircle2 className="h-6 w-6 text-primary" />
           </div>
           <div>
@@ -45,9 +46,9 @@ export const UserStats: React.FC = () => {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="animate-fade-in" style={{ animationDelay: "150ms" }}>
         <CardContent className="p-4 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center animate-scale-in" style={{ animationDelay: "150ms" }}>
             <Flame className="h-6 w-6 text-amber-500" />
           </div>
           <div>
@@ -57,9 +58,9 @@ export const UserStats: React.FC = () => {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="animate-fade-in" style={{ animationDelay: "300ms" }}>
         <CardContent className="p-4 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center animate-scale-in" style={{ animationDelay: "300ms" }}>
             <Award className="h-6 w-6 text-accent" />
           </div>
           <div>
@@ -69,7 +70,7 @@ export const UserStats: React.FC = () => {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="animate-fade-in" style={{ animationDelay: "450ms" }}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-medium text-muted-foreground">Weekly Progress</p>

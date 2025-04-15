@@ -97,6 +97,18 @@ export default {
 				'pulse-light': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.85' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' }
+				},
+				'subtle-bounce': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-3px)' }
+				},
+				'badge-glow': {
+					'0%, 100%': { boxShadow: '0 0 0 rgba(139, 92, 246, 0)' },
+					'50%': { boxShadow: '0 0 5px rgba(139, 92, 246, 0.5)' }
 				}
 			},
 			animation: {
@@ -106,7 +118,10 @@ export default {
 				'fade-out': 'fade-out 0.3s ease-out',
 				'scale-in': 'scale-in 0.2s ease-out',
 				'progress-fill': 'progress-fill 0.5s ease-out forwards',
-				'pulse-light': 'pulse-light 2s ease-in-out infinite'
+				'pulse-light': 'pulse-light 2s ease-in-out infinite',
+				'float': 'float 3s ease-in-out infinite',
+				'subtle-bounce': 'subtle-bounce 2s ease-in-out infinite',
+				'badge-glow': 'badge-glow 2s ease-in-out infinite'
 			},
 			fontFamily: {
 				sans: ['Inter', 'sans-serif']
