@@ -68,7 +68,13 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen, onClose, editingHa
     if (editingHabit) {
       updateHabit(editingHabit.id, values);
     } else {
-      addHabit(values);
+      // Fix: Ensure all required fields are provided to addHabit
+      addHabit({
+        name: values.name, // This is now guaranteed to be a string due to the schema
+        description: values.description || "", // Provide a default empty string for optional description
+        frequency: values.frequency,
+        category: values.category,
+      });
     }
     form.reset();
     onClose();
