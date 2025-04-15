@@ -5,8 +5,9 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { calculateCompletionPercentage, getCategoryColor, isHabitCompletedOnDate } from "@/lib/utils/habitUtils";
 import { Habit } from "@/types/habit";
-import { MoreVertical, Check, BarChart } from "lucide-react";
+import { MoreVertical, Check, BarChart, Leaf } from "lucide-react";
 import { useHabits } from "@/context/HabitContext";
+import { useGardenContext } from "@/context/GardenContext";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface HabitCardProps {
   habit: Habit;
@@ -24,9 +26,13 @@ interface HabitCardProps {
 
 export const HabitCard: React.FC<HabitCardProps> = ({ habit, showActions = true }) => {
   const { completeHabit, uncompleteHabit, archiveHabit, deleteHabit } = useHabits();
+  const { handleHabitCompletion, isGardenEnabled, getPlantByHabitId } = useGardenContext();
+  const navigate = useNavigate();
+  
   const today = new Date().toISOString().split('T')[0];
   const isCompleted = isHabitCompletedOnDate(habit, new Date());
   const completionPercentage = calculateCompletionPercentage(habit);
+  const plantData = getPlantByHabitId(habit.id);
   
   const handleToggleCompletion = () => {
     if (isCompleted) {
@@ -36,10 +42,32 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, showActions = true 
       });
     } else {
       completeHabit(habit.id, today);
-      toast("Habit completed!", {
-        description: `Great job maintaining your "${habit.name}" habit!`,
-      });
+      
+      // Update garden when habit is completed
+      if (isGardenEnabled) {
+        handleHabitCompletion(habit);
+        
+        // Add a garden-specific toast message occasionally
+        if (Math.random() > 0.7) {
+          toast("Your garden is growing!", {
+            description: "Check your Habit Garden to see your progress",
+          });
+        } else {
+          toast("Habit completed!", {
+            description: `Great job maintaining your "${habit.name}" habit!`,
+          });
+        }
+      } else {
+        toast("Habit completed!", {
+          description: `Great job maintaining your "${habit.name}" habit!`,
+        });
+      }
     }
+  };
+  
+  // Navigate to garden view for this specific plant
+  const viewInGarden = () => {
+    navigate('/garden');
   };
 
   return (
@@ -66,6 +94,13 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, showActions = true 
               <DropdownMenuItem>
                 <BarChart className="mr-2 h-4 w-4" /> View insights
               </DropdownMenuItem>
+              
+              {isGardenEnabled && plantData && (
+                <DropdownMenuItem onClick={viewInGarden}>
+                  <Leaf className="mr-2 h-4 w-4" /> View in garden
+                </DropdownMenuItem>
+              )}
+              
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => archiveHabit(habit.id)}>
                 Archive habit
@@ -104,6 +139,18 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, showActions = true 
               </svg>
               <span className="animate-pulse-light">{habit.currentStreak} days</span>
             </div>
+          )}
+          
+          {/* Small plant indicator if it exists in the garden */}
+          {isGardenEnabled && plantData && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="h-5 w-5 p-0" 
+              onClick={viewInGarden}
+            >
+              <Leaf className="h-3 w-3 text-primary" />
+            </Button>
           )}
         </div>
         <Button 

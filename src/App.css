@@ -86,3 +86,99 @@
   transform: scale(1);
   transition: opacity 300ms, transform 300ms;
 }
+
+/* Garden-specific animations */
+@keyframes plant-grow {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes leaf-unfurl {
+  0% {
+    transform: rotate(-10deg) scale(0.9);
+  }
+  100% {
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes butterfly-flutter {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(5px, -5px) rotate(10deg);
+  }
+  50% {
+    transform: translate(0, -8px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-5px, -5px) rotate(-10deg);
+  }
+}
+
+@keyframes bird-fly {
+  0% {
+    transform: translate(-10px, 0) scale(1);
+  }
+  25% {
+    transform: translate(0, -5px) scale(1.05);
+  }
+  50% {
+    transform: translate(10px, 0) scale(1);
+  }
+  75% {
+    transform: translate(0, 5px) scale(0.95);
+  }
+  100% {
+    transform: translate(-10px, 0) scale(1);
+  }
+}
+
+.animate-plant-grow {
+  animation: plant-grow 2s ease-out forwards;
+}
+
+.animate-leaf-unfurl {
+  animation: leaf-unfurl 1.5s ease-out forwards;
+}
+
+.animate-butterfly-flutter {
+  animation: butterfly-flutter 4s ease-in-out infinite;
+}
+
+.animate-bird-fly {
+  animation: bird-fly 6s ease-in-out infinite;
+}
+
+/* Eco-conscious animation reduction */
+.eco-mode .animate-butterfly-flutter,
+.eco-mode .animate-bird-fly {
+  animation-duration: 10s; /* Slow down animations to save processing */
+}
+
+.eco-mode .animate-plant-grow,
+.eco-mode .animate-leaf-unfurl {
+  animation: none; /* Disable growth animations in eco mode */
+}
+
+/* Reduce-animations class for accessibility */
+.reduce-animations * {
+  animation-duration: 0.001s !important;
+  transition-duration: 0.001s !important;
+}
+
+/* High-contrast adjustments for plants */
+.high-contrast-garden .plant-element {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

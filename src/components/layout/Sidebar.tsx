@@ -1,115 +1,141 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { 
-  Home, 
-  Calendar, 
-  Award, 
-  Settings, 
-  Archive, 
-  HelpCircle, 
-  BarChart3, 
-  Menu, 
-  X 
-} from "lucide-react";
-import { useHabits } from "@/context/HabitContext";
-import { Button } from "@/components/ui/button";
+import { useMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { 
+  Home, CalendarCheck2, BarChart2, Medal, 
+  Archive, Settings, HelpCircle, Menu, X, Leaf
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useHabits } from "@/context/HabitContext"; 
+import { useGardenContext } from "@/context/GardenContext";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
+interface NavItemProps {
+  to: string;
+  icon: React.ElementType;
+  label: string;
+  extraLabel?: string;
+  onClick?: () => void;
+}
 
 export const Sidebar: React.FC = () => {
   const location = useLocation();
-  const [isOpen, setIsOpen] = React.useState(false);
-  const { stats } = useHabits();
+  const isMobile = useMobile();
+  const { isOfflineMode } = useHabits();
+  const { isGardenEnabled } = useGardenContext();
   
-  const menuItems = [
-    { name: "Dashboard", icon: <Home className="h-5 w-5" />, path: "/" },
-    { name: "Today", icon: <Calendar className="h-5 w-5" />, path: "/today" },
-    { name: "Insights", icon: <BarChart3 className="h-5 w-5" />, path: "/insights" },
-    { name: "Rewards", icon: <Award className="h-5 w-5" />, path: "/rewards" },
-    { name: "Archive", icon: <Archive className="h-5 w-5" />, path: "/archive" },
-    { name: "Settings", icon: <Settings className="h-5 w-5" />, path: "/settings" },
-    { name: "Help", icon: <HelpCircle className="h-5 w-5" />, path: "/help" },
+  const navItems = [
+    { to: "/", icon: Home, label: "Dashboard" },
+    { to: "/today", icon: CalendarCheck2, label: "Today" },
+    { to: "/insights", icon: BarChart2, label: "Insights" },
+    { to: "/rewards", icon: Medal, label: "Rewards" },
+    { to: "/garden", icon: Leaf, label: "Garden" },
+    { to: "/archive", icon: Archive, label: "Archive" },
+    { to: "/settings", icon: Settings, label: "Settings" },
+    { to: "/help", icon: HelpCircle, label: "Help" },
   ];
 
-  return (
-    <>
-      {/* Mobile menu button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? <X /> : <Menu />}
-      </Button>
-
-      {/* Sidebar background overlay on mobile */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* Sidebar content */}
-      <aside
+  const NavItem: React.FC<NavItemProps> = ({ 
+    to, icon: Icon, label, extraLabel, onClick 
+  }) => {
+    const isActive = location.pathname === to;
+    return (
+      <Link 
+        to={to} 
+        onClick={onClick}
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-72 border-r border-border bg-card md:sticky transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          "flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:text-sidebar-foreground",
+          "hover:bg-sidebar-accent group w-full",
+          isActive 
+            ? "bg-sidebar-accent text-sidebar-primary font-medium" 
+            : "text-sidebar-foreground/80"
         )}
       >
-        <div className="flex h-full flex-col overflow-y-auto py-5">
-          <div className="px-6 mb-6">
-            <h1 className="text-2xl font-bold text-primary">HabitFlow</h1>
-            <p className="text-sm text-muted-foreground">Ethically designed for your growth</p>
-          </div>
-          
-          <div className="px-4 mb-6">
-            <div className="flex items-center justify-between bg-secondary rounded-lg p-3">
-              <div>
-                <p className="text-sm font-medium text-foreground">Your points</p>
-                <p className="text-2xl font-bold text-primary">{stats.points}</p>
-              </div>
-              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                <Award className="h-5 w-5" />
-              </div>
-            </div>
-          </div>
+        <Icon className={cn(
+          "h-5 w-5",
+          isActive ? "text-sidebar-primary" : "text-sidebar-foreground/80"
+        )} />
+        {label}
+        {extraLabel && (
+          <span className="ml-auto text-xs font-medium text-sidebar-primary bg-sidebar-primary/10 px-1.5 py-0.5 rounded">
+            {extraLabel}
+          </span>
+        )}
+      </Link>
+    );
+  };
 
-          <nav className="space-y-1 px-3 flex-1">
-            {menuItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 hover:bg-secondary transition-colors",
-                  location.pathname === item.path
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "text-foreground"
-                )}
-                onClick={() => setIsOpen(false)}
-              >
-                {item.icon}
-                <span>{item.name}</span>
-              </Link>
-            ))}
-          </nav>
-
-          <div className="mt-auto px-4">
-            <div className="rounded-md bg-secondary/50 p-4">
-              <div className="flex items-center">
-                <span className="flex h-8 w-8 rounded-full bg-primary/20 items-center justify-center mr-3">
-                  <span className="text-primary">🌱</span>
-                </span>
-                <div>
-                  <p className="text-sm font-medium">Eco-Mode</p>
-                  <p className="text-xs text-muted-foreground">Reduced animations</p>
-                </div>
-              </div>
-            </div>
+  const SidebarContent = ({ onClick }: { onClick?: () => void }) => (
+    <div className="space-y-4 py-4 h-full flex flex-col">
+      <div className="px-3 py-2">
+        <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight text-sidebar-foreground">
+          HabitFlow
+        </h2>
+        {isOfflineMode && (
+          <div className="mb-2 px-2 py-1 text-xs font-medium bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded">
+            Offline Mode
           </div>
+        )}
+      </div>
+      <div className="px-3 py-1">
+        <h2 className="mb-2 px-2 text-xs tracking-tight uppercase text-sidebar-foreground/70">
+          Navigation
+        </h2>
+        <div className="space-y-1">
+          {navItems.map((item) => (
+            <NavItem 
+              key={item.label}
+              to={item.to}
+              icon={item.icon}
+              label={item.label}
+              onClick={onClick}
+              // Special indicator for Garden feature when enabled
+              extraLabel={item.to === "/garden" && isGardenEnabled ? "New" : undefined}
+            />
+          ))}
         </div>
-      </aside>
-    </>
+      </div>
+      <div className="mt-auto px-3 py-2">
+        <div className="rounded-md bg-sidebar-primary/10 p-2">
+          <h3 className="text-sm font-medium text-sidebar-foreground">
+            Ethical Design
+          </h3>
+          <p className="text-xs text-sidebar-foreground/70 mt-1">
+            HabitFlow is designed without dark patterns or manipulative features.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="md:hidden fixed top-4 left-4 z-50">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle Menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-72 bg-sidebar p-0">
+          <div className="absolute right-4 top-4">
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <X className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+          </div>
+          <SidebarContent onClick={() => document.body.click()} />
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <div className="hidden md:block w-64 border-r border-sidebar-border bg-sidebar-background">
+      <SidebarContent />
+    </div>
   );
 };
