@@ -1,9 +1,8 @@
-
 import React from "react";
 import { Habit } from "@/types/habit";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Award, Lock, Check, Flower, Birds, Trees } from "lucide-react";
+import { Award, Lock, Check, Flower, Bird, Trees } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Achievement {
@@ -21,7 +20,6 @@ interface GardenAchievementsProps {
 }
 
 export const GardenAchievements: React.FC<GardenAchievementsProps> = ({ habits }) => {
-  // Define achievements
   const achievements: Achievement[] = [
     {
       id: "first-plant",
@@ -51,7 +49,7 @@ export const GardenAchievements: React.FC<GardenAchievementsProps> = ({ habits }
       id: "bird-sanctuary",
       name: "Bird Sanctuary",
       description: "Maintain any habit for 21 days",
-      icon: <Birds className="h-5 w-5" />,
+      icon: <Bird className="h-5 w-5" />,
       condition: (habits) => habits.some(h => h.currentStreak >= 21),
       progress: (habits) => {
         const maxStreak = Math.max(...habits.map(h => h.currentStreak), 0);
@@ -88,7 +86,6 @@ export const GardenAchievements: React.FC<GardenAchievementsProps> = ({ habits }
     },
   ];
 
-  // Calculate achievements
   const achievementStatus = achievements.map(achievement => ({
     ...achievement,
     isUnlocked: achievement.condition(habits),
@@ -149,7 +146,6 @@ export const GardenAchievements: React.FC<GardenAchievementsProps> = ({ habits }
   );
 };
 
-// Export Sprout icon for use in component
 export const Sprout = (props: any) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
