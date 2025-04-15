@@ -1,49 +1,44 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HabitProvider } from "@/context/HabitContext";
-import { GardenProvider } from "@/context/GardenContext";
-
-// Pages
+import { Route, Routes } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import TodayPage from "./pages/TodayPage";
 import InsightsPage from "./pages/InsightsPage";
+import GardenPage from "./pages/GardenPage";
 import RewardsPage from "./pages/RewardsPage";
-import ArchivePage from "./pages/ArchivePage";
 import SettingsPage from "./pages/SettingsPage";
 import HelpPage from "./pages/HelpPage";
+import ArchivePage from "./pages/ArchivePage";
 import NotFound from "./pages/NotFound";
-import GardenPage from "./pages/GardenPage";
+import Index from "./pages/Index";
+import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { HabitProvider } from "@/context/HabitContext";
+import { GardenProvider } from "@/context/GardenContext";
+import DebugPage from "./pages/DebugPage";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+function App() {
+  return (
+    <ThemeProvider defaultTheme="system" storageKey="habit-tracker-theme">
       <HabitProvider>
         <GardenProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/today" element={<TodayPage />} />
+            <Route path="/insights" element={<InsightsPage />} />
+            <Route path="/garden" element={<GardenPage />} />
+            <Route path="/rewards" element={<RewardsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/archive" element={<ArchivePage />} />
+            <Route path="/help" element={<HelpPage />} />
+            <Route path="/debug" element={<DebugPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
           <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/today" element={<TodayPage />} />
-              <Route path="/insights" element={<InsightsPage />} />
-              <Route path="/rewards" element={<RewardsPage />} />
-              <Route path="/garden" element={<GardenPage />} />
-              <Route path="/archive" element={<ArchivePage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/help" element={<HelpPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
         </GardenProvider>
       </HabitProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </ThemeProvider>
+  );
+}
 
 export default App;

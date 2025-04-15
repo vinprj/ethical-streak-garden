@@ -1,141 +1,213 @@
 
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
-import { 
-  Home, CalendarCheck2, BarChart2, Medal, 
-  Archive, Settings, HelpCircle, Menu, X, Leaf
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useHabits } from "@/context/HabitContext"; 
-import { useGardenContext } from "@/context/GardenContext";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  CheckCircle2,
+  Home,
+  BarChart2,
+  Award,
+  Archive,
+  Settings,
+  HelpCircle,
+  Leaf,
+  Menu,
+  GanttChartSquare,
+  Bug
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useHabits } from "@/context/HabitContext";
 
-interface NavItemProps {
-  to: string;
-  icon: React.ElementType;
-  label: string;
-  extraLabel?: string;
-  onClick?: () => void;
-}
-
-export const Sidebar: React.FC = () => {
-  const location = useLocation();
+export const Sidebar = () => {
   const isMobile = useIsMobile();
   const { isOfflineMode } = useHabits();
-  const { isGardenEnabled } = useGardenContext();
-  
-  const navItems = [
-    { to: "/", icon: Home, label: "Dashboard" },
-    { to: "/today", icon: CalendarCheck2, label: "Today" },
-    { to: "/insights", icon: BarChart2, label: "Insights" },
-    { to: "/rewards", icon: Medal, label: "Rewards" },
-    { to: "/garden", icon: Leaf, label: "Garden" },
-    { to: "/archive", icon: Archive, label: "Archive" },
-    { to: "/settings", icon: Settings, label: "Settings" },
-    { to: "/help", icon: HelpCircle, label: "Help" },
-  ];
+  const [expanded, setExpanded] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
 
-  const NavItem: React.FC<NavItemProps> = ({ 
-    to, icon: Icon, label, extraLabel, onClick 
-  }) => {
-    const isActive = location.pathname === to;
-    return (
-      <Link 
-        to={to} 
-        onClick={onClick}
-        className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:text-sidebar-foreground",
-          "hover:bg-sidebar-accent group w-full",
-          isActive 
-            ? "bg-sidebar-accent text-sidebar-primary font-medium" 
-            : "text-sidebar-foreground/80"
-        )}
-      >
-        <Icon className={cn(
-          "h-5 w-5",
-          isActive ? "text-sidebar-primary" : "text-sidebar-foreground/80"
-        )} />
-        {label}
-        {extraLabel && (
-          <span className="ml-auto text-xs font-medium text-sidebar-primary bg-sidebar-primary/10 px-1.5 py-0.5 rounded">
-            {extraLabel}
-          </span>
-        )}
-      </Link>
-    );
+  const toggleDebugMenu = () => {
+    // Click the logo 5 times to show debug menu
+    if (!showDebug) {
+      const clickCount = parseInt(localStorage.getItem("debug_click_count") || "0") + 1;
+      localStorage.setItem("debug_click_count", clickCount.toString());
+      
+      if (clickCount >= 5) {
+        setShowDebug(true);
+        localStorage.setItem("show_debug_menu", "true");
+      }
+    }
   };
 
-  const SidebarContent = ({ onClick }: { onClick?: () => void }) => (
-    <div className="space-y-4 py-4 h-full flex flex-col">
-      <div className="px-3 py-2">
-        <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight text-sidebar-foreground">
-          HabitFlow
-        </h2>
-        {isOfflineMode && (
-          <div className="mb-2 px-2 py-1 text-xs font-medium bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded">
-            Offline Mode
-          </div>
-        )}
-      </div>
-      <div className="px-3 py-1">
-        <h2 className="mb-2 px-2 text-xs tracking-tight uppercase text-sidebar-foreground/70">
-          Navigation
-        </h2>
-        <div className="space-y-1">
-          {navItems.map((item) => (
-            <NavItem 
-              key={item.label}
-              to={item.to}
-              icon={item.icon}
-              label={item.label}
-              onClick={onClick}
-              // Special indicator for Garden feature when enabled
-              extraLabel={item.to === "/garden" && isGardenEnabled ? "New" : undefined}
-            />
-          ))}
-        </div>
-      </div>
-      <div className="mt-auto px-3 py-2">
-        <div className="rounded-md bg-sidebar-primary/10 p-2">
-          <h3 className="text-sm font-medium text-sidebar-foreground">
-            Ethical Design
-          </h3>
-          <p className="text-xs text-sidebar-foreground/70 mt-1">
-            HabitFlow is designed without dark patterns or manipulative features.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+  // Check if debug menu should be shown
+  React.useEffect(() => {
+    const shouldShow = localStorage.getItem("show_debug_menu") === "true";
+    setShowDebug(shouldShow);
+  }, []);
+
+  const navItems = [
+    { 
+      name: "Dashboard", 
+      path: "/dashboard",
+      icon: <Home className="h-[18px] w-[18px]" />
+    },
+    { 
+      name: "Today", 
+      path: "/today",
+      icon: <CheckCircle2 className="h-[18px] w-[18px]" /> 
+    },
+    { 
+      name: "Insights", 
+      path: "/insights",
+      icon: <BarChart2 className="h-[18px] w-[18px]" /> 
+    },
+    { 
+      name: "Garden", 
+      path: "/garden",
+      icon: <Leaf className="h-[18px] w-[18px]" /> 
+    },
+    { 
+      name: "Rewards", 
+      path: "/rewards",
+      icon: <Award className="h-[18px] w-[18px]" /> 
+    },
+    { 
+      name: "Archive", 
+      path: "/archive",
+      icon: <Archive className="h-[18px] w-[18px]" /> 
+    },
+  ];
+
+  const bottomNavItems = [
+    { 
+      name: "Settings", 
+      path: "/settings",
+      icon: <Settings className="h-[18px] w-[18px]" /> 
+    },
+    { 
+      name: "Help", 
+      path: "/help",
+      icon: <HelpCircle className="h-[18px] w-[18px]" /> 
+    },
+  ];
+
+  if (showDebug) {
+    bottomNavItems.push({ 
+      name: "Debug", 
+      path: "/debug",
+      icon: <Bug className="h-[18px] w-[18px]" /> 
+    });
+  }
 
   if (isMobile) {
     return (
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="md:hidden fixed top-4 left-4 z-50">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
+      <div className="fixed bottom-0 left-0 z-30 w-full border-t bg-background py-2">
+        <div className="flex justify-around">
+          {navItems.slice(0, 5).map((item) => (
+            <NavLink 
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                cn("flex flex-col items-center py-1 px-2 text-xs", {
+                  "text-primary": isActive,
+                  "text-muted-foreground": !isActive,
+                })
+              }
+            >
+              {item.icon}
+              <span className="mt-1">{item.name}</span>
+            </NavLink>
+          ))}
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="flex flex-col items-center py-1 px-2"
+            onClick={() => setExpanded(!expanded)}
+          >
+            <Menu className="h-[18px] w-[18px] text-muted-foreground" />
+            <span className="mt-1 text-xs text-muted-foreground">Menu</span>
           </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72 bg-sidebar p-0">
-          <div className="absolute right-4 top-4">
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <X className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
+        </div>
+        
+        {expanded && (
+          <div className="px-4 py-2 mt-2 border-t">
+            <div className="grid grid-cols-3 gap-3">
+              {[...navItems.slice(5), ...bottomNavItems].map((item) => (
+                <NavLink 
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    cn("flex flex-col items-center py-2 px-1 rounded-md", {
+                      "bg-primary/10 text-primary": isActive,
+                      "text-muted-foreground hover:bg-muted": !isActive,
+                    })
+                  }
+                  onClick={() => setExpanded(false)}
+                >
+                  {item.icon}
+                  <span className="mt-1 text-xs">{item.name}</span>
+                </NavLink>
+              ))}
+            </div>
           </div>
-          <SidebarContent onClick={() => document.body.click()} />
-        </SheetContent>
-      </Sheet>
+        )}
+      </div>
     );
   }
 
   return (
-    <div className="hidden md:block w-64 border-r border-sidebar-border bg-sidebar-background">
-      <SidebarContent />
+    <div className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r bg-background sm:flex sm:flex-col">
+      <div className="flex h-14 items-center border-b px-4" onClick={toggleDebugMenu}>
+        <div className="flex items-center gap-2">
+          <GanttChartSquare className="h-6 w-6 text-primary" />
+          <span className="font-semibold">HabitFlow</span>
+        </div>
+        {isOfflineMode && (
+          <div className="ml-2 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs text-amber-600">
+            Offline
+          </div>
+        )}
+      </div>
+
+      <ScrollArea className="flex-1 py-4">
+        <div className="flex flex-col gap-1 px-2">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors", {
+                  "bg-primary/10 text-primary hover:bg-primary/10": isActive,
+                  "text-muted-foreground hover:bg-muted hover:text-foreground": !isActive,
+                })
+              }
+            >
+              {item.icon}
+              <span>{item.name}</span>
+            </NavLink>
+          ))}
+        </div>
+      </ScrollArea>
+      
+      <div className="border-t py-4">
+        <div className="flex flex-col gap-1 px-2">
+          {bottomNavItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors", {
+                  "bg-primary/10 text-primary hover:bg-primary/10": isActive,
+                  "text-muted-foreground hover:bg-muted hover:text-foreground": !isActive,
+                })
+              }
+            >
+              {item.icon}
+              <span>{item.name}</span>
+            </NavLink>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
