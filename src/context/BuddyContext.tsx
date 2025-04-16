@@ -2,73 +2,28 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useHabits } from "./HabitContext";
-
-export interface Buddy {
-  id: string;
-  name: string;
-  connectionDate: string;
-  sharedHabits: string[];
-  lastActive?: string;
-  isAnonymous: boolean;
-  inviteCode?: string;
-}
-
-interface Message {
-  id: string;
-  from: string;
-  to: string;
-  content: string;
-  type: 'text' | 'encouragement' | 'reward';
-  sentAt: string;
-  read: boolean;
-}
-
-export interface BuddyContextType {
-  buddies: Buddy[];
-  pendingRequests: Buddy[];
-  messages: Message[];
-  inviteCode: string | null;
-  generateInviteCode: () => void;
-  acceptBuddyRequest: (id: string) => void;
-  declineBuddyRequest: (id: string) => void;
-  removeBuddy: (id: string) => void;
-  sendEncouragement: (buddyId: string, type: 'text' | 'encouragement' | 'reward', content: string) => void;
-  updateSharedHabits: (buddyId: string, habitIds: string[]) => void;
-  markMessagesAsRead: (messageIds: string[]) => void;
-  toggleAnonymous: (buddyId: string) => void;
-  getUnreadMessageCount: () => number;
-  privacyLevel: 'minimal' | 'moderate' | 'open';
-  setPrivacyLevel: (level: 'minimal' | 'moderate' | 'open') => void;
-}
+import { Buddy, BuddyContextType, Message, PrivacyLevel } from "@/types/buddy";
+import { 
+  BUDDY_STORAGE_KEY, 
+  createMessage, 
+  getRandomEncouragement,
+  countUnreadMessages
+} from "@/utils/buddyUtils";
 
 const BuddyContext = createContext<BuddyContextType | undefined>(undefined);
-
-const STORAGE_KEY = "habit-buddy-data";
-
-// Sample encouragement messages
-const encouragementMessages = [
-  "Keep it up!",
-  "You're doing great!",
-  "Amazing progress!",
-  "Stay consistent!",
-  "Proud of your effort!",
-  "Keep growing!",
-  "One day at a time!",
-  "You've got this!",
-];
 
 export const BuddyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [buddies, setBuddies] = useState<Buddy[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Buddy[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
-  const [privacyLevel, setPrivacyLevel] = useState<'minimal' | 'moderate' | 'open'>('moderate');
+  const [privacyLevel, setPrivacyLevel] = useState<PrivacyLevel>('moderate');
   
   const { habits } = useHabits();
 
   // Load data from localStorage
   useEffect(() => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
+    const savedData = localStorage.getItem(BUDDY_STORAGE_KEY);
     if (savedData) {
       try {
         const { buddies: savedBuddies, pendingRequests: savedRequests, messages: savedMessages, privacyLevel: savedPrivacy } = JSON.parse(savedData);
@@ -96,7 +51,7 @@ export const BuddyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
+    localStorage.setItem(BUDDY_STORAGE_KEY, JSON.stringify({ 
       buddies, 
       pendingRequests, 
       messages,
@@ -156,15 +111,12 @@ export const BuddyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const buddy = buddies.find(b => b.id === buddyId);
     
     if (buddy) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        from: "me",
-        to: buddyId,
-        content: content || encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)],
-        type,
-        sentAt: new Date().toISOString(),
-        read: false
-      };
+      const newMessage = createMessage(
+        "me", 
+        buddyId, 
+        content || getRandomEncouragement(),
+        type
+      );
       
       setMessages(prev => [...prev, newMessage]);
       toast.success("Encouragement sent", {
@@ -200,7 +152,7 @@ export const BuddyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Get unread message count
   const getUnreadMessageCount = () => {
-    return messages.filter(msg => msg.to === "me" && !msg.read).length;
+    return countUnreadMessages(messages);
   };
 
   return (
@@ -235,3 +187,5 @@ export const useBuddy = (): BuddyContextType => {
   }
   return context;
 };
+
+export { type Buddy } from "@/types/buddy";
