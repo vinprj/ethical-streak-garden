@@ -153,7 +153,7 @@ export const BuddyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Send encouragement to a buddy
   const sendEncouragement = (buddyId: string, type: 'text' | 'encouragement' | 'reward', content: string) => {
-    const buddy = buddies.find(b => b.id === id);
+    const buddy = buddies.find(b => b.id === buddyId);
     
     if (buddy) {
       const newMessage: Message = {
