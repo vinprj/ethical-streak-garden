@@ -1,7 +1,9 @@
 
 import React from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Settings, Bell, Lock, InfoIcon } from "lucide-react";
+import { Settings, Bell, Lock, InfoIcon, Bug, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 // Import the refactored components
 import { AccessibilitySettings } from "@/components/settings/AccessibilitySettings";
@@ -9,8 +11,10 @@ import { NotificationSettings } from "@/components/settings/NotificationSettings
 import { PrivacySettings } from "@/components/settings/PrivacySettings";
 import { AboutSection } from "@/components/settings/AboutSection";
 import { SectionHeader } from "@/components/settings/SectionHeader";
+import { BuddySettings } from "@/components/buddy/BuddySettings";
 
 const SettingsPage: React.FC = () => {
+  const navigate = useNavigate();
   // UI Settings
   const [fontSize, setFontSize] = React.useState(1); // 1 is default
   const [reduceMotion, setReduceMotion] = React.useState(false);
@@ -63,6 +67,15 @@ const SettingsPage: React.FC = () => {
           </div>
         </section>
         
+        {/* NEW: Habit Buddy Section */}
+        <section className="animate-fade-in" style={{ animationDelay: "50ms" }}>
+          <SectionHeader 
+            icon={Sparkles} 
+            title="Habit Buddy" 
+          />
+          <BuddySettings />
+        </section>
+        
         {/* Accessibility Settings */}
         <section className="animate-fade-in" style={{ animationDelay: "100ms" }}>
           <SectionHeader 
@@ -112,12 +125,34 @@ const SettingsPage: React.FC = () => {
         </section>
         
         {/* About Section */}
-        <section className="mb-8 animate-fade-in" style={{ animationDelay: "400ms" }}>
+        <section className="animate-fade-in" style={{ animationDelay: "400ms" }}>
           <SectionHeader 
             icon={InfoIcon}
             title="About" 
           />
           <AboutSection />
+        </section>
+
+        {/* Debug Section (moved from landing page) */}
+        <section className="animate-fade-in mb-8" style={{ animationDelay: "500ms" }}>
+          <SectionHeader 
+            icon={Bug}
+            title="Debug" 
+          />
+          <div className="bg-card rounded-lg border p-4 transition-all hover:border-primary/30">
+            <p className="text-sm text-muted-foreground mb-4">
+              Generate demo data to explore all app features.
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1.5"
+              onClick={() => navigate('/debug')}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Load Demo Data
+            </Button>
+          </div>
         </section>
       </div>
     </AppLayout>

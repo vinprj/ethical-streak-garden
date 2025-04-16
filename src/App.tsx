@@ -14,6 +14,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { HabitProvider } from "@/context/HabitContext";
 import { GardenProvider } from "@/context/GardenContext";
+import { BuddyProvider } from "@/context/BuddyContext";
 import DebugPage from "./pages/DebugPage";
 
 function App() {
@@ -21,20 +22,22 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="habit-tracker-theme">
       <HabitProvider>
         <GardenProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/today" element={<TodayPage />} />
-            <Route path="/insights" element={<InsightsPage />} />
-            <Route path="/garden" element={<GardenPage />} />
-            <Route path="/rewards" element={<RewardsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/archive" element={<ArchivePage />} />
-            <Route path="/help" element={<HelpPage />} />
-            <Route path="/debug" element={<DebugPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
+          <BuddyProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/today" element={<TodayPage />} />
+              <Route path="/insights" element={<InsightsPage />} />
+              <Route path="/garden" element={<GardenPage />} />
+              <Route path="/rewards" element={<RewardsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/archive" element={<ArchivePage />} />
+              <Route path="/help" element={<HelpPage />} />
+              <Route path="/debug" element={<DebugPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </BuddyProvider>
         </GardenProvider>
       </HabitProvider>
     </ThemeProvider>
