@@ -6,23 +6,45 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { generateAllTestData } from '@/utils/generateTestData';
 import { useHabits } from '@/context/HabitContext';
 import { useGardenContext } from '@/context/GardenContext';
+import { useBuddy } from '@/context/BuddyContext';
 import { Loader2, Play, Trash2, Database, AlertTriangle, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const TestDataGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const { habits: existingHabits, badges: existingBadges } = useHabits();
-  const { plants: existingPlants } = useGardenContext();
+  const { setHabits, setBadges } = useHabits();
+  const { setPlants } = useGardenContext();
+  const { setBuddies } = useBuddy();
   const navigate = useNavigate();
   const [dataStats, setDataStats] = useState<{
     habits: number;
     badges: number;
     plants: number;
   }>({
-    habits: existingHabits.length,
-    badges: existingBadges.filter(b => b.isUnlocked).length,
-    plants: existingPlants.length
+    habits: 0,
+    badges: 0,
+    plants: 0
   });
+
+  // Update stats from localStorage on mount
+  React.useEffect(() => {
+    try {
+      const habitData = localStorage.getItem("ethical-habit-tracker-data");
+      if (habitData) {
+        const { habits = [], badges = [] } = JSON.parse(habitData);
+        const plantData = localStorage.getItem("garden-plants");
+        const plants = plantData ? JSON.parse(plantData) : [];
+        
+        setDataStats({
+          habits: habits.length,
+          badges: badges.filter(b => b.isUnlocked).length,
+          plants: plants.length
+        });
+      }
+    } catch (error) {
+      console.error("Error loading stats:", error);
+    }
+  }, []);
 
   const applyTestData = async () => {
     setIsGenerating(true);
@@ -30,13 +52,18 @@ export const TestDataGenerator: React.FC = () => {
       // Generate more comprehensive test data
       const { habits, badges, plants } = generateAllTestData();
       
-      // Store in localStorage (simulating what our contexts do)
+      // Store in localStorage
       localStorage.setItem("ethical-habit-tracker-data", JSON.stringify({ 
         habits, 
         badges 
       }));
       
       localStorage.setItem("garden-plants", JSON.stringify(plants));
+      
+      // Update context state directly
+      setHabits(habits);
+      setBadges(badges);
+      setPlants(plants);
       
       // Update stats
       setDataStats({
@@ -47,11 +74,7 @@ export const TestDataGenerator: React.FC = () => {
       
       // Show success message
       toast.success('Demo data generated successfully!', {
-        description: 'Refresh the page to see the changes.',
-        action: {
-          label: 'Refresh now',
-          onClick: () => window.location.reload()
-        }
+        description: 'Your dashboard has been updated with demo data.',
       });
     } catch (error) {
       console.error('Error generating test data:', error);
@@ -66,6 +89,11 @@ export const TestDataGenerator: React.FC = () => {
       localStorage.removeItem("ethical-habit-tracker-data");
       localStorage.removeItem("garden-plants");
       
+      // Clear context state directly
+      setHabits([]);
+      setBadges([]);
+      setPlants([]);
+      
       setDataStats({
         habits: 0,
         badges: 0,
@@ -73,11 +101,7 @@ export const TestDataGenerator: React.FC = () => {
       });
       
       toast.success('All data cleared', {
-        description: 'Refresh the page to see the changes.',
-        action: {
-          label: 'Refresh now',
-          onClick: () => window.location.reload()
-        }
+        description: 'Your dashboard has been reset.',
       });
     }
   };
@@ -98,7 +122,7 @@ export const TestDataGenerator: React.FC = () => {
             <div>
               <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">Demo Mode</p>
               <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                This will generate comprehensive sample data to showcase all app features. Existing data will be replaced.
+                This will generate comprehensive sample data to showcase all app features. You can generate new data multiple times.
               </p>
             </div>
           </div>

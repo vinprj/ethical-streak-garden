@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Habit, Badge, UserStats } from "@/types/habit";
 import { calculatePoints, calculateStreak } from "@/lib/utils/habitUtils";
@@ -6,6 +5,7 @@ import { toast } from "sonner";
 
 interface HabitContextType {
   habits: Habit[];
+  setHabits: React.Dispatch<React.SetStateAction<Habit[]>>;
   addHabit: (habit: Omit<Habit, "id" | "createdAt" | "completedDates" | "isArchived" | "currentStreak" | "longestStreak">) => void;
   updateHabit: (id: string, habitData: Partial<Habit>) => void;
   deleteHabit: (id: string) => void;
@@ -13,6 +13,7 @@ interface HabitContextType {
   completeHabit: (id: string, date: string, note?: string, mood?: Habit["completedDates"][0]) => void;
   uncompleteHabit: (id: string, date: string) => void;
   badges: Badge[];
+  setBadges: React.Dispatch<React.SetStateAction<Badge[]>>;
   stats: UserStats;
   filterCategory: string | null;
   setFilterCategory: (category: string | null) => void;
@@ -34,7 +35,6 @@ const HabitContext = createContext<HabitContextType | undefined>(undefined);
 
 const STORAGE_KEY = "ethical-habit-tracker-data";
 
-// Sample badges
 const initialBadges: Badge[] = [
   {
     id: "first-habit",
@@ -81,7 +81,6 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'pending'>('all');
   const [isOfflineMode, setIsOfflineMode] = useState<boolean>(false);
 
-  // Load data from localStorage
   useEffect(() => {
     const savedData = localStorage.getItem(STORAGE_KEY);
     if (savedData) {
@@ -99,14 +98,12 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
-  // Save data to localStorage whenever it changes
   useEffect(() => {
     if (habits.length > 0 || badges.some(b => b.isUnlocked)) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ habits, badges }));
     }
   }, [habits, badges]);
 
-  // Calculate stats whenever habits change
   useEffect(() => {
     const totalCompletions = habits.reduce((sum, habit) => sum + habit.completedDates.length, 0);
     const longestStreak = habits.length > 0 ? Math.max(...habits.map(h => h.longestStreak)) : 0;
@@ -121,10 +118,8 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       points
     });
 
-    // Check for badge unlocks
     const newBadges = [...badges];
     
-    // First habit badge
     if (habits.length > 0 && !newBadges.find(b => b.id === "first-habit")?.isUnlocked) {
       const index = newBadges.findIndex(b => b.id === "first-habit");
       if (index >= 0) {
@@ -135,7 +130,6 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
 
-    // 3-day streak badge
     if (habits.some(h => h.currentStreak >= 3) && !newBadges.find(b => b.id === "3-day-streak")?.isUnlocked) {
       const index = newBadges.findIndex(b => b.id === "3-day-streak");
       if (index >= 0) {
@@ -146,7 +140,6 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
 
-    // 7-day streak badge
     if (habits.some(h => h.currentStreak >= 7) && !newBadges.find(b => b.id === "7-day-streak")?.isUnlocked) {
       const index = newBadges.findIndex(b => b.id === "7-day-streak");
       if (index >= 0) {
@@ -157,7 +150,6 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
 
-    // 5 habits badge
     if (habits.length >= 5 && !newBadges.find(b => b.id === "5-habits")?.isUnlocked) {
       const index = newBadges.findIndex(b => b.id === "5-habits");
       if (index >= 0) {
@@ -222,7 +214,6 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         completedDates.push(date);
       }
       
-      // Calculate new streak
       const newCurrentStreak = calculateStreak({...habit, completedDates});
       const newLongestStreak = Math.max(habit.longestStreak, newCurrentStreak);
       
@@ -271,6 +262,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <HabitContext.Provider
       value={{
         habits,
+        setHabits,
         addHabit,
         updateHabit,
         deleteHabit,
@@ -278,6 +270,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         completeHabit,
         uncompleteHabit,
         badges,
+        setBadges,
         stats,
         filterCategory,
         setFilterCategory,

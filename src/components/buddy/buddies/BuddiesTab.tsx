@@ -8,7 +8,7 @@ import { BuddyCard } from "./BuddyCard";
 export const BuddiesTab: React.FC<{ onNavigateToConnect: () => void }> = ({ onNavigateToConnect }) => {
   const { buddies, removeBuddy, toggleAnonymous, sendEncouragement } = useBuddy();
 
-  // Mock function to simulate sending encouragement
+  // Send encouragement message to buddy
   const handleSendEncouragement = (buddyId: string, message: string) => {
     sendEncouragement(buddyId, 'encouragement', message);
   };
