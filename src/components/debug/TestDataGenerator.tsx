@@ -6,12 +6,14 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { generateAllTestData } from '@/utils/generateTestData';
 import { useHabits } from '@/context/HabitContext';
 import { useGardenContext } from '@/context/GardenContext';
-import { Loader2, Play, Trash2, Database, AlertTriangle } from 'lucide-react';
+import { Loader2, Play, Trash2, Database, AlertTriangle, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const TestDataGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { habits: existingHabits, badges: existingBadges } = useHabits();
   const { plants: existingPlants } = useGardenContext();
+  const navigate = useNavigate();
   const [dataStats, setDataStats] = useState<{
     habits: number;
     badges: number;
@@ -25,7 +27,7 @@ export const TestDataGenerator: React.FC = () => {
   const applyTestData = async () => {
     setIsGenerating(true);
     try {
-      // Generate test data
+      // Generate more comprehensive test data
       const { habits, badges, plants } = generateAllTestData();
       
       // Store in localStorage (simulating what our contexts do)
@@ -44,7 +46,7 @@ export const TestDataGenerator: React.FC = () => {
       });
       
       // Show success message
-      toast.success('Test data generated successfully!', {
+      toast.success('Demo data generated successfully!', {
         description: 'Refresh the page to see the changes.',
         action: {
           label: 'Refresh now',
@@ -85,7 +87,7 @@ export const TestDataGenerator: React.FC = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Database className="h-5 w-5" />
-          Test Data Generator
+          Demo Data Generator
         </CardTitle>
       </CardHeader>
 
@@ -94,9 +96,9 @@ export const TestDataGenerator: React.FC = () => {
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
             <div>
-              <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">Testing Mode</p>
+              <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">Demo Mode</p>
               <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                This will replace any existing data with generated test data. Use for testing and demo purposes only.
+                This will generate comprehensive sample data to showcase all app features. Existing data will be replaced.
               </p>
             </div>
           </div>
@@ -119,43 +121,55 @@ export const TestDataGenerator: React.FC = () => {
 
         <div className="space-y-2">
           <div className="flex justify-between items-center text-sm">
-            <span>Generated data includes:</span>
+            <span>Demo data includes:</span>
           </div>
           <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-5">
-            <li>Multiple habits across different categories</li>
+            <li><span className="text-primary font-medium">16 habits</span> across 8 different categories</li>
             <li>Various streak patterns (consistent, occasional, weekend)</li>
-            <li>Long streaks to test garden growth stages</li>
-            <li>Badges based on achievements</li>
-            <li>Plant data for the garden feature</li>
+            <li>Long streaks (30+ days) to showcase garden growth stages</li>
+            <li><span className="text-primary font-medium">9 achievement badges</span> based on milestones</li>
+            <li>Plant data visualization in the garden feature</li>
+            <li>Data to demonstrate all charts and stats</li>
           </ul>
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-between">
+      <CardFooter className="flex flex-col space-y-4">
+        <div className="flex justify-between w-full">
+          <Button 
+            variant="outline" 
+            onClick={clearAllData}
+            className="gap-1.5"
+          >
+            <Trash2 className="h-4 w-4" />
+            Clear All Data
+          </Button>
+          <Button 
+            onClick={applyTestData} 
+            disabled={isGenerating}
+            className="gap-1.5"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                Generate Demo Data
+              </>
+            )}
+          </Button>
+        </div>
+        
         <Button 
-          variant="outline" 
-          onClick={clearAllData}
-          className="gap-1.5"
+          variant="ghost" 
+          className="text-xs w-full flex gap-1.5 text-muted-foreground hover:text-foreground"
+          onClick={() => navigate('/dashboard')}
         >
-          <Trash2 className="h-4 w-4" />
-          Clear All Data
-        </Button>
-        <Button 
-          onClick={applyTestData} 
-          disabled={isGenerating}
-          className="gap-1.5"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Play className="h-4 w-4" />
-              Generate Test Data
-            </>
-          )}
+          <Sparkles className="h-3.5 w-3.5" />
+          After generating data, go to Dashboard to see all features
         </Button>
       </CardFooter>
     </Card>

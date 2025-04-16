@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Sparkles } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -27,6 +28,18 @@ const Index = () => {
             onClick={() => navigate('/today')}
           >
             Today's Habits
+          </Button>
+        </div>
+        
+        <div className="mt-6">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-xs flex items-center gap-1 text-muted-foreground hover:text-primary"
+            onClick={() => navigate('/debug')}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Load Demo Data
           </Button>
         </div>
       </div>
