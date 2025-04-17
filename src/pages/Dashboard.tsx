@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
           {/* User Stats Component */}
           {activeHabits.length > 0 && (
             <div className="mb-6">
-              <UserStats habits={activeHabits} />
+              <UserStats />
             </div>
           )}
         </section>
@@ -109,7 +109,7 @@ const Dashboard: React.FC = () => {
               <Award className="h-5 w-5 text-primary" />
               <h2 className="text-xl font-semibold">Your Badges</h2>
             </div>
-            <BadgeGrid badges={unlockedBadges.slice(0, 5)} />
+            <BadgeGrid />
           </section>
         )}
 
