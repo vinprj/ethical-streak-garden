@@ -16,11 +16,22 @@ import { BuddySettings } from "@/components/buddy/BuddySettings";
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   // UI Settings
-  const [fontSize, setFontSize] = React.useState(1); // 1 is default
-  const [reduceMotion, setReduceMotion] = React.useState(false);
-  const [highContrast, setHighContrast] = React.useState(false);
-  const [ecoMode, setEcoMode] = React.useState(false);
-  const [enableAnimations, setEnableAnimations] = React.useState(true);
+  const [fontSize, setFontSize] = React.useState(() => {
+    const savedFontSize = localStorage.getItem('fontSize');
+    return savedFontSize ? parseFloat(savedFontSize) : 1; // 1 is default (100%)
+  });
+  const [reduceMotion, setReduceMotion] = React.useState(() => {
+    return localStorage.getItem('reduceMotion') === 'true' || false;
+  });
+  const [highContrast, setHighContrast] = React.useState(() => {
+    return localStorage.getItem('highContrast') === 'true' || false;
+  });
+  const [ecoMode, setEcoMode] = React.useState(() => {
+    return localStorage.getItem('ecoMode') === 'true' || false;
+  });
+  const [enableAnimations, setEnableAnimations] = React.useState(() => {
+    return localStorage.getItem('enableAnimations') !== 'false'; // default to true
+  });
   
   // Notification Settings  
   const [enableNotifications, setEnableNotifications] = React.useState(true);
@@ -30,29 +41,47 @@ const SettingsPage: React.FC = () => {
   const [shareAnalytics, setShareAnalytics] = React.useState(false);
   const [storeDataLocally, setStoreDataLocally] = React.useState(true);
 
-  // Apply any saved settings on component mount
+  // Save settings to localStorage whenever they change
   React.useEffect(() => {
-    if (reduceMotion) {
+    localStorage.setItem('fontSize', fontSize.toString());
+    localStorage.setItem('reduceMotion', reduceMotion.toString());
+    localStorage.setItem('highContrast', highContrast.toString());
+    localStorage.setItem('ecoMode', ecoMode.toString());
+    localStorage.setItem('enableAnimations', enableAnimations.toString());
+    
+    // Apply font size to document
+    document.documentElement.style.fontSize = `${fontSize * 100}%`;
+    
+    // Apply classes based on settings
+    if (reduceMotion || !enableAnimations) {
       document.body.classList.add('reduce-animations');
+    } else {
+      document.body.classList.remove('reduce-animations');
     }
     
     if (ecoMode) {
       document.body.classList.add('eco-mode');
+    } else {
+      document.body.classList.remove('eco-mode');
+    }
+    
+    if (highContrast) {
+      document.documentElement.classList.add('high-contrast');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
     }
     
     // Check for system preference
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches && !reduceMotion) {
       setReduceMotion(true);
       setEnableAnimations(false);
-      document.body.classList.add('reduce-animations');
     }
     
     // Cleanup on unmount
     return () => {
-      document.body.classList.remove('reduce-animations');
-      document.body.classList.remove('eco-mode');
+      // Don't remove settings on unmount - they should persist
     };
-  }, [reduceMotion, ecoMode]);
+  }, [reduceMotion, ecoMode, highContrast, fontSize, enableAnimations]);
 
   return (
     <AppLayout>

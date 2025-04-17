@@ -7,26 +7,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuIte
 import { HabitSearch } from "../habits/HabitSearch";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useTheme } from "@/hooks/use-theme";
 
 export const Header: React.FC = () => {
   const { toggleOfflineMode, isOfflineMode } = useHabits();
-  const [darkMode, setDarkMode] = useState(() => {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return true;
-    }
-    return false;
-  });
+  const { theme, setTheme } = useTheme();
   const [pageTitle, setPageTitle] = useState("Dashboard");
   const location = useLocation();
-  
-  useEffect(() => {
-    // Update the body class for dark mode
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
   
   useEffect(() => {
     // Set page title based on route
@@ -38,10 +25,11 @@ export const Header: React.FC = () => {
     else if (path === "/archive") setPageTitle("Archive");
     else if (path === "/settings") setPageTitle("Settings");
     else if (path === "/help") setPageTitle("Help & Resources");
+    else if (path === "/garden") setPageTitle("Habit Garden");
   }, [location]);
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
@@ -58,8 +46,8 @@ export const Header: React.FC = () => {
             {isOfflineMode ? <WifiOff className="h-5 w-5" /> : <Wifi className="h-5 w-5" />}
           </Button>
           
-          <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
-            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'dark' ? "Light Mode" : "Dark Mode"}>
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
           
           <DropdownMenu>

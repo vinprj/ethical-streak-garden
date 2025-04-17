@@ -86,6 +86,45 @@
     --sidebar-border: 198 25% 22%;
     --sidebar-ring: 174 60% 40%;
   }
+  
+  /* High contrast mode */
+  .high-contrast {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    
+    --card: 0 0% 95%;
+    --card-foreground: 0 0% 0%;
+    
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 30%;
+    
+    --border: 0 0% 40%;
+    
+    --primary: 262 83% 40%;
+    --primary-foreground: 0 0% 100%;
+    
+    --accent: 0 70% 50%;
+    --accent-foreground: 0 0% 100%;
+  }
+  
+  .high-contrast.dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
+    
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 70%;
+    
+    --border: 0 0% 60%;
+    
+    --primary: 262 83% 60%;
+    --primary-foreground: 0 0% 100%;
+    
+    --accent: 0 70% 60%;
+    --accent-foreground: 0 0% 100%;
+  }
 }
 
 @layer base {
@@ -93,8 +132,13 @@
     @apply border-border;
   }
 
+  html {
+    font-size: 16px; /* Base font size */
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
   }
 
   /* Accessible focus styles */
@@ -141,6 +185,45 @@
   .glow-effect {
     @apply relative after:absolute after:inset-0 after:rounded-lg after:opacity-0 after:transition-opacity after:duration-300 hover:after:opacity-100 after:bg-gradient-to-r after:from-primary/20 after:to-accent/20 after:blur-lg;
   }
+  
+  /* Enhanced garden animations */
+  .garden-plant {
+    @apply transition-all duration-700 ease-in-out transform origin-bottom;
+  }
+  
+  .garden-plant:hover {
+    @apply scale-105 rotate-1;
+  }
+  
+  .garden-particle {
+    @apply absolute pointer-events-none;
+    animation: float-particle 3s ease-in-out infinite;
+  }
+  
+  /* Card transitions */
+  .card-transition {
+    @apply transition-all duration-300 transform hover:shadow-lg hover:-translate-y-1;
+  }
+  
+  /* Button animations */
+  .button-pulse {
+    animation: button-pulse 1.5s ease-in-out infinite;
+  }
+  
+  /* Insight card glow */
+  .insight-card {
+    @apply relative overflow-hidden;
+  }
+  
+  .insight-card::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 transition-opacity duration-700;
+    pointer-events: none;
+  }
+  
+  .insight-card:hover::after {
+    @apply opacity-100;
+  }
 }
 
 /* Additional keyframes */
@@ -154,6 +237,28 @@
   50% { transform: translateY(-5px); }
 }
 
+@keyframes float-particle {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(10px, -15px); }
+}
+
+@keyframes button-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(var(--primary), 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(var(--primary), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--primary), 0); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes leaf-wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(2deg); }
+  75% { transform: rotate(-2deg); }
+}
+
 /* Accessibility - reduced motion */
 @media (prefers-reduced-motion) {
   *, *::before, *::after {
@@ -162,6 +267,67 @@
   }
 }
 
+/* Reduced animations class */
+.reduce-animations * {
+  animation-duration: 0.001s !important;
+  transition-duration: 0.001s !important;
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Eco-mode optimizations */
+.eco-mode {
+  @apply reduce-animations;
+}
+
+/* Animation classes */
 .animate-pulse-light {
   animation: pulse-light 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.animate-leaf-wave {
+  animation: leaf-wave 3s ease-in-out infinite;
+}
+
+/* High-contrast garden adjustments */
+.high-contrast .garden-plant {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.high-contrast .badge,
+.high-contrast .progress-bar-fill {
+  outline: 1px solid var(--border);
+}
+
+/* Transitions between routes */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 200ms, transform 200ms;
 }

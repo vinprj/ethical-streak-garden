@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -30,6 +30,26 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
   enableAnimations,
   setEnableAnimations
 }) => {
+  // Apply font size immediately when it changes
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${fontSize * 100}%`;
+    return () => {
+      document.documentElement.style.fontSize = '';
+    };
+  }, [fontSize]);
+
+  // Apply high contrast mode
+  useEffect(() => {
+    if (highContrast) {
+      document.documentElement.classList.add('high-contrast');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
+    }
+    return () => {
+      document.documentElement.classList.remove('high-contrast');
+    };
+  }, [highContrast]);
+
   // Handle animation toggle
   const handleAnimationToggle = (checked: boolean) => {
     setEnableAnimations(checked);
@@ -44,6 +64,28 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
       document.body.classList.remove('reduce-animations');
       toast("Animations enabled", {
         description: "Subtle animations are now active"
+      });
+    }
+  };
+
+  // Handle reduce motion toggle
+  const handleReduceMotionToggle = (checked: boolean) => {
+    setReduceMotion(checked);
+    
+    if (checked) {
+      document.body.classList.add('reduce-animations');
+      // If reduce motion is on, also disable animations
+      if (enableAnimations) {
+        setEnableAnimations(false);
+      }
+      toast("Motion reduced", {
+        description: "Animations have been minimized for accessibility"
+      });
+    } else if (!ecoMode) {
+      // Only remove class if eco-mode isn't also on
+      document.body.classList.remove('reduce-animations');
+      toast("Standard motion restored", {
+        description: "Standard animations have been restored"
       });
     }
   };
@@ -63,6 +105,10 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
       });
     } else {
       document.body.classList.remove('eco-mode');
+      // Only remove reduce-animations if the reduce motion setting isn't also on
+      if (!reduceMotion) {
+        document.body.classList.remove('reduce-animations');
+      }
       toast("Eco-Mode disabled", {
         description: "Standard app experience restored"
       });
@@ -86,6 +132,9 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
           />
           <span className="text-lg">A</span>
         </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Current size: {Math.round(fontSize * 100)}%
+        </p>
       </div>
 
       <div className="flex items-center justify-between space-x-2">
@@ -97,11 +146,15 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
           id="enable-animations" 
           checked={enableAnimations}
           onCheckedChange={handleAnimationToggle}
+          disabled={reduceMotion || ecoMode}
         />
       </div>
       
       <div className="flex items-center justify-between space-x-2">
-        <Label htmlFor="high-contrast">High Contrast Mode</Label>
+        <div>
+          <Label htmlFor="high-contrast">High Contrast Mode</Label>
+          <p className="text-sm text-muted-foreground">Enhance visual distinction</p>
+        </div>
         <Switch 
           id="high-contrast" 
           checked={highContrast}
@@ -110,11 +163,14 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
       </div>
       
       <div className="flex items-center justify-between space-x-2">
-        <Label htmlFor="reduce-motion">Reduce Motion</Label>
+        <div>
+          <Label htmlFor="reduce-motion">Reduce Motion</Label>
+          <p className="text-sm text-muted-foreground">For vestibular sensitivity</p>
+        </div>
         <Switch 
           id="reduce-motion" 
           checked={reduceMotion}
-          onCheckedChange={setReduceMotion}
+          onCheckedChange={handleReduceMotionToggle}
         />
       </div>
       
