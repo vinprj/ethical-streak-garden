@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useHabits } from "@/context/HabitContext";
@@ -52,8 +51,7 @@ const InsightsPage: React.FC = () => {
       // Count daily habits that should have been completed
       const totalDailyHabits = habits.filter(h => 
         !h.isArchived && (h.frequency === 'daily' || 
-          (h.frequency === 'weekly' && date.getDay() === 0) || 
-          (h.frequency === 'custom' && h.customDays.includes(dayNames[date.getDay()].toLowerCase())))
+          (h.frequency === 'weekly' && date.getDay() === 0))
       ).length;
       
       const percentage = totalDailyHabits > 0 ? Math.round((completedCount / totalDailyHabits) * 100) : 0;
