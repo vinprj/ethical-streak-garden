@@ -4,7 +4,7 @@ import { Habit } from "@/types/habit";
 import { useGardenContext } from "@/context/GardenContext";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Check, Clock, Sparkles, Leaf } from "lucide-react";
+import { Clock, Sparkles, Leaf } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getGrowthLabel, getPlantEmoji } from "@/utils/plantUtils";
 
@@ -21,19 +21,19 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
   const today = new Date().toISOString().split("T")[0];
   const isCompletedToday = habit.completedDates.includes(today);
 
+  // Updated minimal status indicator
   const renderStatusIndicator = () => {
     if (isCompletedToday) {
+      // More minimalist completion indicator (just a border)
       return (
-        <div className="absolute top-2 right-2 bg-green-500/90 rounded-full p-1 shadow-md">
-          <Check className="w-4 h-4 text-white" />
-        </div>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-green-500/70 rounded-t-lg" />
       );
     }
     
     if (habit.frequency === 'daily') {
       return (
-        <div className="absolute top-2 right-2 bg-amber-500/90 rounded-full p-1 shadow-md">
-          <Clock className="w-4 h-4 text-white" />
+        <div className="absolute top-2 right-2 bg-amber-500/40 rounded-full p-1">
+          <Clock className="w-3 h-3 text-amber-500" />
         </div>
       );
     }
@@ -89,8 +89,8 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
             className={cn(
               "relative overflow-hidden transition-all duration-500 garden-plant", 
               highContrastGarden ? "high-contrast garden-plant" : "",
-              "hover:shadow-md border-2",
-              isCompletedToday ? "border-green-500/50" : "border-transparent",
+              "hover:shadow-md border",
+              isCompletedToday ? "border-green-500/20" : "border-transparent",
               isHovering ? "transform-gpu translate-y-[-2px]" : ""
             )}
             onMouseEnter={() => setIsHovering(true)}
@@ -118,7 +118,10 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
               <div className="text-center w-full">
                 <div className="bg-muted h-1.5 w-full rounded-full overflow-hidden">
                   <div 
-                    className="bg-primary h-full rounded-full transition-all"
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      isCompletedToday ? "bg-green-500" : "bg-primary"
+                    )}
                     style={{ 
                       width: `${Math.min((plant.completionStreak / 21) * 100, 100)}%`,
                       transition: gardenAnimationsLevel !== 'none' ? 'width 1s ease-out' : 'none'

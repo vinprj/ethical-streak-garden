@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Calendar, Award, Sparkles } from "lucide-react";
 import { HabitCard } from "@/components/habits/HabitCard";
@@ -7,10 +7,20 @@ import { HabitForm } from "@/components/habits/HabitForm";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useHabits } from "@/context/HabitContext";
 import { BadgeGrid } from "@/components/dashboard/BadgeGrid";
+import { UserStats } from "@/components/dashboard/UserStats";
+import { useThemeContext } from "@/hooks/use-theme";
 
 const Dashboard: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const { habits, badges } = useHabits();
+  const { theme } = useThemeContext();
+  
+  // Animation effect when dashboard loads
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
   
   // Get active habits (not archived)
   const activeHabits = habits.filter(h => !h.isArchived);
@@ -31,10 +41,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="flex flex-col gap-8">
-        {/* Welcome section */}
-        <section>
-          <div className="flex justify-between items-center mb-6">
+      <div className={`flex flex-col gap-8 transition-all duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+        {/* Welcome section with user stats */}
+        <section className="transition-all duration-500" style={{ transitionDelay: "100ms" }}>
+          <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
             <div>
               <h1 className="text-3xl font-bold">Welcome to HabitFlow</h1>
               <p className="text-muted-foreground">Track your progress and build lasting habits</p>
@@ -44,10 +54,17 @@ const Dashboard: React.FC = () => {
               New Habit
             </Button>
           </div>
+          
+          {/* User Stats Component */}
+          {activeHabits.length > 0 && (
+            <div className="mb-6">
+              <UserStats habits={activeHabits} />
+            </div>
+          )}
         </section>
 
         {/* Today's overview */}
-        <section>
+        <section className="transition-all duration-500" style={{ transitionDelay: "150ms" }}>
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">Today's Overview</h2>
@@ -87,29 +104,17 @@ const Dashboard: React.FC = () => {
 
         {/* Badges section */}
         {unlockedBadges.length > 0 && (
-          <section>
+          <section className="transition-all duration-500" style={{ transitionDelay: "200ms" }}>
             <div className="flex items-center gap-2 mb-4">
               <Award className="h-5 w-5 text-primary" />
               <h2 className="text-xl font-semibold">Your Badges</h2>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-              {unlockedBadges.slice(0, 5).map((badge) => (
-                <div 
-                  key={badge.id}
-                  className="bg-card p-4 rounded-lg border flex flex-col items-center text-center"
-                >
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-xl mb-2">
-                    {badge.icon}
-                  </div>
-                  <h3 className="font-medium text-sm">{badge.name}</h3>
-                </div>
-              ))}
-            </div>
+            <BadgeGrid badges={unlockedBadges.slice(0, 5)} />
           </section>
         )}
 
         {/* Habit categories */}
-        <section>
+        <section className="transition-all duration-500" style={{ transitionDelay: "250ms" }}>
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">Habit Categories</h2>

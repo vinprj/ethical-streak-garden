@@ -20,11 +20,11 @@ import GardenPage from "./pages/GardenPage";
 import { HabitProvider } from "./context/HabitContext";
 import { BuddyProvider } from "./context/BuddyContext";
 import { GardenProvider } from "./context/GardenContext";
-import { ThemeProvider } from "./components/ui/theme-provider";
+import { ThemeProvider } from "./hooks/use-theme";
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="theme-preference">
+    <ThemeProvider>
       <HabitProvider>
         <BuddyProvider>
           <GardenProvider>

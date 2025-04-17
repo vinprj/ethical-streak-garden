@@ -52,3 +52,18 @@ h1, h2, h3, h4, h5, h6 {
 .recharts-text {
   fill: var(--muted-foreground) !important;
 }
+
+/* Make sure lines in charts are properly connected */
+.recharts-line-curve {
+  stroke-width: 2px !important;
+}
+
+.recharts-line {
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+}
+
+.recharts-dot {
+  stroke: var(--background) !important;
+  stroke-width: 1.5px !important;
+}

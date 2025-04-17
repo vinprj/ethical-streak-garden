@@ -2,6 +2,7 @@
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { type ThemeProviderProps } from "next-themes/dist/types";
+import { Sun, Moon } from "lucide-react";
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
@@ -64,6 +65,9 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
       
       // Store theme preference
       localStorage.setItem('theme', theme);
+
+      // Dispatch custom event for chart components to listen to
+      window.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
     }
   }, [theme]);
 
@@ -73,6 +77,3 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
     </ThemeContext.Provider>
   );
 }
-
-// Import the required icons
-import { Sun, Moon } from "lucide-react";
