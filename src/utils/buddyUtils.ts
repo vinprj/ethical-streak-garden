@@ -18,18 +18,18 @@ export const encouragementMessages = [
 
 // Create a new message object
 export const createMessage = (
-  from: string,
-  to: string,
+  fromId: string,
+  toId: string,
   content: string,
   type: 'text' | 'encouragement' | 'reward'
 ): Message => {
   return {
     id: Date.now().toString(),
-    from,
-    to,
+    fromId,
+    toId,
     content,
     type,
-    sentAt: new Date().toISOString(),
+    timestamp: new Date().toISOString(),
     read: false
   };
 };
@@ -41,5 +41,5 @@ export const getRandomEncouragement = (): string => {
 
 // Count unread messages
 export const countUnreadMessages = (messages: Message[]): number => {
-  return messages.filter(msg => msg.to === "me" && !msg.read).length;
+  return messages.filter(msg => msg.toId === "me" && !msg.read).length;
 };
