@@ -106,9 +106,17 @@ export default {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-3px)' }
 				},
+				'bounce-subtle': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-2px)' }
+				},
 				'badge-glow': {
 					'0%, 100%': { boxShadow: '0 0 0 rgba(139, 92, 246, 0)' },
 					'50%': { boxShadow: '0 0 5px rgba(139, 92, 246, 0.5)' }
+				},
+				'sparkle': {
+					'0%, 100%': { opacity: '0.8', transform: 'scale(1)' },
+					'50%': { opacity: '1', transform: 'scale(1.2)' }
 				}
 			},
 			animation: {
@@ -121,7 +129,9 @@ export default {
 				'pulse-light': 'pulse-light 2s ease-in-out infinite',
 				'float': 'float 3s ease-in-out infinite',
 				'subtle-bounce': 'subtle-bounce 2s ease-in-out infinite',
-				'badge-glow': 'badge-glow 2s ease-in-out infinite'
+				'bounce-subtle': 'bounce-subtle 1.5s ease-in-out infinite',
+				'badge-glow': 'badge-glow 2s ease-in-out infinite',
+				'sparkle': 'sparkle 2s ease-in-out infinite'
 			},
 			fontFamily: {
 				sans: ['Inter', 'sans-serif']

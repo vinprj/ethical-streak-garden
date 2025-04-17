@@ -2,16 +2,26 @@
 import React from "react";
 import { Lightbulb, ArrowRight } from "lucide-react";
 import { Habit } from "@/types/habit";
+import { cn } from "@/lib/utils";
 
 interface SmartInsightsProps {
   activeHabits: Habit[];
 }
 
 export const SmartInsights: React.FC<SmartInsightsProps> = ({ activeHabits }) => {
+  const [isHovering, setIsHovering] = React.useState(false);
+  
   return (
-    <div className="bg-muted/30 rounded-lg p-6 mt-2">
+    <div 
+      className="bg-muted/30 rounded-lg p-6 mt-2 transition-all duration-300 hover:bg-muted/40"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       <div className="flex items-start gap-4">
-        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary animate-pulse-light">
+        <div className={cn(
+          "h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary",
+          isHovering ? "animate-pulse" : "animate-pulse-light"
+        )}>
           <Lightbulb className="h-5 w-5" />
         </div>
         <div>
@@ -22,8 +32,13 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({ activeHabits }) =>
               : "Add a few habits to get personalized insights about your patterns and consistency."}
           </p>
           {activeHabits.length > 0 && (
-            <button className="inline-flex items-center mt-3 text-sm text-primary hover:underline">
-              View detailed analysis <ArrowRight className="h-4 w-4 ml-1" />
+            <button 
+              className={cn(
+                "inline-flex items-center mt-3 text-sm text-primary transition-all duration-300",
+                isHovering ? "gap-2" : "gap-1 hover:gap-2"
+              )}
+            >
+              View detailed analysis <ArrowRight className={cn("h-4 w-4 transition-transform", isHovering ? "transform translate-x-1" : "")} />
             </button>
           )}
         </div>

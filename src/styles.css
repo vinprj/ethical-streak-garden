@@ -1,0 +1,54 @@
+
+/* Import garden plant animations */
+@import './components/garden/plant-animations.css';
+
+/* Global alignments */
+html {
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* Consistent font sizes */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.01em;
+}
+
+/* Improved dropdown alignment */
+[data-radix-popper-content-wrapper] {
+  z-index: 50 !important;
+}
+
+/* Ensure charts are properly themed */
+.recharts-wrapper {
+  font-family: inherit !important;
+}
+
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border-radius: var(--radius) !important;
+  padding: 8px !important;
+}
+
+.recharts-tooltip-label {
+  color: var(--foreground) !important;
+}
+
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value {
+  color: var(--foreground) !important;
+}
+
+.recharts-cartesian-grid line {
+  stroke: var(--border) !important;
+  stroke-opacity: 0.5 !important;
+}
+
+.recharts-text {
+  fill: var(--muted-foreground) !important;
+}

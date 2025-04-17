@@ -2,6 +2,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Habit } from "@/types/habit";
+import { Sun } from "lucide-react";
 
 interface MostConsistentHabitsProps {
   habits: Habit[];
@@ -19,10 +20,10 @@ export const MostConsistentHabits: React.FC<MostConsistentHabitsProps> = ({
           <div
             key={habit.id}
             className={cn(
-              "flex items-center justify-between border-b border-border pb-3 last:border-0 transition-all duration-300",
+              "flex items-center justify-between border-b border-border pb-3 last:border-0 transition-all duration-500",
               isAnimated ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
             )}
-            style={{ transitionDelay: `${150 + index * 100}ms` }}
+            style={{ transitionDelay: `${250 + index * 150}ms` }}
           >
             <div>
               <p className="font-medium">{habit.name}</p>
@@ -31,9 +32,10 @@ export const MostConsistentHabits: React.FC<MostConsistentHabitsProps> = ({
               </p>
             </div>
             <div className="flex items-center gap-1 text-amber-500">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse-light">
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-              </svg>
+              <Sun className={cn(
+                "h-4 w-4",
+                isAnimated && "animate-pulse-light"
+              )} />
               <span className="font-medium">
                 {habit.currentStreak} day{habit.currentStreak !== 1 ? 's' : ''}
               </span>

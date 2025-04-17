@@ -1,6 +1,7 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { Habit } from "@/types/habit";
+import { getPlantTypeForCategory, getNextGrowthStage, getColorForHabit } from "@/utils/plantUtils";
 
 export type PlantGrowthStage = 'seed' | 'sprout' | 'growing' | 'mature' | 'flowering' | 'fruiting';
 
@@ -56,44 +57,6 @@ export const GardenContext = createContext<GardenContextType>({
   addSpecialEffect: () => {},
   handleHabitCompletion: () => {},
 });
-
-// Plant type mapping based on habit category
-const getPlantTypeForCategory = (category: string): PlantType => {
-  switch(category) {
-    case 'health': return 'vegetable';
-    case 'fitness': return 'tree';
-    case 'mindfulness': return 'flower';
-    case 'productivity': return 'herb';
-    case 'learning': return 'fern';
-    case 'creativity': return 'fruit';
-    case 'social': return 'succulent';
-    default: return 'flower';
-  }
-};
-
-// Get next growth stage
-const getNextGrowthStage = (current: PlantGrowthStage, streak: number): PlantGrowthStage => {
-  if (streak < 2) return 'seed';
-  if (streak < 5) return 'sprout';
-  if (streak < 10) return 'growing';
-  if (streak < 15) return 'mature';
-  if (streak < 21) return 'flowering';
-  return 'fruiting';
-};
-
-// Get a color based on habit category
-const getColorForHabit = (category: string): string => {
-  switch(category) {
-    case 'health': return 'emerald';
-    case 'fitness': return 'blue';
-    case 'mindfulness': return 'purple';
-    case 'productivity': return 'amber';
-    case 'learning': return 'cyan';
-    case 'creativity': return 'pink';
-    case 'social': return 'indigo';
-    default: return 'emerald';
-  }
-};
 
 export const GardenProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [plants, setPlants] = useState<PlantData[]>([]);
@@ -192,13 +155,11 @@ export const GardenProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const newStreak = currentPlant.completionStreak + 1;
       const newGrowthStage = getNextGrowthStage(currentPlant.growthStage, newStreak);
       
-      // Add special effects for growth stage changes
+      // Add special effects for growth stage changes - now more subtle
       const specialEffects = [...currentPlant.specialEffects];
       if (currentPlant.growthStage !== newGrowthStage) {
-        if (newGrowthStage === 'flowering') {
-          specialEffects.push('butterfly');
-        } else if (newGrowthStage === 'fruiting') {
-          specialEffects.push('bird');
+        if (newGrowthStage === 'flowering' || newGrowthStage === 'fruiting') {
+          specialEffects.push('sparkle');
         }
       }
       

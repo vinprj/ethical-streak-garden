@@ -24,17 +24,20 @@ export const InsightCard: React.FC<InsightCardProps> = ({
   return (
     <Card 
       className={cn(
-        "transition-all duration-500", 
-        isAnimated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        "transition-all duration-700", 
+        isAnimated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6",
+        "hover:shadow-lg hover:border-primary/50 transform-gpu"
       )}
       style={{ transitionDelay }}
     >
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
-          <Icon className="h-5 w-5 text-primary" />
-          <CardTitle>{title}</CardTitle>
+          <div className="p-1.5 rounded-full bg-primary/10 flex items-center justify-center">
+            <Icon className="h-5 w-5 text-primary" />
+          </div>
+          <CardTitle className="text-lg">{title}</CardTitle>
         </div>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription className="text-sm mt-1">{description}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         {children}

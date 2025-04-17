@@ -1,11 +1,12 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Habit } from "@/types/habit";
-import { useGardenContext, PlantGrowthStage } from "@/context/GardenContext";
+import { useGardenContext } from "@/context/GardenContext";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Check, Clock, X, Sparkles, Leaf } from "lucide-react";
+import { Check, Clock, Sparkles, Leaf } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getGrowthLabel, getPlantEmoji } from "@/utils/plantUtils";
 
 interface PlantDisplayProps {
   habit: Habit;
@@ -14,73 +15,11 @@ interface PlantDisplayProps {
 
 export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) => {
   const { getPlantByHabitId, gardenAnimationsLevel, highContrastGarden } = useGardenContext();
+  const [isHovering, setIsHovering] = useState(false);
+  
   const plant = getPlantByHabitId(habit.id);
   const today = new Date().toISOString().split("T")[0];
   const isCompletedToday = habit.completedDates.includes(today);
-  
-  const getGrowthLabel = (stage: PlantGrowthStage): string => {
-    switch (stage) {
-      case 'seed': return 'Just planted';
-      case 'sprout': return 'Sprouting';
-      case 'growing': return 'Growing';
-      case 'mature': return 'Maturing';
-      case 'flowering': return 'Flowering';
-      case 'fruiting': return 'Fruiting';
-      default: return 'Just planted';
-    }
-  };
-
-  const getPlantEmoji = (type: string, stage: PlantGrowthStage): string => {
-    if (stage === 'seed') return '🌱';
-    if (stage === 'sprout') return '🌿';
-    
-    switch (type) {
-      case 'flower': return stage === 'fruiting' ? '🌸' : stage === 'flowering' ? '🌷' : '🌿';
-      case 'tree': return stage === 'fruiting' ? '🌳' : stage === 'flowering' ? '🌲' : '🌱';
-      case 'herb': return stage === 'fruiting' ? '🌿' : stage === 'flowering' ? '🪴' : '🌱';
-      case 'vegetable': return stage === 'fruiting' ? '🥕' : stage === 'flowering' ? '🥬' : '🌱';
-      case 'fruit': return stage === 'fruiting' ? '🍎' : stage === 'flowering' ? '🌸' : '🌱';
-      case 'succulent': return stage === 'fruiting' ? '🌵' : stage === 'flowering' ? '🪴' : '🌱';
-      case 'fern': return stage === 'fruiting' ? '🌿' : stage === 'flowering' ? '🌿' : '🌱';
-      default: return '🌱';
-    }
-  };
-  
-  // Generate special effects like butterflies or birds
-  const renderSpecialEffects = () => {
-    if (!plant?.specialEffects?.length || gardenAnimationsLevel === 'none') return null;
-    
-    return plant.specialEffects.map((effect, index) => {
-      switch (effect) {
-        case 'butterfly':
-          return (
-            <div 
-              key={`${habit.id}-effect-${index}`}
-              className={cn(
-                "absolute top-1 right-2 text-lg z-10 garden-particle", 
-                gardenAnimationsLevel === 'standard' ? "animate-butterfly-flutter" : ""
-              )}
-            >
-              🦋
-            </div>
-          );
-        case 'bird':
-          return (
-            <div 
-              key={`${habit.id}-effect-${index}`}
-              className={cn(
-                "absolute top-0 right-8 text-lg z-10 garden-particle", 
-                gardenAnimationsLevel === 'standard' ? "animate-bird-fly" : ""
-              )}
-            >
-              🐦
-            </div>
-          );
-        default:
-          return null;
-      }
-    });
-  };
 
   const renderStatusIndicator = () => {
     if (isCompletedToday) {
@@ -95,6 +34,32 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
       return (
         <div className="absolute top-2 right-2 bg-amber-500/90 rounded-full p-1 shadow-md">
           <Clock className="w-4 h-4 text-white" />
+        </div>
+      );
+    }
+    
+    return null;
+  };
+
+  // Special effects for plants instead of wildlife
+  const renderPlantEffects = () => {
+    if (!plant || gardenAnimationsLevel === 'none') return null;
+    
+    if (plant.growthStage === 'flowering' || plant.growthStage === 'fruiting') {
+      return (
+        <div className={cn(
+          "absolute inset-0 overflow-hidden pointer-events-none",
+          gardenAnimationsLevel === 'standard' && "plant-effects"
+        )}>
+          {plant.growthStage === 'fruiting' && (
+            <div className="absolute top-1/3 left-1/4 text-xs animate-float">✨</div>
+          )}
+          {plant.growthStage === 'fruiting' && (
+            <div className="absolute top-1/2 right-1/4 text-xs animate-float" style={{ animationDelay: '1s' }}>✨</div>
+          )}
+          {plant.growthStage === 'flowering' && (
+            <div className="absolute bottom-1/3 right-1/3 text-xs animate-subtle-bounce" style={{ animationDelay: '0.5s' }}>✨</div>
+          )}
         </div>
       );
     }
@@ -125,11 +90,14 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
               "relative overflow-hidden transition-all duration-500 garden-plant", 
               highContrastGarden ? "high-contrast garden-plant" : "",
               "hover:shadow-md border-2",
-              isCompletedToday ? "border-green-500/50" : "border-transparent"
+              isCompletedToday ? "border-green-500/50" : "border-transparent",
+              isHovering ? "transform-gpu translate-y-[-2px]" : ""
             )}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
           >
             {renderStatusIndicator()}
-            {renderSpecialEffects()}
+            {renderPlantEffects()}
             
             <div className="flex flex-col items-center justify-between h-[220px] p-4">
               <div className="text-center">
@@ -140,7 +108,8 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
               <div 
                 className={cn(
                   "text-6xl sm:text-7xl my-4 transition-all duration-700", 
-                  gardenAnimationsLevel === 'standard' && plant.growthStage !== 'seed' ? "animate-pulse-light" : ""
+                  gardenAnimationsLevel === 'standard' && isHovering ? "animate-bounce-subtle" : "",
+                  gardenAnimationsLevel === 'standard' && plant.growthStage !== 'seed' && !isHovering ? "animate-pulse-light" : ""
                 )}
               >
                 {getPlantEmoji(plant.type, plant.growthStage)}
@@ -149,7 +118,7 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
               <div className="text-center w-full">
                 <div className="bg-muted h-1.5 w-full rounded-full overflow-hidden">
                   <div 
-                    className="bg-primary h-full rounded-full" 
+                    className="bg-primary h-full rounded-full transition-all"
                     style={{ 
                       width: `${Math.min((plant.completionStreak / 21) * 100, 100)}%`,
                       transition: gardenAnimationsLevel !== 'none' ? 'width 1s ease-out' : 'none'
