@@ -2,7 +2,6 @@
 import React from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
-import { UserStats } from "../dashboard/UserStats";
 import { useHabits } from "@/context/HabitContext";
 import { cn } from "@/lib/utils";
 
@@ -25,9 +24,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         )}
         <main className={cn("flex-1 overflow-auto p-4 md:p-6", isOfflineMode && "bg-secondary/30")}>
           <div className="container max-w-5xl mx-auto">
-            <div className="mb-8">
-              <UserStats />
-            </div>
             {children}
           </div>
         </main>

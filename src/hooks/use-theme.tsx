@@ -30,6 +30,39 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.classList.add(theme);
     localStorage.setItem('theme', theme);
     
+    // Reapply custom theme colors if present
+    const customTheme = localStorage.getItem('customTheme');
+    if (customTheme) {
+      // Find and apply the custom theme
+      const themeData = {
+        ocean: {
+          primary: "#0EA5E9",
+          background: theme === 'dark' ? '#0c1929' : '#f0f9ff',
+          card: theme === 'dark' ? '#0f172a' : '#ffffff',
+          accent: "#7dd3fc",
+        },
+        forest: {
+          primary: "#10b981",
+          background: theme === 'dark' ? '#0c1f17' : '#f0fdf4',
+          card: theme === 'dark' ? '#0f291a' : '#ffffff',
+          accent: "#86efac",
+        },
+        sunset: {
+          primary: "#f97316",
+          background: theme === 'dark' ? '#291807' : '#fff7ed',
+          card: theme === 'dark' ? '#27150e' : '#ffffff',
+          accent: "#fdba74",
+        }
+      }[customTheme];
+      
+      if (themeData) {
+        root.style.setProperty('--primary', themeData.primary);
+        root.style.setProperty('--background', themeData.background);
+        root.style.setProperty('--card', themeData.card);
+        root.style.setProperty('--accent', themeData.accent);
+      }
+    }
+    
     // Dispatch custom event for components to listen to
     window.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
   }, [theme]);

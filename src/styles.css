@@ -22,6 +22,14 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 50 !important;
 }
 
+/* Theme transition for all elements */
+* {
+  transition-property: color, background-color, border-color, outline-color, 
+    text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
 /* Ensure charts are properly themed */
 .recharts-wrapper {
   font-family: inherit !important;
@@ -66,4 +74,51 @@ h1, h2, h3, h4, h5, h6 {
 .recharts-dot {
   stroke: var(--background) !important;
   stroke-width: 1.5px !important;
+}
+
+/* Better notification styling */
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  height: 18px;
+  width: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 500;
+  border-radius: 50%;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Fix theme customization styling */
+.custom-theme-applied {
+  position: relative;
+}
+
+.custom-theme-applied::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Better loading animations */
+@keyframes pulse-bg {
+  0%, 100% { background-opacity: 0.2; }
+  50% { background-opacity: 0.1; }
+}
+
+.skeleton-pulse {
+  animation: pulse-bg 1.5s ease-in-out infinite;
 }

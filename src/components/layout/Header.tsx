@@ -1,13 +1,13 @@
 
 import React from "react";
-import { Bell, Moon, Sun, Wifi, WifiOff } from "lucide-react";
+import { Wifi, WifiOff, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHabits } from "@/context/HabitContext";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { HabitSearch } from "../habits/HabitSearch";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/use-theme";
+import { NotificationCenter } from "../notifications/NotificationCenter";
 
 export const Header: React.FC = () => {
   const { toggleOfflineMode, isOfflineMode } = useHabits();
@@ -29,7 +29,10 @@ export const Header: React.FC = () => {
   }, [location]);
 
   const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+    // Only toggle theme in header if not on rewards page
+    if (location.pathname !== "/rewards") {
+      setTheme(theme === "dark" ? "light" : "dark");
+    }
   };
 
   return (
@@ -46,29 +49,15 @@ export const Header: React.FC = () => {
             {isOfflineMode ? <WifiOff className="h-5 w-5" /> : <Wifi className="h-5 w-5" />}
           </Button>
           
-          <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'dark' ? "Light Mode" : "Dark Mode"}>
-            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </Button>
+          {/* Only show theme toggle if not on rewards page */}
+          {location.pathname !== "/rewards" && (
+            <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'dark' ? "Light Mode" : "Dark Mode"}>
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+          )}
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-72">
-              <div className="font-medium text-sm px-2 py-2">Notifications</div>
-              <DropdownMenuSeparator />
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                <p>No notifications</p>
-                <p className="mt-1">Reminders will appear here when enabled</p>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center text-sm">
-                Manage notification settings
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Replace dropdown with NotificationCenter */}
+          <NotificationCenter />
         </div>
       </div>
     </header>
