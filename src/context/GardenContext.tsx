@@ -25,6 +25,7 @@ export interface PlantData {
 
 interface GardenContextType {
   plants: PlantData[];
+  setPlants: React.Dispatch<React.SetStateAction<PlantData[]>>;
   isGardenEnabled: boolean;
   gardenAnimationsLevel: 'none' | 'minimal' | 'standard';
   ecoMode: boolean;
@@ -41,6 +42,7 @@ interface GardenContextType {
 
 export const GardenContext = createContext<GardenContextType>({
   plants: [],
+  setPlants: () => {},
   isGardenEnabled: true,
   gardenAnimationsLevel: 'standard',
   ecoMode: false,
@@ -251,7 +253,8 @@ export const GardenProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   return (
     <GardenContext.Provider 
       value={{ 
-        plants, 
+        plants,
+        setPlants, 
         isGardenEnabled, 
         gardenAnimationsLevel, 
         ecoMode,

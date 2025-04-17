@@ -1,28 +1,29 @@
 
+export type PrivacyLevel = 'strict' | 'moderate' | 'open';
+
 export interface Buddy {
   id: string;
   name: string;
+  avatar?: string;
   connectionDate: string;
+  lastActive: string;
   sharedHabits: string[];
-  lastActive?: string;
-  isAnonymous: boolean;
-  inviteCode?: string;
+  isAnonymous?: boolean;
 }
 
 export interface Message {
   id: string;
-  from: string;
-  to: string;
+  fromId: string;
+  toId: string;
   content: string;
   type: 'text' | 'encouragement' | 'reward';
-  sentAt: string;
+  timestamp: string;
   read: boolean;
 }
 
-export type PrivacyLevel = 'minimal' | 'moderate' | 'open';
-
 export interface BuddyContextType {
   buddies: Buddy[];
+  setBuddies: React.Dispatch<React.SetStateAction<Buddy[]>>;
   pendingRequests: Buddy[];
   messages: Message[];
   inviteCode: string | null;
@@ -36,5 +37,5 @@ export interface BuddyContextType {
   toggleAnonymous: (buddyId: string) => void;
   getUnreadMessageCount: () => number;
   privacyLevel: PrivacyLevel;
-  setPrivacyLevel: (level: PrivacyLevel) => void;
+  setPrivacyLevel: React.Dispatch<React.SetStateAction<PrivacyLevel>>;
 }

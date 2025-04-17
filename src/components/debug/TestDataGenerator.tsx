@@ -64,6 +64,7 @@ export const TestDataGenerator: React.FC = () => {
       setHabits(habits);
       setBadges(badges);
       setPlants(plants);
+      setBuddies([]); // Reset buddies when generating new data
       
       // Update stats
       setDataStats({

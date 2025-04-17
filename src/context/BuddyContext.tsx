@@ -159,6 +159,7 @@ export const BuddyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <BuddyContext.Provider
       value={{
         buddies,
+        setBuddies,
         pendingRequests,
         messages,
         inviteCode,
