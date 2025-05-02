@@ -16,12 +16,6 @@ interface ThemeOption {
   key: string;
   pointsRequired: number;
   gradient: string;
-  colors: {
-    primary: string;
-    background: string;
-    card: string;
-    accent: string;
-  };
 }
 
 const themeOptions: ThemeOption[] = [
@@ -30,42 +24,24 @@ const themeOptions: ThemeOption[] = [
     key: "ocean",
     pointsRequired: 500,
     gradient: "bg-gradient-to-r from-blue-400 to-cyan-300",
-    colors: {
-      primary: "#0EA5E9",
-      background: "#f0f9ff",
-      card: "#ffffff",
-      accent: "#7dd3fc",
-    },
   },
   {
     name: "Forest Theme",
     key: "forest",
     pointsRequired: 1000,
     gradient: "bg-gradient-to-r from-emerald-400 to-lime-300",
-    colors: {
-      primary: "#10b981",
-      background: "#f0fdf4",
-      card: "#ffffff",
-      accent: "#86efac",
-    },
   },
   {
     name: "Sunset Theme",
     key: "sunset",
     pointsRequired: 2000,
     gradient: "bg-gradient-to-r from-orange-400 to-pink-300",
-    colors: {
-      primary: "#f97316",
-      background: "#fff7ed",
-      card: "#ffffff",
-      accent: "#fdba74",
-    },
   },
 ];
 
 const RewardsPage: React.FC = () => {
   const { stats } = useHabits();
-  const { theme, setTheme } = useTheme();
+  const { theme, applyCustomTheme } = useTheme();
   const { toast } = useToast();
   const [activeTheme, setActiveTheme] = useState<string | null>(() => {
     // Get active custom theme from local storage if exists
@@ -93,54 +69,30 @@ const RewardsPage: React.FC = () => {
   const { level, progress, remainingPoints, pointsForNextLevel } = calculateLevel(stats.points);
 
   // Apply a theme
-  const applyTheme = (themeOption: ThemeOption) => {
-    if (stats.points < themeOption.pointsRequired) {
+  const handleApplyTheme = (themeKey: string) => {
+    if (stats.points < themeOptions.find(t => t.key === themeKey)?.pointsRequired!) {
       return;
     }
 
-    // Save the active theme in local storage
-    localStorage.setItem('customTheme', themeOption.key);
-    setActiveTheme(themeOption.key);
+    // Set active theme in state
+    setActiveTheme(themeKey);
     
-    // Apply the theme colors to CSS variables
-    const root = document.documentElement;
-    
-    // Apply theme-specific colors
-    root.style.setProperty('--primary', themeOption.colors.primary);
-    root.style.setProperty('--background', themeOption.colors.background);
-    root.style.setProperty('--card', themeOption.colors.card);
-    root.style.setProperty('--accent', themeOption.colors.accent);
-    
-    // Set the base theme mode (light or dark)
-    setTheme(theme === 'dark' ? 'dark' : 'light');
-    
-    // Dispatch custom event for charts to update
-    window.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
+    // Apply the theme using our enhanced theme provider
+    applyCustomTheme(themeKey);
     
     toast({
       title: "Theme Applied",
-      description: `${themeOption.name} has been applied successfully!`,
+      description: `${themeOptions.find(t => t.key === themeKey)?.name} has been applied successfully!`,
       variant: "default",
     });
   };
 
   const resetTheme = () => {
     // Clear custom theme
-    localStorage.removeItem('customTheme');
     setActiveTheme(null);
     
-    // Reset CSS variables
-    const root = document.documentElement;
-    root.style.removeProperty('--primary');
-    root.style.removeProperty('--background');
-    root.style.removeProperty('--card');
-    root.style.removeProperty('--accent');
-    
-    // Reapply the base theme
-    setTheme(theme);
-    
-    // Dispatch custom event for charts to update
-    window.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
+    // Reset via our enhanced theme provider
+    applyCustomTheme(null);
     
     toast({
       title: "Theme Reset",
@@ -249,7 +201,7 @@ const RewardsPage: React.FC = () => {
                   <Button 
                     variant={activeTheme === themeOption.key ? "default" : "outline"} 
                     disabled={stats.points < themeOption.pointsRequired}
-                    onClick={() => applyTheme(themeOption)}
+                    onClick={() => handleApplyTheme(themeOption.key)}
                     className="w-full"
                   >
                     {activeTheme === themeOption.key ? "Applied" : "Apply Theme"}

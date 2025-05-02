@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 
 // Pages
@@ -20,16 +20,17 @@ import GardenPage from "./pages/GardenPage";
 import { HabitProvider } from "./context/HabitContext";
 import { BuddyProvider } from "./context/BuddyContext";
 import { GardenProvider } from "./context/GardenContext";
-import { ThemeProvider } from "./hooks/use-theme";
+import { AppThemeProvider } from "./components/ui/theme-provider";
 
 function App() {
   return (
-    <ThemeProvider>
+    <AppThemeProvider>
       <HabitProvider>
         <BuddyProvider>
           <GardenProvider>
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Navigate to="/" replace />} />
               <Route path="/welcome" element={<Index />} />
               <Route path="/today" element={<TodayPage />} />
               <Route path="/insights" element={<InsightsPage />} />
@@ -45,7 +46,7 @@ function App() {
           </GardenProvider>
         </BuddyProvider>
       </HabitProvider>
-    </ThemeProvider>
+    </AppThemeProvider>
   );
 }
 

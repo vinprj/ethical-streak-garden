@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -48,7 +47,7 @@ export const Sidebar = () => {
   const navItems = [
     { 
       name: "Dashboard", 
-      path: "/dashboard",
+      path: "/",
       icon: <Home className="h-[18px] w-[18px]" />
     },
     { 
@@ -191,21 +190,70 @@ export const Sidebar = () => {
       
       <div className="border-t py-4">
         <div className="flex flex-col gap-1 px-2">
-          {bottomNavItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors", {
-                  "bg-primary/10 text-primary hover:bg-primary/10": isActive,
-                  "text-muted-foreground hover:bg-muted hover:text-foreground": !isActive,
-                })
-              }
-            >
-              {item.icon}
-              <span>{item.name}</span>
-            </NavLink>
-          ))}
+          {showDebug ? (
+            <>
+              {[
+                { 
+                  name: "Settings", 
+                  path: "/settings",
+                  icon: <Settings className="h-[18px] w-[18px]" /> 
+                },
+                { 
+                  name: "Help", 
+                  path: "/help",
+                  icon: <HelpCircle className="h-[18px] w-[18px]" /> 
+                },
+                { 
+                  name: "Debug", 
+                  path: "/debug",
+                  icon: <Bug className="h-[18px] w-[18px]" /> 
+                }
+              ].map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors", {
+                      "bg-primary/10 text-primary hover:bg-primary/10": isActive,
+                      "text-muted-foreground hover:bg-muted hover:text-foreground": !isActive,
+                    })
+                  }
+                >
+                  {item.icon}
+                  <span>{item.name}</span>
+                </NavLink>
+              ))}
+            </>
+          ) : (
+            <>
+              {[
+                { 
+                  name: "Settings", 
+                  path: "/settings",
+                  icon: <Settings className="h-[18px] w-[18px]" /> 
+                },
+                { 
+                  name: "Help", 
+                  path: "/help",
+                  icon: <HelpCircle className="h-[18px] w-[18px]" /> 
+                }
+              ].map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors", {
+                      "bg-primary/10 text-primary hover:bg-primary/10": isActive,
+                      "text-muted-foreground hover:bg-muted hover:text-foreground": !isActive,
+                    })
+                  }
+                >
+                  {item.icon}
+                  <span>{item.name}</span>
+                </NavLink>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>
