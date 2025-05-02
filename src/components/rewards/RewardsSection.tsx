@@ -174,10 +174,10 @@ export const RewardsSection: React.FC<RewardsSectionProps> = ({ stats }) => {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center mb-4">
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <Gift className="h-5 w-5 text-primary" />
-          Practical Rewards
+          Rewards
         </h2>
       </div>
       

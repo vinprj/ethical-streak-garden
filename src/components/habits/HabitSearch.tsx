@@ -45,9 +45,11 @@ export const HabitSearch: React.FC = () => {
       </PopoverTrigger>
       <PopoverContent 
         className="p-0 w-[300px] md:w-[400px]" 
-        align="end" 
+        align="start" 
         side="bottom" 
         sideOffset={5}
+        alignOffset={0}
+        avoidCollisions={true}
       >
         <Command>
           <CommandInput placeholder="Search habits..." />

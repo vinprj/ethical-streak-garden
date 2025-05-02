@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { 
   BarChart, 
   Bar, 
-  LineChart,
+  LineChart as RechartsLineChart,
   Line,
   XAxis, 
   YAxis, 
@@ -14,7 +14,7 @@ import {
   Legend
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import { BarChart2, LineChart as LineChartIcon, Settings } from "lucide-react";
+import { BarChart2, LineChart, Settings } from "lucide-react";
 import { useThemeContext } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 import { 
@@ -23,6 +23,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface WeekData {
   day: string;
@@ -79,6 +80,29 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
     };
   }, []);
   
+  // Custom tooltip formatter
+  const formatTooltip = (value: number, name: string, props: any) => {
+    if (props.payload.isEmpty) {
+      return ["No habits scheduled", ""];
+    }
+    return [`${value}% (${props.payload.completed}/${props.payload.total})`, "Completion"];
+  };
+  
+  // Chart config
+  const chartConfig = {
+    line: {
+      dataKey: "percentage",
+      name: "Completion Rate",
+      stroke: barColor,
+      strokeWidth: 2,
+    },
+    bar: {
+      dataKey: "percentage",
+      name: "Completion Rate",
+      fill: barColor,
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between">
@@ -98,7 +122,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
             onClick={() => setChartType('line')}
             className="flex items-center gap-1"  
           >
-            <LineChartIcon className="h-4 w-4" />
+            <LineChart className="h-4 w-4" />
             <span className="text-xs">Line</span>
           </Button>
         </div>
@@ -136,9 +160,21 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
         "h-[240px] transition-opacity duration-300",
         isAnimated ? "opacity-100" : "opacity-0"
       )}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ChartContainer
+          config={{
+            completion: { 
+              color: barColor,
+              label: "Completion Rate" 
+            },
+            empty: {
+              color: emptyColor,
+              label: "No Data"
+            }
+          }}
+          className="h-full w-full"
+        >
           {chartType === 'bar' ? (
-            <BarChart data={data}>
+            <BarChart data={data} className="h-full w-full">
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
               <XAxis dataKey="day" stroke="var(--foreground)" />
               <YAxis 
@@ -146,26 +182,35 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
                 domain={[0, 100]} 
                 stroke="var(--foreground)"
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: "var(--card)",
-                  border: "1px solid var(--border)",
-                  color: "var(--foreground)",
-                  borderRadius: "6px"
+              <ChartTooltip
+                content={({ active, payload, label }) => {
+                  if (!active || !payload?.length) return null;
+                  const data = payload[0].payload;
+                  return (
+                    <div className="rounded-lg border bg-background p-2 shadow-md">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="font-medium">{label}</div>
+                        <div className="font-medium text-right">
+                          {data.isEmpty ? "No habits" : `${data.percentage}%`}
+                        </div>
+                        {!data.isEmpty && (
+                          <>
+                            <div className="text-xs text-muted-foreground">Completed</div>
+                            <div className="text-xs text-right text-muted-foreground">
+                              {data.completed}/{data.total}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
                 }}
-                formatter={(value, name, props) => {
-                  if (props.payload.isEmpty) {
-                    return ["No habits scheduled", ""];
-                  }
-                  return [`${value}% (${props.payload.completed}/${props.payload.total})`, "Completion"];
-                }}
-                labelFormatter={(label) => `${label}`}
               />
               <Legend />
               <Bar 
-                dataKey="percentage" 
-                name="Completion Rate"
-                fill={barColor}
+                dataKey={chartConfig.bar.dataKey}
+                name={chartConfig.bar.name}
+                fill={chartConfig.bar.fill}
                 radius={[4, 4, 0, 0]} 
                 isAnimationActive={isAnimated}
                 animationDuration={1500}
@@ -181,7 +226,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
               </Bar>
             </BarChart>
           ) : (
-            <LineChart data={data}>
+            <RechartsLineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
               <XAxis dataKey="day" stroke="var(--foreground)" />
               <YAxis 
@@ -189,37 +234,46 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
                 domain={[0, 100]} 
                 stroke="var(--foreground)"
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: "var(--card)",
-                  border: "1px solid var(--border)",
-                  color: "var(--foreground)",
-                  borderRadius: "6px"
+              <ChartTooltip
+                content={({ active, payload, label }) => {
+                  if (!active || !payload?.length) return null;
+                  const data = payload[0].payload;
+                  return (
+                    <div className="rounded-lg border bg-background p-2 shadow-md">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="font-medium">{label}</div>
+                        <div className="font-medium text-right">
+                          {data.isEmpty ? "No habits" : `${data.percentage}%`}
+                        </div>
+                        {!data.isEmpty && (
+                          <>
+                            <div className="text-xs text-muted-foreground">Completed</div>
+                            <div className="text-xs text-right text-muted-foreground">
+                              {data.completed}/{data.total}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
                 }}
-                formatter={(value, name, props) => {
-                  if (props.payload.isEmpty) {
-                    return ["No habits scheduled", ""];
-                  }
-                  return [`${value}% (${props.payload.completed}/${props.payload.total})`, "Completion"];
-                }}
-                labelFormatter={(label) => `${label}`}
               />
               <Legend />
               <Line 
                 type="monotone"
-                dataKey="percentage" 
-                name="Completion Rate"
-                stroke={barColor}
-                strokeWidth={2}
+                dataKey={chartConfig.line.dataKey}
+                name={chartConfig.line.name}
+                stroke={chartConfig.line.stroke}
+                strokeWidth={chartConfig.line.strokeWidth}
                 dot={{ fill: barColor, r: 4 }}
                 isAnimationActive={isAnimated}
                 animationDuration={1500}
                 animationEasing="ease-out"
                 connectNulls={true}
               />
-            </LineChart>
+            </RechartsLineChart>
           )}
-        </ResponsiveContainer>
+        </ChartContainer>
       </div>
     </div>
   );

@@ -153,3 +153,24 @@ button, input, select, textarea {
   transition: all 0.3s ease;
   color: inherit;
 }
+
+/* Chart theme improvements */
+.recharts-default-tooltip {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+/* Ensure chart elements respect theme */
+.recharts-layer text {
+  fill: var(--foreground) !important;
+}
+
+.recharts-active-dot {
+  stroke: var(--background) !important;
+}
+
+/* Improved popover positioning */
+[data-radix-popper-content-wrapper] {
+  z-index: 50 !important;
+}
