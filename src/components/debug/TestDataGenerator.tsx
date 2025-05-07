@@ -1,14 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { generateAllTestData } from '@/utils/generateTestData';
+import { generateAllTestData } from '@/utils/testData';
 import { useHabits } from '@/context/HabitContext';
 import { useGardenContext } from '@/context/GardenContext';
 import { useBuddy } from '@/context/BuddyContext';
 import { Loader2, Play, Trash2, Database, AlertTriangle, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { DataStatsCard } from './DataStatsCard';
+import { DataFeatureList } from './DataFeatureList';
 
 export const TestDataGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -16,13 +18,7 @@ export const TestDataGenerator: React.FC = () => {
   const { setPlants } = useGardenContext();
   const { setBuddies, setPendingRequests, setMessages } = useBuddy();
   const navigate = useNavigate();
-  const [dataStats, setDataStats] = useState<{
-    habits: number;
-    badges: number;
-    plants: number;
-    buddies: number;
-    messages: number;
-  }>({
+  const [dataStats, setDataStats] = useState({
     habits: 0,
     badges: 0,
     plants: 0,
@@ -31,7 +27,7 @@ export const TestDataGenerator: React.FC = () => {
   });
 
   // Update stats from localStorage on mount
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       const habitData = localStorage.getItem("ethical-habit-tracker-data");
       if (habitData) {
@@ -58,7 +54,7 @@ export const TestDataGenerator: React.FC = () => {
   const applyTestData = async () => {
     setIsGenerating(true);
     try {
-      // Generate more comprehensive test data
+      // Generate comprehensive test data
       const { habits, badges, plants, buddies, pendingRequests, messages } = generateAllTestData();
       
       // Store in localStorage
@@ -156,47 +152,8 @@ export const TestDataGenerator: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="p-4 bg-muted/40 rounded-md text-center">
-            <div className="text-2xl font-bold">{dataStats.habits}</div>
-            <div className="text-xs text-muted-foreground mt-1">Habits</div>
-          </div>
-          <div className="p-4 bg-muted/40 rounded-md text-center">
-            <div className="text-2xl font-bold">{dataStats.badges}</div>
-            <div className="text-xs text-muted-foreground mt-1">Badges</div>
-          </div>
-          <div className="p-4 bg-muted/40 rounded-md text-center">
-            <div className="text-2xl font-bold">{dataStats.buddies}</div>
-            <div className="text-xs text-muted-foreground mt-1">Buddies</div>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="p-4 bg-muted/40 rounded-md text-center">
-            <div className="text-2xl font-bold">{dataStats.plants}</div>
-            <div className="text-xs text-muted-foreground mt-1">Plants</div>
-          </div>
-          <div className="p-4 bg-muted/40 rounded-md text-center">
-            <div className="text-2xl font-bold">{dataStats.messages}</div>
-            <div className="text-xs text-muted-foreground mt-1">Messages</div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex justify-between items-center text-sm">
-            <span>Demo data includes:</span>
-          </div>
-          <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-5">
-            <li><span className="text-primary font-medium">16 habits</span> across 8 different categories</li>
-            <li>Various streak patterns (consistent, occasional, weekend)</li>
-            <li>Long streaks (30+ days) to showcase garden growth stages</li>
-            <li><span className="text-primary font-medium">9 achievement badges</span> based on milestones</li>
-            <li>Plant data visualization in the garden feature</li>
-            <li><span className="text-primary font-medium">3 habit buddies</span> with different activity levels</li>
-            <li><span className="text-primary font-medium">2 pending buddy requests</span> to demonstrate the connection flow</li>
-            <li>Sample messages and encouragements between buddies</li>
-          </ul>
-        </div>
+        <DataStatsCard stats={dataStats} />
+        <DataFeatureList />
       </CardContent>
 
       <CardFooter className="flex flex-col space-y-4">
