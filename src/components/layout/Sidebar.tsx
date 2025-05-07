@@ -22,6 +22,13 @@ import { cn } from "@/lib/utils";
 import { useHabits } from "@/context/HabitContext";
 import { useBuddy } from "@/context/BuddyContext";
 
+interface NavItemType {
+  name: string;
+  path: string;
+  icon: React.ReactNode;
+  badgeCount?: number;
+}
+
 export const Sidebar = () => {
   const isMobile = useIsMobile();
   const { isOfflineMode } = useHabits();
@@ -48,7 +55,7 @@ export const Sidebar = () => {
     setShowDebug(shouldShow);
   }, []);
 
-  const navItems = [
+  const navItems: NavItemType[] = [
     { 
       name: "Dashboard", 
       path: "/",
@@ -87,7 +94,7 @@ export const Sidebar = () => {
     },
   ];
 
-  const bottomNavItems = [
+  const bottomNavItems: NavItemType[] = [
     { 
       name: "Settings", 
       path: "/settings",

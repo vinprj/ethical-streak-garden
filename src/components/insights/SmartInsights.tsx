@@ -15,9 +15,10 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({ activeHabits }) =>
   const [activeInsight, setActiveInsight] = useState(0);
   const navigate = useNavigate();
   
-  // Calculate habit insights
-  const morningHabits = activeHabits.filter(h => h.time === "morning").length;
-  const eveningHabits = activeHabits.filter(h => h.time === "evening").length;
+  // Calculate habit insights - removed time property references
+  // Using category to group habits instead of time
+  const healthHabits = activeHabits.filter(h => h.category === "health").length;
+  const fitnessHabits = activeHabits.filter(h => h.category === "fitness").length;
   const mostStreaked = activeHabits.length > 0 
     ? [...activeHabits].sort((a, b) => b.currentStreak - a.currentStreak)[0]
     : null;
@@ -27,10 +28,10 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({ activeHabits }) =>
   
   const insights = [
     {
-      title: "Time Pattern Insight",
+      title: "Category Pattern Insight",
       icon: <Calendar className="h-5 w-5" />,
       content: activeHabits.length > 0 
-        ? `You tend to be more consistent with ${morningHabits > eveningHabits ? 'morning' : 'evening'} habits. Consider scheduling important habits during this time.`
+        ? `You tend to focus more on ${healthHabits > fitnessHabits ? 'health' : 'fitness'} habits. Consider balancing your habit categories for overall well-being.`
         : "Add habits to get personalized insights about your daily patterns.",
       action: "Optimize Schedule",
       onClick: () => navigate('/today')

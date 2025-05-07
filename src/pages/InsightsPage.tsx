@@ -141,7 +141,7 @@ const InsightsPage: React.FC = () => {
                       <Button 
                         variant="outline" 
                         className="w-full text-xs"
-                        onClick={() => navigate('/settings')}
+                        onClick={() => navigate('/buddies')}
                       >
                         View Buddy Details
                       </Button>
@@ -157,7 +157,7 @@ const InsightsPage: React.FC = () => {
                   </p>
                   <Button 
                     variant="default" 
-                    onClick={() => navigate('/settings')}
+                    onClick={() => navigate('/buddies')}
                     className="flex items-center gap-1.5"
                   >
                     <Users className="h-4 w-4" />

@@ -10,6 +10,7 @@ interface InsightCardProps {
   icon: LucideIcon;
   isAnimated: boolean;
   transitionDelay?: string;
+  className?: string;
   children: ReactNode;
 }
 
@@ -19,6 +20,7 @@ export const InsightCard: React.FC<InsightCardProps> = ({
   icon: Icon,
   isAnimated,
   transitionDelay = "0ms",
+  className,
   children
 }) => {
   return (
@@ -26,7 +28,8 @@ export const InsightCard: React.FC<InsightCardProps> = ({
       className={cn(
         "transition-all duration-700", 
         isAnimated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6",
-        "hover:shadow-lg hover:border-primary/50 transform-gpu"
+        "hover:shadow-lg hover:border-primary/50 transform-gpu",
+        className
       )}
       style={{ transitionDelay }}
     >

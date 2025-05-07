@@ -2,7 +2,7 @@
 import React from "react";
 import { useBuddy } from "@/context/BuddyContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Award, Calendar, Clock } from "lucide-react";
+import { User, Award, Calendar, Clock, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
