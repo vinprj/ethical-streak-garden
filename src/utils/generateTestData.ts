@@ -1,6 +1,6 @@
-
 import { Habit, HabitCategory, Badge, HabitFrequency } from "@/types/habit";
 import { PlantData, PlantGrowthStage, PlantType } from "@/context/GardenContext";
+import { Buddy, Message } from "@/types/buddy";
 
 // Sample user profiles for testing
 const userProfiles = [
@@ -486,15 +486,117 @@ export const generatePlantData = (habits: Habit[]): PlantData[] => {
     .map(habit => generatePlantFromHabit(habit));
 };
 
+// Generate buddy data for testing
+export const generateBuddyData = (): { buddies: Buddy[], pendingRequests: Buddy[], messages: Message[] } => {
+  // Demo buddies
+  const buddies: Buddy[] = [
+    {
+      id: "buddy-1",
+      name: "Alex Chen",
+      connectionDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
+      lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+      sharedHabits: ["habit-long-streak-1", "habit-long-streak-2"]
+    },
+    {
+      id: "buddy-2",
+      name: "Jordan Smith",
+      connectionDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days ago
+      lastActive: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      sharedHabits: ["habit-medium-streak"],
+      isAnonymous: true
+    },
+    {
+      id: "buddy-3",
+      name: "Taylor Kim",
+      connectionDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+      lastActive: new Date().toISOString(), // Active now
+      sharedHabits: ["habit-0", "habit-1", "habit-2"]
+    }
+  ];
+
+  // Pending buddy requests
+  const pendingRequests: Buddy[] = [
+    {
+      id: "buddy-request-1",
+      name: "Sam Rodriguez",
+      connectionDate: new Date().toISOString(),
+      lastActive: new Date().toISOString(),
+      sharedHabits: []
+    },
+    {
+      id: "buddy-request-2",
+      name: "Jamie Wong",
+      connectionDate: new Date().toISOString(),
+      lastActive: new Date().toISOString(),
+      sharedHabits: []
+    }
+  ];
+
+  // Generate sample messages
+  const messages: Message[] = [
+    {
+      id: "msg-1",
+      fromId: "buddy-1",
+      toId: "me",
+      content: "Your meditation streak is impressive! How do you stay so consistent?",
+      type: "text",
+      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      read: true
+    },
+    {
+      id: "msg-2",
+      fromId: "me",
+      toId: "buddy-1",
+      content: "Thanks! I find mornings work best for me. Setting a specific time helps a lot.",
+      type: "text",
+      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 3600000).toISOString(),
+      read: true
+    },
+    {
+      id: "msg-3",
+      fromId: "buddy-2",
+      toId: "me",
+      content: "Keep it up!",
+      type: "encouragement",
+      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      read: true
+    },
+    {
+      id: "msg-4",
+      fromId: "buddy-3",
+      toId: "me",
+      content: "You're on a roll with your workout habit!",
+      type: "encouragement",
+      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+      read: false
+    },
+    {
+      id: "msg-5",
+      fromId: "buddy-3",
+      toId: "me",
+      content: "I just unlocked the '7-Day Streak' badge. Working toward the monthly one next!",
+      type: "text",
+      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+      read: false
+    }
+  ];
+
+  return { buddies, pendingRequests, messages };
+};
+
 // Main function to generate all test data
 export const generateAllTestData = () => {
   const habits = generateTestHabits(16);
   const badges = generateBadgeData(habits);
   const plants = generatePlantData(habits);
+  const { buddies, pendingRequests, messages } = generateBuddyData();
   
   return {
     habits,
     badges,
-    plants
+    plants,
+    buddies,
+    pendingRequests,
+    messages
   };
 };

@@ -14,16 +14,20 @@ export const TestDataGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { setHabits, setBadges } = useHabits();
   const { setPlants } = useGardenContext();
-  const { setBuddies } = useBuddy();
+  const { setBuddies, setPendingRequests, setMessages } = useBuddy();
   const navigate = useNavigate();
   const [dataStats, setDataStats] = useState<{
     habits: number;
     badges: number;
     plants: number;
+    buddies: number;
+    messages: number;
   }>({
     habits: 0,
     badges: 0,
-    plants: 0
+    plants: 0,
+    buddies: 0,
+    messages: 0
   });
 
   // Update stats from localStorage on mount
@@ -35,10 +39,15 @@ export const TestDataGenerator: React.FC = () => {
         const plantData = localStorage.getItem("garden-plants");
         const plants = plantData ? JSON.parse(plantData) : [];
         
+        const buddyData = localStorage.getItem("habit-buddy-data");
+        const buddyInfo = buddyData ? JSON.parse(buddyData) : { buddies: [], messages: [] };
+        
         setDataStats({
           habits: habits.length,
           badges: badges.filter(b => b.isUnlocked).length,
-          plants: plants.length
+          plants: plants.length,
+          buddies: buddyInfo.buddies?.length || 0,
+          messages: buddyInfo.messages?.length || 0
         });
       }
     } catch (error) {
@@ -50,7 +59,7 @@ export const TestDataGenerator: React.FC = () => {
     setIsGenerating(true);
     try {
       // Generate more comprehensive test data
-      const { habits, badges, plants } = generateAllTestData();
+      const { habits, badges, plants, buddies, pendingRequests, messages } = generateAllTestData();
       
       // Store in localStorage
       localStorage.setItem("ethical-habit-tracker-data", JSON.stringify({ 
@@ -60,17 +69,29 @@ export const TestDataGenerator: React.FC = () => {
       
       localStorage.setItem("garden-plants", JSON.stringify(plants));
       
+      // Store buddy data
+      localStorage.setItem("habit-buddy-data", JSON.stringify({
+        buddies,
+        pendingRequests,
+        messages,
+        privacyLevel: 'moderate'
+      }));
+      
       // Update context state directly
       setHabits(habits);
       setBadges(badges);
       setPlants(plants);
-      setBuddies([]); // Reset buddies when generating new data
+      setBuddies(buddies);
+      setPendingRequests(pendingRequests);
+      setMessages(messages);
       
       // Update stats
       setDataStats({
         habits: habits.length,
         badges: badges.filter(b => b.isUnlocked).length,
-        plants: plants.length
+        plants: plants.length,
+        buddies: buddies.length,
+        messages: messages.length
       });
       
       // Show success message
@@ -89,16 +110,22 @@ export const TestDataGenerator: React.FC = () => {
     if (confirm("This will remove ALL your habit data. Are you sure?")) {
       localStorage.removeItem("ethical-habit-tracker-data");
       localStorage.removeItem("garden-plants");
+      localStorage.removeItem("habit-buddy-data");
       
       // Clear context state directly
       setHabits([]);
       setBadges([]);
       setPlants([]);
+      setBuddies([]);
+      setPendingRequests([]);
+      setMessages([]);
       
       setDataStats({
         habits: 0,
         badges: 0,
-        plants: 0
+        plants: 0,
+        buddies: 0,
+        messages: 0
       });
       
       toast.success('All data cleared', {
@@ -139,8 +166,19 @@ export const TestDataGenerator: React.FC = () => {
             <div className="text-xs text-muted-foreground mt-1">Badges</div>
           </div>
           <div className="p-4 bg-muted/40 rounded-md text-center">
+            <div className="text-2xl font-bold">{dataStats.buddies}</div>
+            <div className="text-xs text-muted-foreground mt-1">Buddies</div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="p-4 bg-muted/40 rounded-md text-center">
             <div className="text-2xl font-bold">{dataStats.plants}</div>
             <div className="text-xs text-muted-foreground mt-1">Plants</div>
+          </div>
+          <div className="p-4 bg-muted/40 rounded-md text-center">
+            <div className="text-2xl font-bold">{dataStats.messages}</div>
+            <div className="text-xs text-muted-foreground mt-1">Messages</div>
           </div>
         </div>
 
@@ -154,7 +192,9 @@ export const TestDataGenerator: React.FC = () => {
             <li>Long streaks (30+ days) to showcase garden growth stages</li>
             <li><span className="text-primary font-medium">9 achievement badges</span> based on milestones</li>
             <li>Plant data visualization in the garden feature</li>
-            <li>Data to demonstrate all charts and stats</li>
+            <li><span className="text-primary font-medium">3 habit buddies</span> with different activity levels</li>
+            <li><span className="text-primary font-medium">2 pending buddy requests</span> to demonstrate the connection flow</li>
+            <li>Sample messages and encouragements between buddies</li>
           </ul>
         </div>
       </CardContent>
