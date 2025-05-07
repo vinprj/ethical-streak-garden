@@ -1,10 +1,9 @@
 
 import React, { useState } from "react";
 import { Gift, Medal, Trophy, Star } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { UserStats } from "@/types/habit";
 import { useToast } from "@/hooks/use-toast";
+import { RewardCard } from "./RewardCard";
 
 // Define the available rewards
 export interface RewardOption {
@@ -158,19 +157,6 @@ export const RewardsSection: React.FC<RewardsSectionProps> = ({ stats }) => {
   const isRewardClaimed = (rewardId: string) => {
     return claimedRewards.includes(rewardId);
   };
-  
-  // Get button status text based on reward state
-  const getButtonText = (reward: RewardOption) => {
-    if (isRewardClaimed(reward.id)) {
-      return "Already Used";
-    }
-    
-    if (isRewardActive(reward.id)) {
-      return "Active";
-    }
-    
-    return reward.action;
-  };
 
   return (
     <section>
@@ -183,37 +169,14 @@ export const RewardsSection: React.FC<RewardsSectionProps> = ({ stats }) => {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {rewardOptions.map((reward) => (
-          <Card key={reward.id} className={isRewardActive(reward.id) ? "ring-2 ring-primary" : ""}>
-            <CardHeader className="flex flex-row items-center justify-between py-4">
-              <h3 className="font-medium text-lg">{reward.name}</h3>
-              <div className="rounded-full p-2 bg-muted/50">
-                {reward.icon}
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 pt-0 flex flex-col gap-4">
-              <p className="text-sm text-muted-foreground">
-                {reward.description}
-              </p>
-              
-              <div className="mt-auto">
-                <p className="text-sm text-muted-foreground mb-3">
-                  {stats.points >= reward.pointsRequired 
-                    ? "Available to claim" 
-                    : `Requires ${reward.pointsRequired} points (${reward.pointsRequired - stats.points} more needed)`}
-                </p>
-                
-                <Button 
-                  variant={isRewardActive(reward.id) || isRewardClaimed(reward.id) ? "outline" : "default"} 
-                  disabled={stats.points < reward.pointsRequired || 
-                          (isRewardClaimed(reward.id) && reward.id === "streak-recovery")}
-                  onClick={() => handleClaimReward(reward)}
-                  className="w-full"
-                >
-                  {getButtonText(reward)}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <RewardCard
+            key={reward.id}
+            reward={reward}
+            stats={stats}
+            isActive={isRewardActive(reward.id)}
+            isClaimed={isRewardClaimed(reward.id)}
+            onClaim={handleClaimReward}
+          />
         ))}
       </div>
     </section>

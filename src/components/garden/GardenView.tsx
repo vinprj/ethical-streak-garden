@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { HabitCategory } from "@/types/habit";
 import { cn } from "@/lib/utils";
+import { RecentActivity } from "./RecentActivity";
 
 interface GardenViewProps {
   habits: Habit[];
@@ -60,50 +61,56 @@ export const GardenView: React.FC<GardenViewProps> = ({ habits }) => {
           </TabsList>
         </Tabs>
         
-        <div className="flex gap-2 overflow-x-auto pb-2 w-full sm:w-auto">
-          <Button 
-            variant={filterCategory === null ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setFilterCategory(null)}
-            className="whitespace-nowrap"
-          >
-            All Plants
-          </Button>
-          {categories.map(category => (
+        {viewType === "garden" && (
+          <div className="flex gap-2 overflow-x-auto pb-2 w-full sm:w-auto">
             <Button 
-              key={category}
-              variant={filterCategory === category ? "default" : "outline"}
+              variant={filterCategory === null ? "default" : "outline"} 
               size="sm"
-              onClick={() => setFilterCategory(category)}
+              onClick={() => setFilterCategory(null)}
               className="whitespace-nowrap"
             >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
+              All Plants
             </Button>
-          ))}
-        </div>
-      </div>
-      
-      <div className={cn(
-        "grid gap-6 p-4 bg-muted/30 rounded-lg min-h-[400px]",
-        "transition-all duration-500",
-        filteredHabits.length > 2 ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-2"
-      )}>
-        {filteredHabits.length > 0 ? (
-          filteredHabits.map((habit) => (
-            <PlantDisplay 
-              key={habit.id}
-              habit={habit}
-              viewType={viewType}
-            />
-          ))
-        ) : (
-          <div className="col-span-full flex items-center justify-center h-60">
-            <p className="text-muted-foreground">
-              No plants match your filter. Try another category.
-            </p>
+            {categories.map(category => (
+              <Button 
+                key={category}
+                variant={filterCategory === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilterCategory(category)}
+                className="whitespace-nowrap"
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </Button>
+            ))}
           </div>
         )}
       </div>
+      
+      {viewType === "garden" ? (
+        <div className={cn(
+          "grid gap-6 p-4 bg-muted/30 rounded-lg min-h-[400px]",
+          "transition-all duration-500",
+          filteredHabits.length > 2 ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-2"
+        )}>
+          {filteredHabits.length > 0 ? (
+            filteredHabits.map((habit) => (
+              <PlantDisplay 
+                key={habit.id}
+                habit={habit}
+                viewType={viewType}
+              />
+            ))
+          ) : (
+            <div className="col-span-full flex items-center justify-center h-60">
+              <p className="text-muted-foreground">
+                No plants match your filter. Try another category.
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <RecentActivity habits={habits} />
+      )}
       
       <div className="text-sm text-muted-foreground text-center italic">
         Complete your habits daily to help your plants grow and flourish!
