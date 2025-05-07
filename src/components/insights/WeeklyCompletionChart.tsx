@@ -39,6 +39,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
   const { theme } = useThemeContext();
   
   const emptyColor = theme === 'dark' ? 'var(--muted)' : '#e5e7eb';
+  const chartColor = '#29AB87'; // Updated chart color to #29AB87
   
   // Listen for theme changes
   useEffect(() => {
@@ -66,7 +67,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
         <ChartContainer
           config={{
             completion: { 
-              color: "var(--primary)",
+              color: chartColor,
               label: "Completion Rate" 
             },
             empty: {
@@ -113,7 +114,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
               <Bar 
                 dataKey="percentage"
                 name="Completion Rate"
-                fill="var(--primary)"
+                fill={chartColor}
                 radius={[4, 4, 0, 0]} 
                 isAnimationActive={isAnimated}
                 animationDuration={1500}
@@ -122,7 +123,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
                 {data.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={entry.isEmpty ? emptyColor : "var(--primary)"} 
+                    fill={entry.isEmpty ? emptyColor : chartColor} 
                     opacity={entry.isEmpty ? 0.3 : 1}
                   />
                 ))}
@@ -166,9 +167,9 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
                 type="monotone"
                 dataKey="percentage"
                 name="Completion Rate"
-                stroke="var(--primary)"
+                stroke={chartColor}
                 strokeWidth={2}
-                dot={{ fill: "var(--primary)", r: 4 }}
+                dot={{ fill: chartColor, r: 4 }}
                 isAnimationActive={isAnimated}
                 animationDuration={1500}
                 animationEasing="ease-out"

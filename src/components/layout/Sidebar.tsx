@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -14,14 +15,17 @@ import {
   Leaf,
   Menu,
   GanttChartSquare,
-  Bug
+  Bug,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHabits } from "@/context/HabitContext";
+import { useBuddy } from "@/context/BuddyContext";
 
 export const Sidebar = () => {
   const isMobile = useIsMobile();
   const { isOfflineMode } = useHabits();
+  const { buddies } = useBuddy();
   const [expanded, setExpanded] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
 
@@ -59,6 +63,12 @@ export const Sidebar = () => {
       name: "Insights", 
       path: "/insights",
       icon: <BarChart2 className="h-[18px] w-[18px]" /> 
+    },
+    {
+      name: "Buddies",
+      path: "/settings",
+      icon: <Users className="h-[18px] w-[18px]" />,
+      badge: buddies.length > 0 ? buddies.length : undefined
     },
     { 
       name: "Garden", 
@@ -104,7 +114,7 @@ export const Sidebar = () => {
         <div className="flex justify-around">
           {navItems.slice(0, 5).map((item) => (
             <NavLink 
-              key={item.path}
+              key={item.path + item.name}
               to={item.path}
               className={({ isActive }) =>
                 cn("flex flex-col items-center py-1 px-2 text-xs", {
@@ -113,7 +123,14 @@ export const Sidebar = () => {
                 })
               }
             >
-              {item.icon}
+              <div className="relative">
+                {item.icon}
+                {item.badge && (
+                  <span className="absolute -top-1 -right-2 bg-primary text-primary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center text-[10px]">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
               <span className="mt-1">{item.name}</span>
             </NavLink>
           ))}
@@ -133,7 +150,7 @@ export const Sidebar = () => {
             <div className="grid grid-cols-3 gap-3">
               {[...navItems.slice(5), ...bottomNavItems].map((item) => (
                 <NavLink 
-                  key={item.path}
+                  key={item.path + item.name}
                   to={item.path}
                   className={({ isActive }) =>
                     cn("flex flex-col items-center py-2 px-1 rounded-md", {
@@ -143,7 +160,14 @@ export const Sidebar = () => {
                   }
                   onClick={() => setExpanded(false)}
                 >
-                  {item.icon}
+                  <div className="relative">
+                    {item.icon}
+                    {item.badge && (
+                      <span className="absolute -top-1 -right-2 bg-primary text-primary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center text-[10px]">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
                   <span className="mt-1 text-xs">{item.name}</span>
                 </NavLink>
               ))}
@@ -172,7 +196,7 @@ export const Sidebar = () => {
         <div className="flex flex-col gap-1 px-2">
           {navItems.map((item) => (
             <NavLink
-              key={item.path}
+              key={item.path + item.name}
               to={item.path}
               className={({ isActive }) =>
                 cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors", {
@@ -181,7 +205,14 @@ export const Sidebar = () => {
                 })
               }
             >
-              {item.icon}
+              <div className="relative">
+                {item.icon}
+                {item.badge && (
+                  <span className="absolute -top-1 -right-2 bg-primary text-primary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center text-[10px]">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
               <span>{item.name}</span>
             </NavLink>
           ))}
@@ -192,25 +223,9 @@ export const Sidebar = () => {
         <div className="flex flex-col gap-1 px-2">
           {showDebug ? (
             <>
-              {[
-                { 
-                  name: "Settings", 
-                  path: "/settings",
-                  icon: <Settings className="h-[18px] w-[18px]" /> 
-                },
-                { 
-                  name: "Help", 
-                  path: "/help",
-                  icon: <HelpCircle className="h-[18px] w-[18px]" /> 
-                },
-                { 
-                  name: "Debug", 
-                  path: "/debug",
-                  icon: <Bug className="h-[18px] w-[18px]" /> 
-                }
-              ].map((item) => (
+              {bottomNavItems.map((item) => (
                 <NavLink
-                  key={item.path}
+                  key={item.path + item.name}
                   to={item.path}
                   className={({ isActive }) =>
                     cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors", {
@@ -226,20 +241,9 @@ export const Sidebar = () => {
             </>
           ) : (
             <>
-              {[
-                { 
-                  name: "Settings", 
-                  path: "/settings",
-                  icon: <Settings className="h-[18px] w-[18px]" /> 
-                },
-                { 
-                  name: "Help", 
-                  path: "/help",
-                  icon: <HelpCircle className="h-[18px] w-[18px]" /> 
-                }
-              ].map((item) => (
+              {bottomNavItems.map((item) => (
                 <NavLink
-                  key={item.path}
+                  key={item.path + item.name}
                   to={item.path}
                   className={({ isActive }) =>
                     cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors", {

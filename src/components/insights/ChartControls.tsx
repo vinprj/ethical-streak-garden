@@ -19,6 +19,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
         size="sm" 
         onClick={() => setChartType('bar')}
         className="flex items-center gap-1"
+        style={chartType === 'bar' ? {backgroundColor: '#29AB87'} : {}}
       >
         <BarChart2 className="h-4 w-4" />
         <span className="text-xs">Bar</span>
@@ -27,7 +28,8 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
         variant={chartType === 'line' ? 'default' : 'outline'} 
         size="sm"
         onClick={() => setChartType('line')}
-        className="flex items-center gap-1"  
+        className="flex items-center gap-1"
+        style={chartType === 'line' ? {backgroundColor: '#29AB87'} : {}}
       >
         <LineChart className="h-4 w-4" />
         <span className="text-xs">Line</span>
