@@ -25,7 +25,9 @@ export interface BuddyContextType {
   buddies: Buddy[];
   setBuddies: React.Dispatch<React.SetStateAction<Buddy[]>>;
   pendingRequests: Buddy[];
+  setPendingRequests: React.Dispatch<React.SetStateAction<Buddy[]>>;
   messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   inviteCode: string | null;
   generateInviteCode: () => void;
   acceptBuddyRequest: (id: string) => void;

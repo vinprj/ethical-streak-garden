@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useHabits } from "./HabitContext";
@@ -161,7 +160,9 @@ export const BuddyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         buddies,
         setBuddies,
         pendingRequests,
+        setPendingRequests,
         messages,
+        setMessages,
         inviteCode,
         generateInviteCode,
         acceptBuddyRequest,
