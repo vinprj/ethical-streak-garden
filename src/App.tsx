@@ -15,6 +15,7 @@ import HelpPage from "./pages/HelpPage";
 import NotFound from "./pages/NotFound";
 import DebugPage from "./pages/DebugPage";
 import GardenPage from "./pages/GardenPage";
+import BuddiesPage from "./pages/BuddiesPage";
 
 // Providers
 import { HabitProvider } from "./context/HabitContext";
@@ -39,6 +40,7 @@ function App() {
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/help" element={<HelpPage />} />
               <Route path="/garden" element={<GardenPage />} />
+              <Route path="/buddies" element={<BuddiesPage />} />
               <Route path="/debug" element={<DebugPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

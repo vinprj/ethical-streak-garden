@@ -66,9 +66,9 @@ export const Sidebar = () => {
     },
     {
       name: "Buddies",
-      path: "/settings",
+      path: "/buddies",
       icon: <Users className="h-[18px] w-[18px]" />,
-      badge: buddies.length > 0 ? buddies.length : undefined
+      badgeCount: buddies.length > 0 ? buddies.length : undefined
     },
     { 
       name: "Garden", 
@@ -125,9 +125,9 @@ export const Sidebar = () => {
             >
               <div className="relative">
                 {item.icon}
-                {item.badge && (
+                {item.badgeCount && (
                   <span className="absolute -top-1 -right-2 bg-primary text-primary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center text-[10px]">
-                    {item.badge}
+                    {item.badgeCount}
                   </span>
                 )}
               </div>
@@ -162,9 +162,9 @@ export const Sidebar = () => {
                 >
                   <div className="relative">
                     {item.icon}
-                    {item.badge && (
+                    {item.badgeCount && (
                       <span className="absolute -top-1 -right-2 bg-primary text-primary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center text-[10px]">
-                        {item.badge}
+                        {item.badgeCount}
                       </span>
                     )}
                   </div>
@@ -207,9 +207,9 @@ export const Sidebar = () => {
             >
               <div className="relative">
                 {item.icon}
-                {item.badge && (
+                {item.badgeCount && (
                   <span className="absolute -top-1 -right-2 bg-primary text-primary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center text-[10px]">
-                    {item.badge}
+                    {item.badgeCount}
                   </span>
                 )}
               </div>

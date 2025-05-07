@@ -16,13 +16,13 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({ activeHabits }) =>
   const navigate = useNavigate();
   
   // Calculate habit insights
-  const morningHabits = activeHabits.filter(h => h.reminderTime?.includes('morning')).length;
-  const eveningHabits = activeHabits.filter(h => h.reminderTime?.includes('evening')).length;
+  const morningHabits = activeHabits.filter(h => h.time === "morning").length;
+  const eveningHabits = activeHabits.filter(h => h.time === "evening").length;
   const mostStreaked = activeHabits.length > 0 
     ? [...activeHabits].sort((a, b) => b.currentStreak - a.currentStreak)[0]
     : null;
   const missedHabits = activeHabits.filter(h => 
-    new Date().getTime() - new Date(h.lastCompletedDate || 0).getTime() > 86400000 * 2
+    new Date().getTime() - new Date(h.completedDates?.[h.completedDates.length - 1] || 0).getTime() > 86400000 * 2
   );
   
   const insights = [
@@ -39,7 +39,7 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({ activeHabits }) =>
       title: "Streak Analysis",
       icon: <TrendingUp className="h-5 w-5" />,
       content: mostStreaked 
-        ? `"${mostStreaked.title}" is your most consistent habit with a ${mostStreaked.currentStreak} day streak. Keep it up!`
+        ? `"${mostStreaked.name}" is your most consistent habit with a ${mostStreaked.currentStreak} day streak. Keep it up!`
         : "Start building streaks by completing habits consistently.",
       action: "View Streaks",
       onClick: () => navigate('/today')
@@ -48,7 +48,7 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({ activeHabits }) =>
       title: "Habit Recovery",
       icon: <Trophy className="h-5 w-5" />,
       content: missedHabits.length > 0
-        ? `You have ${missedHabits.length} habit${missedHabits.length > 1 ? 's' : ''} that need attention. The longest neglected is "${missedHabits[0]?.title}".`
+        ? `You have ${missedHabits.length} habit${missedHabits.length > 1 ? 's' : ''} that need attention. The longest neglected is "${missedHabits[0]?.name}".`
         : "Great job! You're keeping up with all your active habits.",
       action: "Recover Habits",
       onClick: () => navigate('/today')

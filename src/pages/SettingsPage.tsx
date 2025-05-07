@@ -11,7 +11,6 @@ import { NotificationSettings } from "@/components/settings/NotificationSettings
 import { PrivacySettings } from "@/components/settings/PrivacySettings";
 import { AboutSection } from "@/components/settings/AboutSection";
 import { SectionHeader } from "@/components/settings/SectionHeader";
-import { BuddySettings } from "@/components/buddy/BuddySettings";
 
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -94,15 +93,6 @@ const SettingsPage: React.FC = () => {
               <p className="text-muted-foreground">Customize your experience</p>
             </div>
           </div>
-        </section>
-        
-        {/* NEW: Habit Buddy Section */}
-        <section className="animate-fade-in" style={{ animationDelay: "50ms" }}>
-          <SectionHeader 
-            icon={Sparkles} 
-            title="Habit Buddy" 
-          />
-          <BuddySettings />
         </section>
         
         {/* Accessibility Settings */}
