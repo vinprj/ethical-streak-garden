@@ -1,23 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Database } from 'lucide-react';
 import { generateAllTestData } from '@/utils/testData';
 import { useHabits } from '@/context/HabitContext';
 import { useGardenContext } from '@/context/GardenContext';
 import { useBuddy } from '@/context/BuddyContext';
-import { Loader2, Play, Trash2, Database, AlertTriangle, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { DataStatsCard } from './DataStatsCard';
-import { DataFeatureList } from './DataFeatureList';
+import { DataGeneratorCard } from './DataGeneratorCard';
+import { DataGeneratorActions } from './DataGeneratorActions';
+import { DataPreview } from './DataPreview';
 
 export const TestDataGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { setHabits, setBadges } = useHabits();
   const { setPlants } = useGardenContext();
   const { setBuddies, setPendingRequests, setMessages } = useBuddy();
-  const navigate = useNavigate();
   const [dataStats, setDataStats] = useState({
     habits: 0,
     badges: 0,
@@ -131,69 +128,18 @@ export const TestDataGenerator: React.FC = () => {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Database className="h-5 w-5" />
-          Demo Data Generator
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent>
-        <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-300 dark:border-amber-900 rounded-md">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
-            <div>
-              <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">Demo Mode</p>
-              <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                This will generate comprehensive sample data to showcase all app features. You can generate new data multiple times.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <DataStatsCard stats={dataStats} />
-        <DataFeatureList />
-      </CardContent>
-
-      <CardFooter className="flex flex-col space-y-4">
-        <div className="flex justify-between w-full">
-          <Button 
-            variant="outline" 
-            onClick={clearAllData}
-            className="gap-1.5"
-          >
-            <Trash2 className="h-4 w-4" />
-            Clear All Data
-          </Button>
-          <Button 
-            onClick={applyTestData} 
-            disabled={isGenerating}
-            className="gap-1.5"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Play className="h-4 w-4" />
-                Generate Demo Data
-              </>
-            )}
-          </Button>
-        </div>
-        
-        <Button 
-          variant="ghost" 
-          className="text-xs w-full flex gap-1.5 text-muted-foreground hover:text-foreground"
-          onClick={() => navigate('/dashboard')}
-        >
-          <Sparkles className="h-3.5 w-3.5" />
-          After generating data, go to Dashboard to see all features
-        </Button>
-      </CardFooter>
-    </Card>
+    <DataGeneratorCard
+      title="Demo Data Generator"
+      icon={<Database className="h-5 w-5" />}
+      footer={
+        <DataGeneratorActions
+          isGenerating={isGenerating}
+          onGenerate={applyTestData}
+          onClear={clearAllData}
+        />
+      }
+    >
+      <DataPreview stats={dataStats} />
+    </DataGeneratorCard>
   );
 };
