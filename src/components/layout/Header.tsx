@@ -43,7 +43,10 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <HabitSearch />
+          {/* Fixed search bar with stable dimensions */}
+          <div className="flex-shrink-0">
+            <HabitSearch />
+          </div>
           
           <Button variant="ghost" size="icon" onClick={toggleOfflineMode} title={isOfflineMode ? "Go Online" : "Go Offline"}>
             {isOfflineMode ? <WifiOff className="h-5 w-5" /> : <Wifi className="h-5 w-5" />}

@@ -33,15 +33,15 @@ export const HabitSearch: React.FC = () => {
   };
   
   return (
-    <div className="relative">
+    <div className="relative w-9 md:w-64 flex-shrink-0">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button 
             variant="outline" 
-            className="relative h-9 w-9 md:w-64 md:justify-start md:px-3 md:py-2"
+            className="h-9 w-full justify-start px-3 py-2 transition-none"
           >
-            <Search className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline-flex">Search habits...</span>
+            <Search className="h-4 w-4 md:mr-2 flex-shrink-0" />
+            <span className="hidden md:inline-flex text-left truncate">Search habits...</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent 
@@ -63,10 +63,10 @@ export const HabitSearch: React.FC = () => {
                     onSelect={() => handleSelect(habit.id)}
                     className="flex items-center cursor-pointer"
                   >
-                    <div className="w-2 h-2 rounded-full mr-2" style={{
+                    <div className="w-2 h-2 rounded-full mr-2 flex-shrink-0" style={{
                       backgroundColor: habit.color || '#6366f1'
                     }} />
-                    <span>{habit.name}</span>
+                    <span className="truncate">{habit.name}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>

@@ -38,15 +38,18 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
     };
   }, [fontSize]);
 
-  // Apply high contrast mode
+  // Apply high contrast mode globally
   useEffect(() => {
     if (highContrast) {
       document.documentElement.classList.add('high-contrast');
+      document.body.classList.add('high-contrast');
     } else {
       document.documentElement.classList.remove('high-contrast');
+      document.body.classList.remove('high-contrast');
     }
     return () => {
       document.documentElement.classList.remove('high-contrast');
+      document.body.classList.remove('high-contrast');
     };
   }, [highContrast]);
 
@@ -68,40 +71,19 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
     }
   };
 
-  // Handle reduce motion toggle
-  const handleReduceMotionToggle = (checked: boolean) => {
-    setReduceMotion(checked);
-    
-    if (checked) {
-      document.body.classList.add('reduce-animations');
-      // If reduce motion is on, also disable animations
-      if (enableAnimations) {
-        setEnableAnimations(false);
-      }
-      toast("Motion reduced", {
-        description: "Animations have been minimized for accessibility"
-      });
-    } else if (!ecoMode) {
-      // Only remove class if eco-mode isn't also on
-      document.body.classList.remove('reduce-animations');
-      toast("Standard motion restored", {
-        description: "Standard animations have been restored"
-      });
-    }
-  };
-
-  // Handle eco-mode toggle
+  // Combined eco-conscious mode (includes reduced motion)
   const handleEcoModeToggle = (checked: boolean) => {
     setEcoMode(checked);
     
     if (checked) {
-      // Apply eco mode - reduce animations further and optimize rendering
+      // Apply eco mode - reduce animations and optimize rendering
       document.body.classList.add('eco-mode');
-      // If eco mode is on, also reduce animations
-      setEnableAnimations(false);
       document.body.classList.add('reduce-animations');
-      toast("Eco-Mode enabled", {
-        description: "Reduced animations and background processes to save energy"
+      // Also set reduce motion when eco mode is enabled
+      setReduceMotion(true);
+      setEnableAnimations(false);
+      toast("Eco-Conscious Mode enabled", {
+        description: "Reduced animations and background processes to save energy and improve accessibility"
       });
     } else {
       document.body.classList.remove('eco-mode');
@@ -109,7 +91,7 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
       if (!reduceMotion) {
         document.body.classList.remove('reduce-animations');
       }
-      toast("Eco-Mode disabled", {
+      toast("Eco-Conscious Mode disabled", {
         description: "Standard app experience restored"
       });
     }
@@ -146,14 +128,14 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
           id="enable-animations" 
           checked={enableAnimations}
           onCheckedChange={handleAnimationToggle}
-          disabled={reduceMotion || ecoMode}
+          disabled={ecoMode}
         />
       </div>
       
       <div className="flex items-center justify-between space-x-2">
         <div>
           <Label htmlFor="high-contrast">High Contrast Mode</Label>
-          <p className="text-sm text-muted-foreground">Enhance visual distinction</p>
+          <p className="text-sm text-muted-foreground">Enhance visual distinction throughout the app</p>
         </div>
         <Switch 
           id="high-contrast" 
@@ -164,20 +146,8 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
       
       <div className="flex items-center justify-between space-x-2">
         <div>
-          <Label htmlFor="reduce-motion">Reduce Motion</Label>
-          <p className="text-sm text-muted-foreground">For vestibular sensitivity</p>
-        </div>
-        <Switch 
-          id="reduce-motion" 
-          checked={reduceMotion}
-          onCheckedChange={handleReduceMotionToggle}
-        />
-      </div>
-      
-      <div className="flex items-center justify-between space-x-2">
-        <div>
-          <Label htmlFor="eco-mode">Eco-Conscious Mode</Label>
-          <p className="text-sm text-muted-foreground">Reduces animations and background processes</p>
+          <Label htmlFor="eco-mode">Eco-Conscious & Reduced Motion</Label>
+          <p className="text-sm text-muted-foreground">Reduces animations, background processes, and motion for accessibility and energy efficiency</p>
         </div>
         <Switch 
           id="eco-mode" 

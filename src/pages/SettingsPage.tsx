@@ -52,7 +52,7 @@ const SettingsPage: React.FC = () => {
     document.documentElement.style.fontSize = `${fontSize * 100}%`;
     
     // Apply classes based on settings
-    if (reduceMotion || !enableAnimations) {
+    if (reduceMotion || !enableAnimations || ecoMode) {
       document.body.classList.add('reduce-animations');
     } else {
       document.body.classList.remove('reduce-animations');
@@ -66,8 +66,10 @@ const SettingsPage: React.FC = () => {
     
     if (highContrast) {
       document.documentElement.classList.add('high-contrast');
+      document.body.classList.add('high-contrast');
     } else {
       document.documentElement.classList.remove('high-contrast');
+      document.body.classList.remove('high-contrast');
     }
     
     // Check for system preference
