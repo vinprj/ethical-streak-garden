@@ -51,37 +51,28 @@ const SettingsPage: React.FC = () => {
     // Apply font size to document
     document.documentElement.style.fontSize = `${fontSize * 100}%`;
     
-    // Apply classes based on settings
-    if (reduceMotion || !enableAnimations || ecoMode) {
-      document.body.classList.add('reduce-animations');
+    // Apply animation classes based on settings
+    const body = document.body;
+    
+    // Handle animations
+    if (ecoMode || !enableAnimations || reduceMotion) {
+      body.classList.add('reduce-animations');
     } else {
-      document.body.classList.remove('reduce-animations');
+      body.classList.remove('reduce-animations');
     }
     
+    // Handle eco mode
     if (ecoMode) {
-      document.body.classList.add('eco-mode');
+      body.classList.add('eco-mode');
     } else {
-      document.body.classList.remove('eco-mode');
+      body.classList.remove('eco-mode');
     }
     
-    if (highContrast) {
-      document.documentElement.classList.add('high-contrast');
-      document.body.classList.add('high-contrast');
-    } else {
-      document.documentElement.classList.remove('high-contrast');
-      document.body.classList.remove('high-contrast');
-    }
-    
-    // Check for system preference
+    // Check for system preference for reduced motion
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches && !reduceMotion) {
       setReduceMotion(true);
       setEnableAnimations(false);
     }
-    
-    // Cleanup on unmount
-    return () => {
-      // Don't remove settings on unmount - they should persist
-    };
   }, [reduceMotion, ecoMode, highContrast, fontSize, enableAnimations]);
 
   return (
@@ -154,7 +145,7 @@ const SettingsPage: React.FC = () => {
           <AboutSection />
         </section>
 
-        {/* Debug Section (moved from landing page) */}
+        {/* Debug Section */}
         <section className="animate-fade-in mb-8" style={{ animationDelay: "500ms" }}>
           <SectionHeader 
             icon={Bug}

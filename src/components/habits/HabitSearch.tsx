@@ -28,20 +28,20 @@ export const HabitSearch: React.FC = () => {
 
   const handleSelect = (habitId: string) => {
     setOpen(false);
-    // Navigate to a detailed view or highlight the habit
     navigate(`/today?highlight=${habitId}`);
   };
   
   return (
-    <div className="relative w-9 md:w-64 flex-shrink-0">
+    <div className="w-9 md:w-64 shrink-0">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button 
             variant="outline" 
-            className="h-9 w-full justify-start px-3 py-2 transition-none"
+            className="h-9 w-full justify-start px-3 py-2 min-w-9 md:min-w-64"
+            aria-label="Search habits"
           >
-            <Search className="h-4 w-4 md:mr-2 flex-shrink-0" />
-            <span className="hidden md:inline-flex text-left truncate">Search habits...</span>
+            <Search className="h-4 w-4 shrink-0" />
+            <span className="hidden md:inline ml-2 text-left truncate">Search habits...</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent 
@@ -63,7 +63,7 @@ export const HabitSearch: React.FC = () => {
                     onSelect={() => handleSelect(habit.id)}
                     className="flex items-center cursor-pointer"
                   >
-                    <div className="w-2 h-2 rounded-full mr-2 flex-shrink-0" style={{
+                    <div className="w-2 h-2 rounded-full mr-2 shrink-0" style={{
                       backgroundColor: habit.color || '#6366f1'
                     }} />
                     <span className="truncate">{habit.name}</span>
