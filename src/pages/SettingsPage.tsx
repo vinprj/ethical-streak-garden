@@ -21,20 +21,8 @@ const SettingsPage: React.FC = () => {
     return savedFontSize ? parseFloat(savedFontSize) : 1; // 1 is default (100%)
   });
   
-  const [reduceMotion, setReduceMotion] = React.useState(() => {
-    return localStorage.getItem('reduceMotion') === 'true' || false;
-  });
-  
-  const [highContrast, setHighContrast] = React.useState(() => {
-    return localStorage.getItem('highContrast') === 'true' || false;
-  });
-  
   const [ecoMode, setEcoMode] = React.useState(() => {
     return localStorage.getItem('ecoMode') === 'true' || false;
-  });
-  
-  const [enableAnimations, setEnableAnimations] = React.useState(() => {
-    return localStorage.getItem('enableAnimations') !== 'false'; // default to true
   });
   
   // Notification Settings  
@@ -48,19 +36,8 @@ const SettingsPage: React.FC = () => {
   // Save settings to localStorage whenever they change
   React.useEffect(() => {
     localStorage.setItem('fontSize', fontSize.toString());
-    localStorage.setItem('reduceMotion', reduceMotion.toString());
-    localStorage.setItem('highContrast', highContrast.toString());
     localStorage.setItem('ecoMode', ecoMode.toString());
-    localStorage.setItem('enableAnimations', enableAnimations.toString());
-  }, [fontSize, reduceMotion, highContrast, ecoMode, enableAnimations]);
-
-  // Check for system preference for reduced motion on mount
-  React.useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches && !reduceMotion) {
-      setReduceMotion(true);
-      setEnableAnimations(false);
-    }
-  }, []);
+  }, [fontSize, ecoMode]);
 
   return (
     <AppLayout>
@@ -84,14 +61,8 @@ const SettingsPage: React.FC = () => {
           <AccessibilitySettings 
             fontSize={fontSize}
             setFontSize={setFontSize}
-            reduceMotion={reduceMotion}
-            setReduceMotion={setReduceMotion}
-            highContrast={highContrast}
-            setHighContrast={setHighContrast}
             ecoMode={ecoMode}
             setEcoMode={setEcoMode}
-            enableAnimations={enableAnimations}
-            setEnableAnimations={setEnableAnimations}
           />
         </section>
         

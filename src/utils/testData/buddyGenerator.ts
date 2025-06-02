@@ -3,12 +3,12 @@ import { Buddy, Message } from "@/types/buddy";
 
 // Generate buddy data for testing
 export const generateBuddyData = (): { buddies: Buddy[], pendingRequests: Buddy[], messages: Message[] } => {
-  // Demo buddies
+  // Demo buddies with proper avatar URLs
   const buddies: Buddy[] = [
     {
       id: "buddy-1",
       name: "Alex Chen",
-      avatar: "/images/avatars/alex.jpg",
+      avatar: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=64&h=64&fit=crop&crop=face",
       connectionDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
       lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
       sharedHabits: ["habit-long-streak-1", "habit-long-streak-2"]
@@ -16,7 +16,7 @@ export const generateBuddyData = (): { buddies: Buddy[], pendingRequests: Buddy[
     {
       id: "buddy-2",
       name: "Jordan Smith",
-      avatar: "/images/avatars/jordan.jpg",
+      avatar: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=64&h=64&fit=crop&crop=face",
       connectionDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days ago
       lastActive: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
       sharedHabits: ["habit-medium-streak"],
@@ -25,18 +25,19 @@ export const generateBuddyData = (): { buddies: Buddy[], pendingRequests: Buddy[
     {
       id: "buddy-3",
       name: "Taylor Kim",
+      avatar: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=64&h=64&fit=crop&crop=face",
       connectionDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
       lastActive: new Date().toISOString(), // Active now
       sharedHabits: ["habit-0", "habit-1", "habit-2"]
     }
   ];
 
-  // Pending buddy requests
+  // Pending buddy requests with proper avatar URLs
   const pendingRequests: Buddy[] = [
     {
       id: "buddy-request-1",
       name: "Sam Rodriguez",
-      avatar: "/images/avatars/sam.jpg",
+      avatar: "https://images.unsplash.com/photo-1501286353178-1ec881214838?w=64&h=64&fit=crop&crop=face",
       connectionDate: new Date().toISOString(),
       lastActive: new Date().toISOString(),
       sharedHabits: []
@@ -44,6 +45,7 @@ export const generateBuddyData = (): { buddies: Buddy[], pendingRequests: Buddy[
     {
       id: "buddy-request-2",
       name: "Jamie Wong",
+      avatar: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=64&h=64&fit=crop&crop=face",
       connectionDate: new Date().toISOString(),
       lastActive: new Date().toISOString(),
       sharedHabits: []

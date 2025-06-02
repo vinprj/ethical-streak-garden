@@ -1,17 +1,19 @@
 
 import { createContext, useState, useEffect, useContext } from 'react';
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | 'high-contrast';
 
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  cycleTheme: () => void;
   applyCustomTheme: (themeKey: string | null) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'light',
   setTheme: () => {},
+  cycleTheme: () => {},
   applyCustomTheme: () => {},
 });
 
@@ -90,7 +92,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === 'undefined') return 'light';
     
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light' || savedTheme === 'dark') {
+    if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'high-contrast') {
       return savedTheme as Theme;
     }
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -99,6 +101,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [customThemeKey, setCustomThemeKey] = useState<string | null>(
     typeof window !== 'undefined' ? localStorage.getItem('customTheme') : null
   );
+
+  // Cycle through themes: light → dark → high-contrast → light
+  const cycleTheme = () => {
+    if (theme === 'light') {
+      setTheme('dark');
+    } else if (theme === 'dark') {
+      setTheme('high-contrast');
+    } else {
+      setTheme('light');
+    }
+  };
 
   // Apply theme colors based on the current theme and custom theme
   const applyThemeColors = (themeMode: Theme, customKey: string | null) => {
@@ -110,8 +123,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.removeProperty('--card');
     root.style.removeProperty('--accent');
     
-    if (customKey && customThemes[customKey]) {
-      const themeColors = customThemes[customKey].colors[themeMode];
+    if (customKey && customThemes[customKey] && themeMode !== 'high-contrast') {
+      const baseTheme = themeMode === 'dark' ? 'dark' : 'light';
+      const themeColors = customThemes[customKey].colors[baseTheme];
       
       // Apply custom theme colors
       root.style.setProperty('--primary', themeColors.primary);
@@ -143,12 +157,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Handle theme changes
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove('light', 'dark');
+    root.classList.remove('light', 'dark', 'high-contrast');
     root.classList.add(theme);
     localStorage.setItem('theme', theme);
     
-    // Apply theme colors whenever theme changes
-    applyThemeColors(theme, customThemeKey);
+    // Apply theme colors whenever theme changes (skip for high-contrast as it uses CSS)
+    if (theme !== 'high-contrast') {
+      applyThemeColors(theme, customThemeKey);
+    }
     
     // Dispatch custom event
     window.dispatchEvent(new CustomEvent('themechange', { detail: { theme, customTheme: customThemeKey } }));
@@ -156,13 +172,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Apply saved custom theme on initial load
   useEffect(() => {
-    if (customThemeKey) {
+    if (customThemeKey && theme !== 'high-contrast') {
       applyThemeColors(theme, customThemeKey);
     }
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, applyCustomTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, cycleTheme, applyCustomTheme }}>
       {children}
     </ThemeContext.Provider>
   );

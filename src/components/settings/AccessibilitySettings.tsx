@@ -8,27 +8,15 @@ import { toast } from "sonner";
 interface AccessibilitySettingsProps {
   fontSize: number;
   setFontSize: (value: number) => void;
-  reduceMotion: boolean;
-  setReduceMotion: (checked: boolean) => void;
-  highContrast: boolean;
-  setHighContrast: (checked: boolean) => void;
   ecoMode: boolean;
   setEcoMode: (checked: boolean) => void;
-  enableAnimations: boolean;
-  setEnableAnimations: (checked: boolean) => void;
 }
 
 export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
   fontSize,
   setFontSize,
-  reduceMotion,
-  setReduceMotion,
-  highContrast,
-  setHighContrast,
   ecoMode,
-  setEcoMode,
-  enableAnimations,
-  setEnableAnimations
+  setEcoMode
 }) => {
   // Apply font size immediately when it changes
   useEffect(() => {
@@ -38,70 +26,34 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
     };
   }, [fontSize]);
 
-  // Apply high contrast mode globally
-  useEffect(() => {
-    const root = document.documentElement;
-    
-    if (highContrast) {
-      root.classList.add('high-contrast');
-    } else {
-      root.classList.remove('high-contrast');
-    }
-    
-    return () => {
-      root.classList.remove('high-contrast');
-    };
-  }, [highContrast]);
-
-  // Apply animation settings
+  // Apply animation settings based on eco mode
   useEffect(() => {
     const body = document.body;
     
-    // Remove all animation classes first
+    // Remove animation classes first
     body.classList.remove('reduce-animations', 'eco-mode');
     
     // Apply based on current settings
-    if (ecoMode || reduceMotion || !enableAnimations) {
-      body.classList.add('reduce-animations');
-    }
-    
     if (ecoMode) {
-      body.classList.add('eco-mode');
+      body.classList.add('reduce-animations', 'eco-mode');
     }
     
     return () => {
       body.classList.remove('reduce-animations', 'eco-mode');
     };
-  }, [ecoMode, reduceMotion, enableAnimations]);
+  }, [ecoMode]);
 
-  // Combined eco-conscious mode (includes reduced motion)
+  // Handle eco mode toggle
   const handleEcoModeToggle = (checked: boolean) => {
     setEcoMode(checked);
     
     if (checked) {
-      setReduceMotion(true);
-      setEnableAnimations(false);
       toast("Eco-Conscious Mode enabled", {
         description: "Reduced animations and motion for accessibility and energy efficiency"
       });
     } else {
       toast("Eco-Conscious Mode disabled", {
         description: "Standard app experience restored"
-      });
-    }
-  };
-
-  // Handle high contrast toggle
-  const handleHighContrastToggle = (checked: boolean) => {
-    setHighContrast(checked);
-    
-    if (checked) {
-      toast("High Contrast Mode enabled", {
-        description: "Enhanced visual distinction throughout the app"
-      });
-    } else {
-      toast("High Contrast Mode disabled", {
-        description: "Standard contrast restored"
       });
     }
   };
@@ -126,18 +78,6 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
         <p className="text-xs text-muted-foreground mt-1">
           Current size: {Math.round(fontSize * 100)}%
         </p>
-      </div>
-
-      <div className="flex items-center justify-between space-x-2">
-        <div>
-          <Label htmlFor="high-contrast">High Contrast Mode</Label>
-          <p className="text-sm text-muted-foreground">Enhance visual distinction throughout the app</p>
-        </div>
-        <Switch 
-          id="high-contrast" 
-          checked={highContrast}
-          onCheckedChange={handleHighContrastToggle}
-        />
       </div>
       
       <div className="flex items-center justify-between space-x-2">

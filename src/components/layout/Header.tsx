@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Wifi, WifiOff, Moon, Sun } from "lucide-react";
+import { Wifi, WifiOff, Moon, Sun, Contrast } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHabits } from "@/context/HabitContext";
 import { HabitSearch } from "../habits/HabitSearch";
@@ -11,7 +11,7 @@ import { NotificationCenter } from "../notifications/NotificationCenter";
 
 export const Header: React.FC = () => {
   const { toggleOfflineMode, isOfflineMode } = useHabits();
-  const { theme, setTheme } = useTheme();
+  const { theme, cycleTheme } = useTheme();
   const [pageTitle, setPageTitle] = useState("Dashboard");
   const location = useLocation();
   
@@ -28,10 +28,30 @@ export const Header: React.FC = () => {
     else if (path === "/garden") setPageTitle("Habit Garden");
   }, [location]);
 
-  const toggleTheme = () => {
-    // Only toggle theme in header if not on rewards page
-    if (location.pathname !== "/rewards") {
-      setTheme(theme === "dark" ? "light" : "dark");
+  // Get the appropriate icon for current theme
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'light':
+        return <Sun className="h-5 w-5" />;
+      case 'dark':
+        return <Moon className="h-5 w-5" />;
+      case 'high-contrast':
+        return <Contrast className="h-5 w-5" />;
+      default:
+        return <Sun className="h-5 w-5" />;
+    }
+  };
+
+  const getThemeTitle = () => {
+    switch (theme) {
+      case 'light':
+        return "Switch to Dark Mode";
+      case 'dark':
+        return "Switch to High Contrast Mode";
+      case 'high-contrast':
+        return "Switch to Light Mode";
+      default:
+        return "Switch Theme";
     }
   };
 
@@ -54,8 +74,8 @@ export const Header: React.FC = () => {
           
           {/* Only show theme toggle if not on rewards page */}
           {location.pathname !== "/rewards" && (
-            <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'dark' ? "Light Mode" : "Dark Mode"}>
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            <Button variant="ghost" size="icon" onClick={cycleTheme} title={getThemeTitle()}>
+              {getThemeIcon()}
             </Button>
           )}
           
