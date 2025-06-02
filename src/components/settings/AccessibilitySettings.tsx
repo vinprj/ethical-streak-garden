@@ -38,59 +38,53 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
     };
   }, [fontSize]);
 
-  // Apply high contrast mode globally without forcing theme
+  // Apply high contrast mode globally
   useEffect(() => {
     const root = document.documentElement;
-    const body = document.body;
     
     if (highContrast) {
       root.classList.add('high-contrast');
-      body.classList.add('high-contrast');
     } else {
       root.classList.remove('high-contrast');
-      body.classList.remove('high-contrast');
     }
     
     return () => {
       root.classList.remove('high-contrast');
-      body.classList.remove('high-contrast');
     };
   }, [highContrast]);
 
-  // Handle animation toggle
-  const handleAnimationToggle = (checked: boolean) => {
-    setEnableAnimations(checked);
+  // Apply animation settings
+  useEffect(() => {
+    const body = document.body;
     
-    if (!checked) {
-      document.body.classList.add('reduce-animations');
-      toast("Animations reduced", {
-        description: "Most animations have been disabled for a calmer experience"
-      });
-    } else {
-      document.body.classList.remove('reduce-animations');
-      toast("Animations enabled", {
-        description: "Subtle animations are now active"
-      });
+    // Remove all animation classes first
+    body.classList.remove('reduce-animations', 'eco-mode');
+    
+    // Apply based on current settings
+    if (ecoMode || reduceMotion || !enableAnimations) {
+      body.classList.add('reduce-animations');
     }
-  };
+    
+    if (ecoMode) {
+      body.classList.add('eco-mode');
+    }
+    
+    return () => {
+      body.classList.remove('reduce-animations', 'eco-mode');
+    };
+  }, [ecoMode, reduceMotion, enableAnimations]);
 
   // Combined eco-conscious mode (includes reduced motion)
   const handleEcoModeToggle = (checked: boolean) => {
     setEcoMode(checked);
     
     if (checked) {
-      document.body.classList.add('eco-mode');
-      document.body.classList.add('reduce-animations');
       setReduceMotion(true);
       setEnableAnimations(false);
       toast("Eco-Conscious Mode enabled", {
-        description: "Reduced animations and background processes to save energy and improve accessibility"
+        description: "Reduced animations and motion for accessibility and energy efficiency"
       });
     } else {
-      document.body.classList.remove('eco-mode');
-      if (!reduceMotion && enableAnimations) {
-        document.body.classList.remove('reduce-animations');
-      }
       toast("Eco-Conscious Mode disabled", {
         description: "Standard app experience restored"
       });
@@ -149,7 +143,7 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
       <div className="flex items-center justify-between space-x-2">
         <div>
           <Label htmlFor="eco-mode">Eco-Conscious & Reduced Motion</Label>
-          <p className="text-sm text-muted-foreground">Reduces animations, background processes, and motion for accessibility and energy efficiency</p>
+          <p className="text-sm text-muted-foreground">Reduces animations and motion for accessibility and energy efficiency</p>
         </div>
         <Switch 
           id="eco-mode" 

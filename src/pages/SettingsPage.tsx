@@ -14,20 +14,25 @@ import { SectionHeader } from "@/components/settings/SectionHeader";
 
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
-  // UI Settings
+  
+  // UI Settings with proper state management
   const [fontSize, setFontSize] = React.useState(() => {
     const savedFontSize = localStorage.getItem('fontSize');
     return savedFontSize ? parseFloat(savedFontSize) : 1; // 1 is default (100%)
   });
+  
   const [reduceMotion, setReduceMotion] = React.useState(() => {
     return localStorage.getItem('reduceMotion') === 'true' || false;
   });
+  
   const [highContrast, setHighContrast] = React.useState(() => {
     return localStorage.getItem('highContrast') === 'true' || false;
   });
+  
   const [ecoMode, setEcoMode] = React.useState(() => {
     return localStorage.getItem('ecoMode') === 'true' || false;
   });
+  
   const [enableAnimations, setEnableAnimations] = React.useState(() => {
     return localStorage.getItem('enableAnimations') !== 'false'; // default to true
   });
@@ -47,33 +52,15 @@ const SettingsPage: React.FC = () => {
     localStorage.setItem('highContrast', highContrast.toString());
     localStorage.setItem('ecoMode', ecoMode.toString());
     localStorage.setItem('enableAnimations', enableAnimations.toString());
-    
-    // Apply font size to document
-    document.documentElement.style.fontSize = `${fontSize * 100}%`;
-    
-    // Apply animation classes based on settings
-    const body = document.body;
-    
-    // Handle animations
-    if (ecoMode || !enableAnimations || reduceMotion) {
-      body.classList.add('reduce-animations');
-    } else {
-      body.classList.remove('reduce-animations');
-    }
-    
-    // Handle eco mode
-    if (ecoMode) {
-      body.classList.add('eco-mode');
-    } else {
-      body.classList.remove('eco-mode');
-    }
-    
-    // Check for system preference for reduced motion
+  }, [fontSize, reduceMotion, highContrast, ecoMode, enableAnimations]);
+
+  // Check for system preference for reduced motion on mount
+  React.useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches && !reduceMotion) {
       setReduceMotion(true);
       setEnableAnimations(false);
     }
-  }, [reduceMotion, ecoMode, highContrast, fontSize, enableAnimations]);
+  }, []);
 
   return (
     <AppLayout>
