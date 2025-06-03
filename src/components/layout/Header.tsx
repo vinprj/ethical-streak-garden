@@ -1,15 +1,17 @@
 
 import React from "react";
-import { Moon, Sun, Contrast } from "lucide-react";
+import { Moon, Sun, Contrast, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HabitSearch } from "../habits/HabitSearch";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/use-theme";
 import { NotificationCenter } from "../notifications/NotificationCenter";
+import { useAuth } from "@/context/AuthContext";
 
 export const Header: React.FC = () => {
   const { theme, cycleTheme } = useTheme();
+  const { signOut, user } = useAuth();
   const [pageTitle, setPageTitle] = useState("Dashboard");
   const location = useLocation();
   
@@ -74,6 +76,13 @@ export const Header: React.FC = () => {
           
           {/* Notification Center */}
           <NotificationCenter />
+          
+          {/* Sign out button */}
+          {user && (
+            <Button variant="ghost" size="icon" onClick={signOut} title="Sign Out">
+              <LogOut className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
     </header>

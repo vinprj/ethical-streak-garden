@@ -1,5 +1,4 @@
 
-import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 
@@ -16,38 +15,84 @@ import NotFound from "./pages/NotFound";
 import DebugPage from "./pages/DebugPage";
 import GardenPage from "./pages/GardenPage";
 import BuddiesPage from "./pages/BuddiesPage";
+import AuthPage from "./pages/AuthPage";
 
 // Providers
 import { HabitProvider } from "./context/HabitContext";
 import { BuddyProvider } from "./context/BuddyContext";
 import { GardenProvider } from "./context/GardenContext";
+import { AuthProvider } from "./context/AuthContext";
 import { AppThemeProvider } from "./components/ui/theme-provider";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 function App() {
   return (
     <AppThemeProvider>
-      <HabitProvider>
-        <BuddyProvider>
-          <GardenProvider>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/dashboard" element={<Navigate to="/" replace />} />
-              <Route path="/welcome" element={<Index />} />
-              <Route path="/today" element={<TodayPage />} />
-              <Route path="/insights" element={<InsightsPage />} />
-              <Route path="/rewards" element={<RewardsPage />} />
-              <Route path="/archive" element={<ArchivePage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/help" element={<HelpPage />} />
-              <Route path="/garden" element={<GardenPage />} />
-              <Route path="/buddies" element={<BuddiesPage />} />
-              <Route path="/debug" element={<DebugPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster richColors position="top-center" />
-          </GardenProvider>
-        </BuddyProvider>
-      </HabitProvider>
+      <AuthProvider>
+        <HabitProvider>
+          <BuddyProvider>
+            <GardenProvider>
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/welcome" element={<Index />} />
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard" element={<Navigate to="/" replace />} />
+                <Route path="/today" element={
+                  <ProtectedRoute>
+                    <TodayPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/insights" element={
+                  <ProtectedRoute>
+                    <InsightsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/rewards" element={
+                  <ProtectedRoute>
+                    <RewardsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/archive" element={
+                  <ProtectedRoute>
+                    <ArchivePage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/help" element={
+                  <ProtectedRoute>
+                    <HelpPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/garden" element={
+                  <ProtectedRoute>
+                    <GardenPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/buddies" element={
+                  <ProtectedRoute>
+                    <BuddiesPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/debug" element={
+                  <ProtectedRoute>
+                    <DebugPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster richColors position="top-center" />
+            </GardenProvider>
+          </BuddyProvider>
+        </HabitProvider>
+      </AuthProvider>
     </AppThemeProvider>
   );
 }

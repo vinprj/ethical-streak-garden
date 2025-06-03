@@ -1,130 +1,88 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { UserRoundPlus, Copy, Check, RefreshCcw, UserX, UserCheck, Mail } from "lucide-react";
-import { useBuddy } from "@/context/BuddyContext";
-import { toast } from "sonner";
+import { UserRoundPlus, UserX, UserCheck, Mail, Send } from "lucide-react";
+import { useBuddyData } from "@/hooks/useBuddyData";
+import { useAuth } from "@/context/AuthContext";
 
 export const BuddyConnect: React.FC = () => {
+  const { user } = useAuth();
   const { 
-    generateInviteCode, 
-    inviteCode, 
     pendingRequests,
     acceptBuddyRequest,
-    declineBuddyRequest  
-  } = useBuddy();
+    declineBuddyRequest,
+    sendBuddyInvitation
+  } = useBuddyData();
   
-  const [buddyCode, setBuddyCode] = React.useState("");
-  const [copied, setCopied] = React.useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteMessage, setInviteMessage] = useState("");
+  const [sending, setSending] = useState(false);
   
-  const handleCopyCode = () => {
-    if (!inviteCode) return;
+  const handleSendInvitation = async () => {
+    if (!inviteEmail.trim() || !user) return;
     
-    navigator.clipboard.writeText(inviteCode);
-    setCopied(true);
-    toast.success("Invite code copied to clipboard");
-    
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
-  };
-  
-  const handleConnectWithCode = () => {
-    if (!buddyCode.trim()) {
-      toast.error("Please enter a valid buddy code");
+    if (inviteEmail === user.email) {
       return;
     }
     
-    // Simulate sending request
-    toast.success("Buddy request sent successfully");
-    setBuddyCode("");
+    setSending(true);
+    const { error } = await sendBuddyInvitation(inviteEmail, inviteMessage);
+    
+    if (!error) {
+      setInviteEmail("");
+      setInviteMessage("");
+    }
+    
+    setSending(false);
   };
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Generate Invite Code */}
+      <div className="grid grid-cols-1 gap-6">
+        {/* Send Invitation */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <UserRoundPlus className="h-4 w-4 text-primary" />
-              Share Your Buddy Code
+              Invite a Friend
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Generate a code to share with friends so they can connect with you.
+              Send an invitation to connect with a friend via email.
             </p>
             
             <div className="space-y-3">
-              {inviteCode ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="border rounded-md bg-muted/50 px-3 py-1.5 text-lg font-mono tracking-wider flex-1 text-center">
-                      {inviteCode}
-                    </div>
-                    <Button size="icon" variant="outline" onClick={handleCopyCode}>
-                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={generateInviteCode} 
-                    className="w-full flex items-center gap-1.5"
-                  >
-                    <RefreshCcw className="h-3.5 w-3.5" />
-                    Generate New Code
-                  </Button>
-                </div>
-              ) : (
-                <Button 
-                  onClick={generateInviteCode} 
-                  className="w-full"
-                >
-                  Generate Invite Code
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Enter Buddy Code */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <UserRoundPlus className="h-4 w-4 text-primary" />
-              Connect with a Buddy
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Enter the code shared by your friend to connect with them.
-            </p>
-            
-            <div className="space-y-3">
-              <Input 
-                placeholder="Enter buddy code" 
-                value={buddyCode}
-                onChange={e => setBuddyCode(e.target.value)}
-                className="font-mono tracking-wider text-center"
-              />
+              <div>
+                <label className="text-sm font-medium">Friend's Email</label>
+                <Input 
+                  type="email"
+                  placeholder="friend@example.com" 
+                  value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Message (Optional)</label>
+                <Input 
+                  placeholder="Let's be habit buddies!" 
+                  value={inviteMessage}
+                  onChange={e => setInviteMessage(e.target.value)}
+                />
+              </div>
               
               <Button 
-                disabled={!buddyCode.trim()}
-                onClick={handleConnectWithCode} 
+                disabled={!inviteEmail.trim() || sending}
+                onClick={handleSendInvitation} 
                 className="w-full"
               >
-                Connect with Buddy
+                <Send className="h-4 w-4 mr-2" />
+                {sending ? 'Sending...' : 'Send Invitation'}
               </Button>
-              
-              <p className="text-xs text-center text-muted-foreground pt-1">
-                Or connect via <Button variant="link" size="sm" className="h-auto p-0">email invitation</Button>
-              </p>
             </div>
           </CardContent>
         </Card>
@@ -132,7 +90,7 @@ export const BuddyConnect: React.FC = () => {
       
       {/* Pending Requests */}
       {pendingRequests.length > 0 && (
-        <div className="mt-8 space-y-4">
+        <div className="space-y-4">
           <h3 className="text-lg font-medium">Pending Requests</h3>
           <div className="space-y-3">
             {pendingRequests.map(request => (
@@ -140,14 +98,14 @@ export const BuddyConnect: React.FC = () => {
                 <div className="flex items-center justify-between p-4">
                   <div className="flex items-center gap-3">
                     <div className="bg-muted h-10 w-10 rounded-full flex items-center justify-center">
-                      {request.avatar ? 
-                        <img src={request.avatar} alt={request.name} className="rounded-full" /> :
-                        <Mail className="h-5 w-5 text-muted-foreground" />
-                      }
+                      <Mail className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-medium">{request.name}</h4>
-                      <p className="text-xs text-muted-foreground">Sent a connection request</p>
+                      <h4 className="font-medium">{request.sender.full_name}</h4>
+                      <p className="text-sm text-muted-foreground">{request.sender.email}</p>
+                      {request.message && (
+                        <p className="text-xs text-muted-foreground mt-1">"{request.message}"</p>
+                      )}
                     </div>
                   </div>
                   
@@ -179,14 +137,13 @@ export const BuddyConnect: React.FC = () => {
       
       <div className="flex items-center gap-2 my-4">
         <Separator className="flex-1" />
-        <span className="text-xs text-muted-foreground">Privacy Settings</span>
+        <span className="text-xs text-muted-foreground">Privacy & Security</span>
         <Separator className="flex-1" />
       </div>
       
       <div className="bg-muted/30 rounded-lg p-4">
         <p className="text-sm text-muted-foreground">
-          Control who can connect with you and what information is shared with your buddies by visiting your 
-          <Button variant="link" size="sm" className="px-1.5 h-auto py-0">privacy settings</Button>.
+          Your email and personal information are kept secure. Only users you connect with can see your habit progress and send you messages.
         </p>
       </div>
     </div>
