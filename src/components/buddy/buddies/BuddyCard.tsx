@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MessageCircle, BellRing, Trash2, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { MessageCircle, Trash2, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import { Buddy } from "@/types/buddy";
 import { useNavigate } from "react-router-dom";
 
@@ -47,7 +47,6 @@ export const BuddyCard: React.FC<BuddyCardProps> = ({
 
   // Navigate to messages with this buddy selected
   const handleMessageClick = () => {
-    // You could pass buddy ID as state or use URL params
     navigate('/buddies', { state: { selectedBuddy: buddy.id, activeTab: 'messages' } });
   };
   
@@ -92,28 +91,6 @@ export const BuddyCard: React.FC<BuddyCardProps> = ({
         {/* Expanded section */}
         {isExpanded && (
           <div className="mt-4 space-y-4 border-t pt-4">
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Quick Actions</h4>
-              <div className="grid grid-cols-2 gap-2">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="text-xs h-8 justify-start"
-                  onClick={() => onSendEncouragement(getRandomEncouragement())}
-                >
-                  Send Motivation ⭐
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="text-xs h-8 justify-start"
-                  onClick={() => onSendEncouragement("Your habit consistency is inspiring! Keep it up! 🌟")}
-                >
-                  Celebrate Progress 🎉
-                </Button>
-              </div>
-            </div>
-            
             <div className="space-y-2">
               <h4 className="text-sm font-medium">Settings</h4>
               <div className="flex flex-wrap gap-2">
@@ -162,20 +139,12 @@ export const BuddyCard: React.FC<BuddyCardProps> = ({
             <Button 
               size="sm" 
               variant="ghost" 
-              className="h-8 w-8 p-0"
+              className="h-8 px-3 text-xs"
               onClick={handleMessageClick}
               title="Send Message"
             >
-              <MessageCircle className="h-4 w-4" />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="h-8 w-8 p-0"
-              onClick={() => onSendEncouragement(getRandomEncouragement())}
-              title="Send Encouragement"
-            >
-              <BellRing className="h-4 w-4" />
+              <MessageCircle className="h-4 w-4 mr-1" />
+              Message
             </Button>
           </div>
         </div>

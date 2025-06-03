@@ -11,10 +11,10 @@ import {
   CommandList 
 } from "@/components/ui/command";
 import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
-} from "@/components/ui/popover";
+  Dialog,
+  DialogContent,
+  DialogTrigger
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useHabits } from "@/context/HabitContext";
 import { useNavigate } from "react-router-dom";
@@ -32,48 +32,39 @@ export const HabitSearch: React.FC = () => {
   };
   
   return (
-    <div className="w-9 md:w-64 flex-shrink-0">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button 
-            variant="outline" 
-            className="w-full h-9 justify-start px-3 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-            aria-label="Search habits"
-          >
-            <Search className="h-4 w-4 flex-shrink-0" />
-            <span className="hidden md:inline ml-2 text-left flex-1 truncate">Search habits...</span>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent 
-          className="p-0 w-[300px] md:w-[400px]" 
-          align="start" 
-          side="bottom" 
-          sideOffset={5}
-          alignOffset={0}
-          avoidCollisions={true}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button 
+          variant="outline" 
+          className="w-9 md:w-64 h-9 justify-start px-3 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+          aria-label="Search habits"
         >
-          <Command>
-            <CommandInput placeholder="Search habits..." />
-            <CommandList>
-              <CommandEmpty>No habits found.</CommandEmpty>
-              <CommandGroup heading="Active Habits">
-                {activeHabits.map(habit => (
-                  <CommandItem 
-                    key={habit.id} 
-                    onSelect={() => handleSelect(habit.id)}
-                    className="flex items-center cursor-pointer"
-                  >
-                    <div className="w-2 h-2 rounded-full mr-2 flex-shrink-0" style={{
-                      backgroundColor: habit.color || '#6366f1'
-                    }} />
-                    <span className="truncate">{habit.name}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
+          <Search className="h-4 w-4 flex-shrink-0" />
+          <span className="hidden md:inline ml-2 text-left flex-1 truncate text-muted-foreground">Search habits...</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px] p-0">
+        <Command className="rounded-lg border-0">
+          <CommandInput placeholder="Search habits..." className="border-0" />
+          <CommandList className="max-h-[300px]">
+            <CommandEmpty>No habits found.</CommandEmpty>
+            <CommandGroup heading="Active Habits">
+              {activeHabits.map(habit => (
+                <CommandItem 
+                  key={habit.id} 
+                  onSelect={() => handleSelect(habit.id)}
+                  className="flex items-center cursor-pointer"
+                >
+                  <div className="w-2 h-2 rounded-full mr-2 flex-shrink-0" style={{
+                    backgroundColor: habit.color || '#6366f1'
+                  }} />
+                  <span className="truncate">{habit.name}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </DialogContent>
+    </Dialog>
   );
 };

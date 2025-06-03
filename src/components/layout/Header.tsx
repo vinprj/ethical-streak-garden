@@ -1,8 +1,7 @@
 
 import React from "react";
-import { Wifi, WifiOff, Moon, Sun, Contrast } from "lucide-react";
+import { Moon, Sun, Contrast } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useHabits } from "@/context/HabitContext";
 import { HabitSearch } from "../habits/HabitSearch";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -10,7 +9,6 @@ import { useTheme } from "@/hooks/use-theme";
 import { NotificationCenter } from "../notifications/NotificationCenter";
 
 export const Header: React.FC = () => {
-  const { toggleOfflineMode, isOfflineMode } = useHabits();
   const { theme, cycleTheme } = useTheme();
   const [pageTitle, setPageTitle] = useState("Dashboard");
   const location = useLocation();
@@ -26,6 +24,7 @@ export const Header: React.FC = () => {
     else if (path === "/settings") setPageTitle("Settings");
     else if (path === "/help") setPageTitle("Help & Resources");
     else if (path === "/garden") setPageTitle("Habit Garden");
+    else if (path === "/buddies") setPageTitle("Habit Buddies");
   }, [location]);
 
   // Get the appropriate icon for current theme
@@ -63,14 +62,10 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Fixed search bar with stable dimensions */}
+          {/* Search positioned in the center-right area */}
           <div className="flex-shrink-0">
             <HabitSearch />
           </div>
-          
-          <Button variant="ghost" size="icon" onClick={toggleOfflineMode} title={isOfflineMode ? "Go Online" : "Go Offline"}>
-            {isOfflineMode ? <WifiOff className="h-5 w-5" /> : <Wifi className="h-5 w-5" />}
-          </Button>
           
           {/* Only show theme toggle if not on rewards page */}
           {location.pathname !== "/rewards" && (
@@ -79,7 +74,7 @@ export const Header: React.FC = () => {
             </Button>
           )}
           
-          {/* Replace dropdown with NotificationCenter */}
+          {/* Notification Center */}
           <NotificationCenter />
         </div>
       </div>
