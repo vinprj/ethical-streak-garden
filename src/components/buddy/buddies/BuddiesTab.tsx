@@ -6,12 +6,7 @@ import { useBuddy } from "@/context/BuddyContext";
 import { BuddyCard } from "./BuddyCard";
 
 export const BuddiesTab: React.FC<{ onNavigateToConnect: () => void }> = ({ onNavigateToConnect }) => {
-  const { buddies, removeBuddy, toggleAnonymous, sendEncouragement } = useBuddy();
-
-  // Send encouragement message to buddy
-  const handleSendEncouragement = (buddyId: string, message: string) => {
-    sendEncouragement(buddyId, 'encouragement', message);
-  };
+  const { buddies, removeBuddy, toggleAnonymous } = useBuddy();
 
   if (buddies.length === 0) {
     return (
@@ -34,9 +29,14 @@ export const BuddiesTab: React.FC<{ onNavigateToConnect: () => void }> = ({ onNa
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium">Your Buddies ({buddies.length})</h3>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-medium">Your Buddies</h3>
+          <p className="text-sm text-muted-foreground">
+            You have {buddies.length} active connection{buddies.length !== 1 ? 's' : ''}
+          </p>
+        </div>
         <Button variant="outline" size="sm" onClick={onNavigateToConnect}>
           <UserPlus className="h-4 w-4 mr-2" />
           Add More
@@ -50,7 +50,6 @@ export const BuddiesTab: React.FC<{ onNavigateToConnect: () => void }> = ({ onNa
             buddy={buddy}
             onRemove={() => removeBuddy(buddy.id)}
             onToggleAnonymous={() => toggleAnonymous(buddy.id)}
-            onSendEncouragement={(msg) => handleSendEncouragement(buddy.id, msg)}
           />
         ))}
       </div>

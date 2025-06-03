@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, UserPlus, UserRoundPlus, MessageCircle, Activity } from "lucide-react";
+import { Users, UserRoundPlus, MessageCircle, Activity } from "lucide-react";
 import { BuddiesOverview } from "@/components/buddy/BuddiesOverview";
 import { BuddyConnect } from "@/components/buddy/BuddyConnect";
 import { BuddyMessages } from "@/components/buddy/BuddyMessages";

@@ -61,18 +61,16 @@ export const Header: React.FC = () => {
           <h2 className="text-xl font-bold hidden md:block">{pageTitle}</h2>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* Search positioned in the center-right area */}
           <div className="flex-shrink-0">
             <HabitSearch />
           </div>
           
-          {/* Only show theme toggle if not on rewards page */}
-          {location.pathname !== "/rewards" && (
-            <Button variant="ghost" size="icon" onClick={cycleTheme} title={getThemeTitle()}>
-              {getThemeIcon()}
-            </Button>
-          )}
+          {/* Theme toggle */}
+          <Button variant="ghost" size="icon" onClick={cycleTheme} title={getThemeTitle()}>
+            {getThemeIcon()}
+          </Button>
           
           {/* Notification Center */}
           <NotificationCenter />
