@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   BarChart, 
@@ -13,7 +12,7 @@ import {
   Cell, 
   Legend
 } from "recharts";
-import { useThemeContext } from "@/hooks/use-theme";
+import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { ChartControls } from "./ChartControls";
@@ -36,7 +35,7 @@ export const WeeklyCompletionChart: React.FC<WeeklyCompletionChartProps> = ({
   isAnimated 
 }) => {
   const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
-  const { theme } = useThemeContext();
+  const { theme } = useTheme();
   
   const emptyColor = theme === 'dark' ? 'var(--muted)' : '#e5e7eb';
   const chartColor = '#29AB87'; // Updated chart color to #29AB87

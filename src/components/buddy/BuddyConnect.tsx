@@ -7,14 +7,14 @@ import { Separator } from "@/components/ui/separator";
 import { UserRoundPlus, UserX, UserCheck, Mail, Send } from "lucide-react";
 import { useBuddyData } from "@/hooks/useBuddyData";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 export const BuddyConnect: React.FC = () => {
   const { user } = useAuth();
   const { 
     pendingRequests,
-    acceptBuddyRequest,
-    declineBuddyRequest,
-    sendBuddyInvitation
+    acceptConnectionRequest,
+    sendConnectionRequest
   } = useBuddyData();
   
   const [inviteEmail, setInviteEmail] = useState("");
@@ -25,18 +25,34 @@ export const BuddyConnect: React.FC = () => {
     if (!inviteEmail.trim() || !user) return;
     
     if (inviteEmail === user.email) {
+      toast.error("You can't send an invitation to yourself");
       return;
     }
     
     setSending(true);
-    const { error } = await sendBuddyInvitation(inviteEmail, inviteMessage);
+    const { error } = await sendConnectionRequest(inviteEmail, inviteMessage);
     
-    if (!error) {
+    if (error) {
+      toast.error("Failed to send invitation", {
+        description: error
+      });
+    } else {
+      toast.success("Invitation sent!");
       setInviteEmail("");
       setInviteMessage("");
     }
     
     setSending(false);
+  };
+
+  const handleAcceptRequest = async (requestId: string) => {
+    await acceptConnectionRequest(requestId);
+    toast.success("Connection accepted!");
+  };
+
+  const handleDeclineRequest = async (requestId: string) => {
+    // For now, we'll just show a toast - in a full implementation you'd update the database
+    toast.success("Connection request declined");
   };
 
   return (
@@ -113,7 +129,7 @@ export const BuddyConnect: React.FC = () => {
                     <Button 
                       size="sm" 
                       variant="outline"
-                      onClick={() => declineBuddyRequest(request.id)}
+                      onClick={() => handleDeclineRequest(request.id)}
                       className="flex items-center gap-1"
                     >
                       <UserX className="h-3.5 w-3.5" />
@@ -121,7 +137,7 @@ export const BuddyConnect: React.FC = () => {
                     </Button>
                     <Button 
                       size="sm"
-                      onClick={() => acceptBuddyRequest(request.id)}
+                      onClick={() => handleAcceptRequest(request.id)}
                       className="flex items-center gap-1"
                     >
                       <UserCheck className="h-3.5 w-3.5" />

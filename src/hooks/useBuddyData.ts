@@ -51,21 +51,15 @@ export const useBuddyData = () => {
         .from('user_connections')
         .select(`
           *,
-          requester:requester_id(id, email, full_name, avatar_url, created_at, updated_at),
-          addressee:addressee_id(id, email, full_name, avatar_url, created_at, updated_at)
+          requester:profiles!user_connections_requester_id_fkey(id, email, full_name, avatar_url, created_at, updated_at),
+          addressee:profiles!user_connections_addressee_id_fkey(id, email, full_name, avatar_url, created_at, updated_at)
         `)
         .eq('status', 'accepted')
         .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
       if (error) throw error;
 
-      // Type assertion with proper validation
-      const typedConnections = (data || []).map(conn => ({
-        ...conn,
-        status: conn.status as 'pending' | 'accepted' | 'declined' | 'blocked'
-      })) as Connection[];
-
-      setConnections(typedConnections);
+      setConnections(data || []);
     } catch (error) {
       console.error('Error fetching connections:', error);
     }
@@ -79,7 +73,7 @@ export const useBuddyData = () => {
         .from('connection_requests')
         .select(`
           *,
-          sender:sender_id(id, email, full_name, avatar_url, created_at, updated_at)
+          sender:profiles!connection_requests_sender_id_fkey(id, email, full_name, avatar_url, created_at, updated_at)
         `)
         .eq('recipient_email', user.email)
         .eq('status', 'pending')
@@ -87,13 +81,7 @@ export const useBuddyData = () => {
 
       if (error) throw error;
 
-      // Type assertion with proper validation
-      const typedRequests = (data || []).map(req => ({
-        ...req,
-        status: req.status as 'pending' | 'accepted' | 'declined' | 'expired'
-      })) as ConnectionRequest[];
-
-      setPendingRequests(typedRequests);
+      setPendingRequests(data || []);
     } catch (error) {
       console.error('Error fetching pending requests:', error);
     }

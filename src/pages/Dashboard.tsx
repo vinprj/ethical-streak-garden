@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Calendar, Award, Sparkles } from "lucide-react";
@@ -8,14 +7,14 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useHabits } from "@/context/HabitContext";
 import { BadgeGrid } from "@/components/dashboard/BadgeGrid";
 import { UserStats } from "@/components/dashboard/UserStats";
-import { useThemeContext } from "@/hooks/use-theme";
+import { useTheme } from "@/hooks/use-theme";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Dashboard: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const { habits, badges } = useHabits();
-  const { theme } = useThemeContext();
+  const { theme } = useTheme();
   
   // Animation effect when dashboard loads
   useEffect(() => {
