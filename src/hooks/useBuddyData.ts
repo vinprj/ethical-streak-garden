@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -59,7 +58,13 @@ export const useBuddyData = () => {
 
       if (error) throw error;
 
-      setConnections(data || []);
+      // Type assertion to ensure status matches our interface
+      const typedConnections = (data || []).map(conn => ({
+        ...conn,
+        status: conn.status as 'pending' | 'accepted' | 'declined' | 'blocked'
+      })) as Connection[];
+
+      setConnections(typedConnections);
     } catch (error) {
       console.error('Error fetching connections:', error);
     }
@@ -81,7 +86,13 @@ export const useBuddyData = () => {
 
       if (error) throw error;
 
-      setPendingRequests(data || []);
+      // Type assertion to ensure status matches our interface
+      const typedRequests = (data || []).map(req => ({
+        ...req,
+        status: req.status as 'pending' | 'accepted' | 'declined' | 'expired'
+      })) as ConnectionRequest[];
+
+      setPendingRequests(typedRequests);
     } catch (error) {
       console.error('Error fetching pending requests:', error);
     }
