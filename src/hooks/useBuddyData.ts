@@ -2,13 +2,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from 'sonner';
 
+// Define proper types matching our database
 interface Profile {
   id: string;
-  email: string;
-  full_name: string;
-  avatar_url?: string;
+  email: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Connection {
@@ -17,6 +19,7 @@ interface Connection {
   addressee_id: string;
   status: 'pending' | 'accepted' | 'declined' | 'blocked';
   created_at: string;
+  updated_at: string;
   requester: Profile;
   addressee: Profile;
 }
@@ -26,10 +29,11 @@ interface ConnectionRequest {
   sender_id: string;
   recipient_email: string;
   invite_token: string;
-  message?: string;
+  message: string | null;
   status: 'pending' | 'accepted' | 'declined' | 'expired';
   expires_at: string;
   created_at: string;
+  updated_at: string;
   sender: Profile;
 }
 
@@ -39,7 +43,6 @@ export const useBuddyData = () => {
   const [pendingRequests, setPendingRequests] = useState<ConnectionRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch connections
   const fetchConnections = async () => {
     if (!user) return;
 
@@ -48,21 +51,26 @@ export const useBuddyData = () => {
         .from('user_connections')
         .select(`
           *,
-          requester:profiles!user_connections_requester_id_fkey(*),
-          addressee:profiles!user_connections_addressee_id_fkey(*)
+          requester:requester_id(id, email, full_name, avatar_url, created_at, updated_at),
+          addressee:addressee_id(id, email, full_name, avatar_url, created_at, updated_at)
         `)
-        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
-        .eq('status', 'accepted');
+        .eq('status', 'accepted')
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
       if (error) throw error;
-      setConnections(data || []);
+
+      // Type assertion with proper validation
+      const typedConnections = (data || []).map(conn => ({
+        ...conn,
+        status: conn.status as 'pending' | 'accepted' | 'declined' | 'blocked'
+      })) as Connection[];
+
+      setConnections(typedConnections);
     } catch (error) {
       console.error('Error fetching connections:', error);
-      toast.error('Failed to load connections');
     }
   };
 
-  // Fetch pending requests
   const fetchPendingRequests = async () => {
     if (!user) return;
 
@@ -71,23 +79,28 @@ export const useBuddyData = () => {
         .from('connection_requests')
         .select(`
           *,
-          sender:profiles!connection_requests_sender_id_fkey(*)
+          sender:sender_id(id, email, full_name, avatar_url, created_at, updated_at)
         `)
         .eq('recipient_email', user.email)
         .eq('status', 'pending')
         .gt('expires_at', new Date().toISOString());
 
       if (error) throw error;
-      setPendingRequests(data || []);
+
+      // Type assertion with proper validation
+      const typedRequests = (data || []).map(req => ({
+        ...req,
+        status: req.status as 'pending' | 'accepted' | 'declined' | 'expired'
+      })) as ConnectionRequest[];
+
+      setPendingRequests(typedRequests);
     } catch (error) {
       console.error('Error fetching pending requests:', error);
-      toast.error('Failed to load pending requests');
     }
   };
 
-  // Send buddy invitation
-  const sendBuddyInvitation = async (recipientEmail: string, message?: string) => {
-    if (!user) return { error: 'Not authenticated' };
+  const sendConnectionRequest = async (email: string, message?: string) => {
+    if (!user) return { error: 'User not authenticated' };
 
     try {
       // Generate invite token
@@ -100,37 +113,33 @@ export const useBuddyData = () => {
         .from('connection_requests')
         .insert({
           sender_id: user.id,
-          recipient_email: recipientEmail,
+          recipient_email: email.toLowerCase(),
           invite_token: tokenData,
-          message
+          message: message || null
         });
 
       if (error) throw error;
-
-      toast.success('Invitation sent successfully!');
       return { error: null };
-    } catch (error: any) {
-      console.error('Error sending invitation:', error);
-      toast.error(error.message || 'Failed to send invitation');
-      return { error };
+    } catch (error) {
+      console.error('Error sending connection request:', error);
+      return { error: error instanceof Error ? error.message : 'Failed to send request' };
     }
   };
 
-  // Accept buddy request
-  const acceptBuddyRequest = async (requestId: string) => {
+  const acceptConnectionRequest = async (requestId: string) => {
     if (!user) return;
 
     try {
-      // Get the request details
-      const { data: request, error: requestError } = await supabase
+      // First get the request details
+      const { data: request, error: fetchError } = await supabase
         .from('connection_requests')
         .select('*')
         .eq('id', requestId)
         .single();
 
-      if (requestError) throw requestError;
+      if (fetchError) throw fetchError;
 
-      // Create connection
+      // Create the connection
       const { error: connectionError } = await supabase
         .from('user_connections')
         .insert({
@@ -141,7 +150,7 @@ export const useBuddyData = () => {
 
       if (connectionError) throw connectionError;
 
-      // Update request status
+      // Update the request status
       const { error: updateError } = await supabase
         .from('connection_requests')
         .update({ status: 'accepted' })
@@ -149,34 +158,13 @@ export const useBuddyData = () => {
 
       if (updateError) throw updateError;
 
-      toast.success('Buddy request accepted!');
-      fetchConnections();
-      fetchPendingRequests();
-    } catch (error: any) {
-      console.error('Error accepting request:', error);
-      toast.error(error.message || 'Failed to accept request');
+      // Refresh data
+      await Promise.all([fetchConnections(), fetchPendingRequests()]);
+    } catch (error) {
+      console.error('Error accepting connection request:', error);
     }
   };
 
-  // Decline buddy request
-  const declineBuddyRequest = async (requestId: string) => {
-    try {
-      const { error } = await supabase
-        .from('connection_requests')
-        .update({ status: 'declined' })
-        .eq('id', requestId);
-
-      if (error) throw error;
-
-      toast.success('Request declined');
-      fetchPendingRequests();
-    } catch (error: any) {
-      console.error('Error declining request:', error);
-      toast.error(error.message || 'Failed to decline request');
-    }
-  };
-
-  // Remove connection
   const removeConnection = async (connectionId: string) => {
     try {
       const { error } = await supabase
@@ -185,22 +173,21 @@ export const useBuddyData = () => {
         .eq('id', connectionId);
 
       if (error) throw error;
-
-      toast.success('Connection removed');
-      fetchConnections();
-    } catch (error: any) {
+      await fetchConnections();
+    } catch (error) {
       console.error('Error removing connection:', error);
-      toast.error(error.message || 'Failed to remove connection');
     }
   };
 
   useEffect(() => {
-    if (user) {
-      Promise.all([fetchConnections(), fetchPendingRequests()]).finally(() => {
-        setLoading(false);
-      });
-    } else {
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchConnections(), fetchPendingRequests()]);
       setLoading(false);
+    };
+
+    if (user) {
+      loadData();
     }
   }, [user]);
 
@@ -208,13 +195,9 @@ export const useBuddyData = () => {
     connections,
     pendingRequests,
     loading,
-    sendBuddyInvitation,
-    acceptBuddyRequest,
-    declineBuddyRequest,
+    sendConnectionRequest,
+    acceptConnectionRequest,
     removeConnection,
-    refetch: () => {
-      fetchConnections();
-      fetchPendingRequests();
-    }
+    refetch: () => Promise.all([fetchConnections(), fetchPendingRequests()])
   };
 };

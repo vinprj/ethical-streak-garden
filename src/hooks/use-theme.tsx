@@ -10,12 +10,7 @@ interface ThemeContextType {
   applyCustomTheme: (themeKey: string | null) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({
-  theme: 'light',
-  setTheme: () => {},
-  cycleTheme: () => {},
-  applyCustomTheme: () => {},
-});
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 interface ThemeColors {
   primary: string;
@@ -88,19 +83,29 @@ const customThemes: Record<string, CustomTheme> = {
 };
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'light';
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<Theme>('light');
+  const [customThemeKey, setCustomThemeKey] = useState<string | null>(null);
+
+  // Initialize theme from localStorage after mount
+  useEffect(() => {
+    setMounted(true);
     
     const savedTheme = localStorage.getItem('theme');
+    const savedCustomTheme = localStorage.getItem('customTheme');
+    
     if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'high-contrast') {
-      return savedTheme as Theme;
+      setTheme(savedTheme as Theme);
+    } else {
+      // Default to system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(prefersDark ? 'dark' : 'light');
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
-
-  const [customThemeKey, setCustomThemeKey] = useState<string | null>(
-    typeof window !== 'undefined' ? localStorage.getItem('customTheme') : null
-  );
+    
+    if (savedCustomTheme) {
+      setCustomThemeKey(savedCustomTheme);
+    }
+  }, []);
 
   // Cycle through themes: light → dark → high-contrast → light
   const cycleTheme = () => {
@@ -156,6 +161,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Handle theme changes
   useEffect(() => {
+    if (!mounted) return;
+    
     const root = document.documentElement;
     root.classList.remove('light', 'dark', 'high-contrast');
     root.classList.add(theme);
@@ -168,14 +175,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     // Dispatch custom event
     window.dispatchEvent(new CustomEvent('themechange', { detail: { theme, customTheme: customThemeKey } }));
-  }, [theme, customThemeKey]);
+  }, [theme, customThemeKey, mounted]);
 
-  // Apply saved custom theme on initial load
-  useEffect(() => {
-    if (customThemeKey && theme !== 'high-contrast') {
-      applyThemeColors(theme, customThemeKey);
-    }
-  }, []);
+  // Don't render until mounted to avoid hydration issues
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, cycleTheme, applyCustomTheme }}>
@@ -184,16 +189,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useThemeContext() {
+export function useTheme() {
   const context = useContext(ThemeContext);
   
   if (context === undefined) {
-    throw new Error('useThemeContext must be used within a ThemeProvider');
+    throw new Error('useTheme must be used within a ThemeProvider');
   }
   
   return context;
 }
 
-export function useTheme() {
-  return useThemeContext();
-}
+// Export as AppThemeProvider for use in App.tsx
+export { ThemeProvider as AppThemeProvider };
