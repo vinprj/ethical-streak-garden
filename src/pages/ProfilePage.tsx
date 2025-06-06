@@ -40,6 +40,33 @@ const ProfilePage: React.FC = () => {
       .slice(0, 2);
   };
 
+  // Calculate weekly completion rate from existing data
+  const calculateWeeklyCompletionRate = () => {
+    const today = new Date();
+    const weekStart = new Date();
+    weekStart.setDate(today.getDate() - today.getDay());
+    
+    const totalHabitsThisWeek = habits.filter(h => !h.isArchived && h.frequency === 'daily').length * 7 + 
+      habits.filter(h => !h.isArchived && h.frequency === 'weekly').length;
+    
+    const completionsThisWeek = habits
+      .filter(h => !h.isArchived)
+      .reduce((acc, habit) => {
+        const thisWeekCompletions = habit.completedDates.filter(date => {
+          const completionDate = new Date(date);
+          return completionDate >= weekStart;
+        });
+        
+        return acc + thisWeekCompletions.length;
+      }, 0);
+    
+    return totalHabitsThisWeek > 0 
+      ? Math.round((completionsThisWeek / totalHabitsThisWeek) * 100) 
+      : 0;
+  };
+
+  const weeklyCompletionRate = calculateWeeklyCompletionRate();
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -117,7 +144,7 @@ const ProfilePage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-emerald-500">
-                {Math.round((stats.weeklyCompletionRate || 0) * 100)}%
+                {weeklyCompletionRate}%
               </div>
               <p className="text-sm text-muted-foreground">This week</p>
             </CardContent>
