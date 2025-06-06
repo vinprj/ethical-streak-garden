@@ -40,8 +40,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
+  const getRedirectUrl = () => {
+    // Check if we're on Vercel production
+    if (window.location.hostname === 'habitflow-wine.vercel.app') {
+      return 'https://habitflow-wine.vercel.app/';
+    }
+    // Check if we're on any vercel deployment
+    if (window.location.hostname.includes('vercel.app')) {
+      return `${window.location.origin}/`;
+    }
+    // Default to current origin for local development
+    return `${window.location.origin}/`;
+  };
+
   const signUp = async (email: string, password: string, fullName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = getRedirectUrl();
     
     const { error } = await supabase.auth.signUp({
       email,

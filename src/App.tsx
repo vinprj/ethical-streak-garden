@@ -16,6 +16,7 @@ import DebugPage from "./pages/DebugPage";
 import GardenPage from "./pages/GardenPage";
 import BuddiesPage from "./pages/BuddiesPage";
 import AuthPage from "./pages/AuthPage";
+import ProfilePage from "./pages/ProfilePage";
 
 // Providers
 import { HabitProvider } from "./context/HabitContext";
@@ -59,6 +60,11 @@ function App() {
                 <Route path="/archive" element={
                   <ProtectedRoute>
                     <ArchivePage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <ProfilePage />
                   </ProtectedRoute>
                 } />
                 <Route path="/settings" element={

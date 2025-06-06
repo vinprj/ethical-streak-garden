@@ -11,7 +11,7 @@ import {
   Leaf,
   Bug,
   Users,
-  GanttChartSquare
+  User
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useHabits } from "@/context/HabitContext";
@@ -88,6 +88,11 @@ export const Sidebar = () => {
 
   // Define bottom navigation items
   const bottomNavItems: NavItemType[] = [
+    { 
+      name: "Profile", 
+      path: "/profile",
+      icon: <User className="h-[18px] w-[18px]" /> 
+    },
     { 
       name: "Settings", 
       path: "/settings",

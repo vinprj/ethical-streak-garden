@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Bell,
   X,
@@ -18,67 +18,18 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: "info" | "success" | "warning" | "achievement";
-  timestamp: Date;
-  read: boolean;
-}
-
-// Mock notifications - in a real app these would come from a context or state management
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    title: "Streak Milestone!",
-    message: "You've completed your meditation habit 5 days in a row!",
-    type: "achievement",
-    timestamp: new Date(Date.now() - 15 * 60000),
-    read: false,
-  },
-  {
-    id: "2",
-    title: "Habit Reminder",
-    message: "Don't forget to drink water today",
-    type: "info",
-    timestamp: new Date(Date.now() - 2 * 3600000),
-    read: false,
-  },
-  {
-    id: "3",
-    title: "Badge Unlocked",
-    message: "You've earned the 'Early Bird' badge!",
-    type: "success",
-    timestamp: new Date(Date.now() - 12 * 3600000),
-    read: true,
-  },
-];
+import { useNotifications, Notification } from "@/hooks/useNotifications";
 
 export const NotificationCenter: React.FC = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const {
+    notifications,
+    markAsRead,
+    markAllAsRead,
+    removeNotification
+  } = useNotifications();
   const [open, setOpen] = useState(false);
   
   const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const markAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(
-      notifications.map((n) => ({ ...n, read: true }))
-    );
-  };
-
-  const removeNotification = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
-  };
 
   const getIcon = (type: Notification["type"]) => {
     switch (type) {
@@ -139,6 +90,7 @@ export const NotificationCenter: React.FC = () => {
         {notifications.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
             <p>No notifications</p>
+            <p className="text-xs mt-1">Complete habits to see updates here!</p>
           </div>
         ) : (
           <ScrollArea className="h-[300px]">
@@ -194,7 +146,7 @@ export const NotificationCenter: React.FC = () => {
         )}
         <Separator />
         <div className="p-2">
-          <Button variant="outline" size="sm" className="w-full">
+          <Button variant="outline" size="sm" className="w-full" disabled>
             View all notifications
           </Button>
         </div>
