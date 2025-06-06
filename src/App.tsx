@@ -1,6 +1,7 @@
 
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
+import { useEffect } from "react";
 
 // Pages
 import Index from "./pages/Index";
@@ -27,6 +28,33 @@ import { AppThemeProvider } from "./components/ui/theme-provider";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 function App() {
+  // Apply saved accessibility settings on app initialization
+  useEffect(() => {
+    // Apply font size
+    const savedFontSize = localStorage.getItem('fontSize');
+    if (savedFontSize) {
+      const fontSize = parseFloat(savedFontSize);
+      document.documentElement.style.fontSize = `${fontSize * 100}%`;
+      document.documentElement.style.setProperty('--app-font-scale', fontSize.toString());
+    }
+
+    // Apply eco mode
+    const ecoMode = localStorage.getItem('ecoMode') === 'true';
+    const body = document.body;
+    const html = document.documentElement;
+    
+    if (ecoMode) {
+      body.classList.add('reduce-animations', 'eco-mode');
+      html.classList.add('reduce-animations', 'eco-mode');
+      
+      // Apply to all elements
+      document.querySelectorAll('*').forEach(el => {
+        (el as HTMLElement).style.animationDuration = '0.001s';
+        (el as HTMLElement).style.transitionDuration = '0.001s';
+      });
+    }
+  }, []);
+
   return (
     <AppThemeProvider>
       <AuthProvider>

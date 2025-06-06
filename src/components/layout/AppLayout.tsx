@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { useHabits } from "@/context/HabitContext";
@@ -11,6 +11,24 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { isOfflineMode } = useHabits();
+  
+  // Apply settings on page load/route change
+  useEffect(() => {
+    // Re-apply font size
+    const savedFontSize = localStorage.getItem('fontSize');
+    if (savedFontSize) {
+      const fontSize = parseFloat(savedFontSize);
+      document.documentElement.style.fontSize = `${fontSize * 100}%`;
+      document.documentElement.style.setProperty('--app-font-scale', fontSize.toString());
+    }
+
+    // Re-apply eco mode
+    const ecoMode = localStorage.getItem('ecoMode') === 'true';
+    if (ecoMode) {
+      document.body.classList.add('reduce-animations', 'eco-mode');
+      document.documentElement.classList.add('reduce-animations', 'eco-mode');
+    }
+  }, []);
   
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-background">

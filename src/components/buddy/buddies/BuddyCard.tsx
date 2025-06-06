@@ -3,9 +3,8 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MessageCircle, Trash2, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import { Buddy } from "@/types/buddy";
-import { useNavigate } from "react-router-dom";
 
 interface BuddyCardProps {
   buddy: Buddy;
@@ -19,20 +18,9 @@ export const BuddyCard: React.FC<BuddyCardProps> = ({
   onToggleAnonymous
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const navigate = useNavigate();
   
   // Format the connection date
   const connectionDate = new Date(buddy.connectionDate).toLocaleDateString();
-
-  // Navigate to messages with this buddy selected
-  const handleMessageClick = () => {
-    navigate('/buddies', { 
-      state: { 
-        selectedBuddy: buddy.id, 
-        activeTab: 'messages' 
-      } 
-    });
-  };
   
   return (
     <div className="rounded-lg border bg-card">
@@ -62,18 +50,7 @@ export const BuddyCard: React.FC<BuddyCardProps> = ({
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-8 px-3 text-xs"
-              onClick={handleMessageClick}
-              title="Send Message"
-            >
-              <MessageCircle className="h-4 w-4 mr-1" />
-              Message
-            </Button>
-            
+          <div>
             <Button 
               variant="ghost" 
               size="sm" 
