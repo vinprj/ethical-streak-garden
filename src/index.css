@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -45,6 +46,9 @@
     --sidebar-ring: 174 70% 40%;
 
     --radius: 0.6rem;
+    
+    /* Font scaling variable */
+    --app-font-scale: 1;
   }
 
   .dark {
@@ -133,12 +137,25 @@
   }
 
   html {
-    font-size: 16px; /* Base font size */
+    font-size: 16px; /* Base font size - will be scaled by settings */
+  }
+  
+  /* Respect system font scaling preferences */
+  @media (prefers-reduced-motion: reduce) {
+    html.reduce-animations *,
+    html.reduce-animations *::before,
+    html.reduce-animations *::after {
+      animation-duration: 0.001s !important;
+      transition-duration: 0.001s !important;
+      animation-play-state: paused !important;
+    }
   }
 
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
+    /* Apply font scaling from settings */
+    font-size: calc(1rem * var(--app-font-scale, 1));
   }
 
   /* Accessible focus styles */
@@ -226,6 +243,25 @@
   }
 }
 
+/* Eco-mode and reduced motion - Global application */
+.reduce-animations *,
+.reduce-animations *::before,
+.reduce-animations *::after,
+.eco-mode *,
+.eco-mode *::before,
+.eco-mode *::after {
+  animation-duration: 0.001s !important;
+  transition-duration: 0.001s !important;
+  animation-play-state: paused !important;
+  transform: none !important;
+}
+
+/* Override for essential accessibility animations */
+.reduce-animations :focus-visible,
+.eco-mode :focus-visible {
+  transition: outline 0.2s ease !important;
+}
+
 /* Additional keyframes */
 @keyframes pulse-light {
   0%, 100% { opacity: 1; }
@@ -259,27 +295,23 @@
   75% { transform: rotate(-2deg); }
 }
 
-/* Accessibility - reduced motion */
+/* System-level accessibility - respect user preferences */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001s !important;
     transition-duration: 0.001s !important;
+    animation-play-state: paused !important;
+  }
+  
+  /* But keep essential focus indicators */
+  :focus-visible {
+    transition: outline 0.2s ease !important;
   }
 }
 
-/* Reduced animations class - only disable when explicitly set */
-.reduce-animations *,
-.reduce-animations *::before,
-.reduce-animations *::after {
-  animation-duration: 0.001s !important;
-  transition-duration: 0.001s !important;
-  transition: none !important;
-  animation: none !important;
-}
-
-/* Eco-mode optimizations */
-.eco-mode {
-  /* Apply additional eco-friendly optimizations */
+/* Font scaling support for all text elements */
+h1, h2, h3, h4, h5, h6, p, span, div, button, input, label {
+  font-size: calc(1em * var(--app-font-scale, 1));
 }
 
 /* Animation classes */
