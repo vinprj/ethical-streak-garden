@@ -5,6 +5,7 @@ import { Users, UserPlus } from "lucide-react";
 import { useBuddyData } from "@/hooks/useBuddyData";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
+import { BuddyCard } from "./BuddyCard";
 
 export const BuddiesTab: React.FC<{ onNavigateToConnect: () => void }> = ({ onNavigateToConnect }) => {
   const { user } = useAuth();
@@ -57,38 +58,27 @@ export const BuddiesTab: React.FC<{ onNavigateToConnect: () => void }> = ({ onNa
         {connections.map(connection => {
           const buddy = connection.requester_id === user?.id ? connection.addressee : connection.requester;
           
+          // Convert the connection data to match Buddy interface for the card
+          const buddyData = {
+            id: connection.id,
+            name: buddy.full_name || 'Unknown',
+            avatar: buddy.avatar_url || undefined,
+            connectionDate: connection.created_at,
+            lastActive: connection.updated_at,
+            sharedHabits: [], // This would be populated from shared habits data
+            isAnonymous: false
+          };
+          
           return (
-            <Card key={connection.id}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 h-10 w-10 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-primary">
-                        {buddy.full_name?.charAt(0).toUpperCase() || buddy.email?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium">{buddy.full_name || 'Unknown'}</h4>
-                      <p className="text-sm text-muted-foreground">{buddy.email}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Connected {new Date(connection.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeConnection(connection.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <BuddyCard
+              key={connection.id}
+              buddy={buddyData}
+              onRemove={() => removeConnection(connection.id)}
+              onToggleAnonymous={() => {
+                // This would toggle anonymous mode if implemented
+                console.log('Toggle anonymous mode for', buddy.full_name);
+              }}
+            />
           );
         })}
       </div>

@@ -4,42 +4,89 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { UserRoundPlus, UserX, UserCheck, Mail, Send } from "lucide-react";
+import { UserRoundPlus, UserX, UserCheck, Mail, Send, AlertCircle } from "lucide-react";
 import { useBuddyData } from "@/hooks/useBuddyData";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const BuddyConnect: React.FC = () => {
   const { user } = useAuth();
   const { 
     pendingRequests,
+    connections,
     acceptConnectionRequest,
-    sendConnectionRequest
+    sendConnectionRequest,
+    refetch
   } = useBuddyData();
   
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteMessage, setInviteMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const checkIfAlreadyConnected = (email: string): boolean => {
+    return connections.some(conn => {
+      const buddy = conn.requester_id === user?.id ? conn.addressee : conn.requester;
+      return buddy.email?.toLowerCase() === email.toLowerCase();
+    });
+  };
+
+  const checkIfRequestPending = (email: string): boolean => {
+    return pendingRequests.some(req => req.sender.email?.toLowerCase() === email.toLowerCase());
+  };
   
   const handleSendInvitation = async () => {
     if (!inviteEmail.trim() || !user) return;
     
-    if (inviteEmail === user.email) {
-      toast.error("You can't send an invitation to yourself");
+    setEmailError("");
+    
+    // Validate email format
+    if (!validateEmail(inviteEmail.trim())) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
+    
+    // Check if trying to connect to self
+    if (inviteEmail.toLowerCase() === user.email?.toLowerCase()) {
+      setEmailError("You cannot send an invitation to yourself");
+      return;
+    }
+
+    // Check if already connected
+    if (checkIfAlreadyConnected(inviteEmail.trim())) {
+      setEmailError("You are already connected to this user");
+      return;
+    }
+
+    // Check if request already pending
+    if (checkIfRequestPending(inviteEmail.trim())) {
+      setEmailError("A connection request is already pending for this email");
       return;
     }
     
     setSending(true);
-    const { error } = await sendConnectionRequest(inviteEmail, inviteMessage);
+    const { error } = await sendConnectionRequest(inviteEmail.trim(), inviteMessage.trim() || undefined);
     
     if (error) {
-      toast.error("Failed to send invitation", {
-        description: error
-      });
+      if (error.includes("not found") || error.includes("No user found")) {
+        setEmailError("No user found with this email address. Please check the email or ask them to sign up first.");
+      } else {
+        setEmailError(`Failed to send invitation: ${error}`);
+      }
     } else {
-      toast.success("Invitation sent!");
+      toast.success("Connection request sent!", {
+        description: `Invitation sent to ${inviteEmail}`
+      });
       setInviteEmail("");
       setInviteMessage("");
+      // Refresh data to show any updates
+      refetch();
     }
     
     setSending(false);
@@ -48,11 +95,13 @@ export const BuddyConnect: React.FC = () => {
   const handleAcceptRequest = async (requestId: string) => {
     await acceptConnectionRequest(requestId);
     toast.success("Connection accepted!");
+    refetch();
   };
 
   const handleDeclineRequest = async (requestId: string) => {
     // For now, we'll just show a toast - in a full implementation you'd update the database
     toast.success("Connection request declined");
+    refetch();
   };
 
   return (
@@ -68,7 +117,7 @@ export const BuddyConnect: React.FC = () => {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Send an invitation to connect with a friend via email.
+              Send an invitation to connect with a friend via email. They must have an account to receive your invitation.
             </p>
             
             <div className="space-y-3">
@@ -78,8 +127,20 @@ export const BuddyConnect: React.FC = () => {
                   type="email"
                   placeholder="friend@example.com" 
                   value={inviteEmail}
-                  onChange={e => setInviteEmail(e.target.value)}
+                  onChange={e => {
+                    setInviteEmail(e.target.value);
+                    setEmailError("");
+                  }}
+                  className={emailError ? "border-destructive" : ""}
                 />
+                {emailError && (
+                  <Alert className="mt-2 border-destructive bg-destructive/10">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-destructive">
+                      {emailError}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
               
               <div>
@@ -92,7 +153,7 @@ export const BuddyConnect: React.FC = () => {
               </div>
               
               <Button 
-                disabled={!inviteEmail.trim() || sending}
+                disabled={!inviteEmail.trim() || sending || !!emailError}
                 onClick={handleSendInvitation} 
                 className="w-full"
               >
@@ -117,10 +178,10 @@ export const BuddyConnect: React.FC = () => {
                       <Mail className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-medium">{request.sender.full_name}</h4>
+                      <h4 className="font-medium">{request.sender.full_name || 'Unknown User'}</h4>
                       <p className="text-sm text-muted-foreground">{request.sender.email}</p>
                       {request.message && (
-                        <p className="text-xs text-muted-foreground mt-1">"{request.message}"</p>
+                        <p className="text-xs text-muted-foreground mt-1 italic">"{request.message}"</p>
                       )}
                     </div>
                   </div>

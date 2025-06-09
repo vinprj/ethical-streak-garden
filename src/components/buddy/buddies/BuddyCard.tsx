@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Trash2, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Buddy } from "@/types/buddy";
 
 interface BuddyCardProps {
@@ -62,40 +62,15 @@ export const BuddyCard: React.FC<BuddyCardProps> = ({
           </div>
         </div>
         
-        {/* Expanded section */}
+        {/* Expanded section - simplified for demo data */}
         {isExpanded && (
           <div className="mt-4 space-y-4 border-t pt-4">
             <div className="space-y-3">
-              <h4 className="text-sm font-medium">Settings</h4>
-              <div className="flex flex-wrap gap-2">
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="text-xs h-8 justify-start"
-                  onClick={onToggleAnonymous}
-                >
-                  {buddy.isAnonymous ? (
-                    <>
-                      <Eye className="h-3 w-3 mr-2" />
-                      Show Identity
-                    </>
-                  ) : (
-                    <>
-                      <EyeOff className="h-3 w-3 mr-2" />
-                      Go Anonymous
-                    </>
-                  )}
-                </Button>
-                
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="text-xs h-8 text-destructive hover:text-destructive hover:bg-destructive/10 justify-start"
-                  onClick={onRemove}
-                >
-                  <Trash2 className="h-3 w-3 mr-2" />
-                  Remove Buddy
-                </Button>
+              <h4 className="text-sm font-medium">Connection Details</h4>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>Shared habits: {buddy.sharedHabits.length}</p>
+                <p>Last active: {new Date(buddy.lastActive).toLocaleDateString()}</p>
+                <p>Connection status: {buddy.isAnonymous ? 'Anonymous' : 'Public'}</p>
               </div>
             </div>
           </div>
