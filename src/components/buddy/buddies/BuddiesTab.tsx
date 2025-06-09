@@ -3,7 +3,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Users, UserPlus } from "lucide-react";
 import { useBuddyData } from "@/hooks/useBuddyData";
-import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { BuddyCard } from "./BuddyCard";
 

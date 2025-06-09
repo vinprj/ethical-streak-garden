@@ -8,8 +8,8 @@ import { Buddy } from "@/types/buddy";
 
 interface BuddyCardProps {
   buddy: Buddy;
-  onRemove: () => void;
-  onToggleAnonymous: () => void;
+  onRemove?: () => void;
+  onToggleAnonymous?: () => void;
 }
 
 export const BuddyCard: React.FC<BuddyCardProps> = ({ 

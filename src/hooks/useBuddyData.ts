@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 // Define proper types matching our database
 interface Profile {
@@ -67,6 +69,7 @@ export const useBuddyData = () => {
       setConnections(typedConnections);
     } catch (error) {
       console.error('Error fetching connections:', error);
+      toast.error('Failed to load connections');
     }
   };
 
@@ -95,6 +98,7 @@ export const useBuddyData = () => {
       setPendingRequests(typedRequests);
     } catch (error) {
       console.error('Error fetching pending requests:', error);
+      toast.error('Failed to load connection requests');
     }
   };
 
@@ -102,6 +106,41 @@ export const useBuddyData = () => {
     if (!user) return { error: 'User not authenticated' };
 
     try {
+      // Check if the recipient has a profile
+      const { data: recipientProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      if (profileError || !recipientProfile) {
+        return { error: 'No user found with this email address. Please check the email or ask them to sign up first.' };
+      }
+
+      // Check if already connected
+      const { data: existingConnection } = await supabase
+        .from('user_connections')
+        .select('id')
+        .or(`and(requester_id.eq.${user.id},addressee_id.eq.${recipientProfile.id}),and(requester_id.eq.${recipientProfile.id},addressee_id.eq.${user.id})`)
+        .single();
+
+      if (existingConnection) {
+        return { error: 'You are already connected to this user' };
+      }
+
+      // Check if request already exists
+      const { data: existingRequest } = await supabase
+        .from('connection_requests')
+        .select('id')
+        .eq('sender_id', user.id)
+        .eq('recipient_email', email.toLowerCase())
+        .eq('status', 'pending')
+        .single();
+
+      if (existingRequest) {
+        return { error: 'A connection request is already pending for this email' };
+      }
+
       // Generate invite token
       const { data: tokenData, error: tokenError } = await supabase
         .rpc('generate_invite_token');
@@ -159,8 +198,10 @@ export const useBuddyData = () => {
 
       // Refresh data
       await Promise.all([fetchConnections(), fetchPendingRequests()]);
+      toast.success('Connection accepted!');
     } catch (error) {
       console.error('Error accepting connection request:', error);
+      toast.error('Failed to accept connection request');
     }
   };
 
@@ -173,8 +214,10 @@ export const useBuddyData = () => {
 
       if (error) throw error;
       await fetchConnections();
+      toast.success('Connection removed');
     } catch (error) {
       console.error('Error removing connection:', error);
+      toast.error('Failed to remove connection');
     }
   };
 

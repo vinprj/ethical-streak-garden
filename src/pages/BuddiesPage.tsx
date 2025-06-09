@@ -8,12 +8,12 @@ import { BuddiesOverview } from "@/components/buddy/BuddiesOverview";
 import { BuddyConnect } from "@/components/buddy/BuddyConnect";
 import { BuddyMessages } from "@/components/buddy/BuddyMessages";
 import { BuddyActivities } from "@/components/buddy/BuddyActivities";
-import { useBuddy } from "@/context/BuddyContext";
+import { useBuddyData } from "@/hooks/useBuddyData";
 import { useLocation } from "react-router-dom";
 
 const BuddiesPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const { buddies, pendingRequests } = useBuddy();
+  const { connections, pendingRequests } = useBuddyData();
   const location = useLocation();
 
   // Handle navigation state from BuddyCard
@@ -22,6 +22,18 @@ const BuddiesPage = () => {
       setActiveTab(location.state.activeTab);
     }
   }, [location.state]);
+
+  // Listen for navigation events from child components
+  useEffect(() => {
+    const handleNavigateToConnect = () => {
+      setActiveTab("connect");
+    };
+
+    window.addEventListener('navigate-to-connect', handleNavigateToConnect);
+    return () => {
+      window.removeEventListener('navigate-to-connect', handleNavigateToConnect);
+    };
+  }, []);
 
   return (
     <AppLayout>
@@ -45,9 +57,9 @@ const BuddiesPage = () => {
                 <TabsTrigger value="overview" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   <span>Buddies</span>
-                  {buddies.length > 0 && (
+                  {connections.length > 0 && (
                     <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary/20 rounded-full">
-                      {buddies.length}
+                      {connections.length}
                     </span>
                   )}
                 </TabsTrigger>
