@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Database } from 'lucide-react';
-import { generateAllTestData } from '@/utils/testData';
+import { generateTestHabits, generateBadgeData } from '@/utils/testData/habitGenerator';
+import { generatePlantData } from '@/utils/testData/plantGenerator';
 import { useHabits } from '@/context/HabitContext';
 import { useGardenContext } from '@/context/GardenContext';
-import { useBuddy } from '@/context/BuddyContext';
 import { DataGeneratorCard } from './DataGeneratorCard';
 import { DataGeneratorActions } from './DataGeneratorActions';
 import { DataPreview } from './DataPreview';
@@ -14,7 +14,6 @@ export const TestDataGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { setHabits, setBadges } = useHabits();
   const { setPlants } = useGardenContext();
-  const { setBuddies, setPendingRequests, setMessages } = useBuddy();
   const [dataStats, setDataStats] = useState({
     habits: 0,
     badges: 0,
@@ -32,15 +31,12 @@ export const TestDataGenerator: React.FC = () => {
         const plantData = localStorage.getItem("garden-plants");
         const plants = plantData ? JSON.parse(plantData) : [];
         
-        const buddyData = localStorage.getItem("habit-buddy-data");
-        const buddyInfo = buddyData ? JSON.parse(buddyData) : { buddies: [], messages: [] };
-        
         setDataStats({
           habits: habits.length,
           badges: badges.filter(b => b.isUnlocked).length,
           plants: plants.length,
-          buddies: buddyInfo.buddies?.length || 0,
-          messages: buddyInfo.messages?.length || 0
+          buddies: 0, // No longer generating buddy data
+          messages: 0
         });
       }
     } catch (error) {
@@ -51,8 +47,10 @@ export const TestDataGenerator: React.FC = () => {
   const applyTestData = async () => {
     setIsGenerating(true);
     try {
-      // Generate comprehensive test data
-      const { habits, badges, plants, buddies, pendingRequests, messages } = generateAllTestData();
+      // Generate only habits and plants data
+      const habits = generateTestHabits(16);
+      const badges = generateBadgeData(habits);
+      const plants = generatePlantData(habits);
       
       // Store in localStorage
       localStorage.setItem("ethical-habit-tracker-data", JSON.stringify({ 
@@ -62,34 +60,26 @@ export const TestDataGenerator: React.FC = () => {
       
       localStorage.setItem("garden-plants", JSON.stringify(plants));
       
-      // Store buddy data
-      localStorage.setItem("habit-buddy-data", JSON.stringify({
-        buddies,
-        pendingRequests,
-        messages,
-        privacyLevel: 'moderate'
-      }));
+      // Clear any existing buddy data to prevent conflicts
+      localStorage.removeItem("habit-buddy-data");
       
       // Update context state directly
       setHabits(habits);
       setBadges(badges);
       setPlants(plants);
-      setBuddies(buddies);
-      setPendingRequests(pendingRequests);
-      setMessages(messages);
       
       // Update stats
       setDataStats({
         habits: habits.length,
         badges: badges.filter(b => b.isUnlocked).length,
         plants: plants.length,
-        buddies: buddies.length,
-        messages: messages.length
+        buddies: 0,
+        messages: 0
       });
       
       // Show success message
       toast.success('Demo data generated successfully!', {
-        description: 'Your dashboard has been updated with demo data.',
+        description: 'Your dashboard has been updated with demo data. Buddy connections now use real database data.',
       });
     } catch (error) {
       console.error('Error generating test data:', error);
@@ -103,15 +93,12 @@ export const TestDataGenerator: React.FC = () => {
     if (confirm("This will remove ALL your habit data. Are you sure?")) {
       localStorage.removeItem("ethical-habit-tracker-data");
       localStorage.removeItem("garden-plants");
-      localStorage.removeItem("habit-buddy-data");
+      localStorage.removeItem("habit-buddy-data"); // Also clear buddy data
       
       // Clear context state directly
       setHabits([]);
       setBadges([]);
       setPlants([]);
-      setBuddies([]);
-      setPendingRequests([]);
-      setMessages([]);
       
       setDataStats({
         habits: 0,
@@ -122,7 +109,7 @@ export const TestDataGenerator: React.FC = () => {
       });
       
       toast.success('All data cleared', {
-        description: 'Your dashboard has been reset.',
+        description: 'Your dashboard has been reset. Buddy connections will use real database data.',
       });
     }
   };

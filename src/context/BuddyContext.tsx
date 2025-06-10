@@ -20,40 +20,20 @@ export const BuddyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   
   const { habits } = useHabits();
 
-  // Load data from localStorage
+  // Clear localStorage buddy data on initialization to prevent conflicts with Supabase
   useEffect(() => {
-    const savedData = localStorage.getItem(BUDDY_STORAGE_KEY);
-    if (savedData) {
-      try {
-        const { buddies: savedBuddies, pendingRequests: savedRequests, messages: savedMessages, privacyLevel: savedPrivacy } = JSON.parse(savedData);
-        
-        if (Array.isArray(savedBuddies)) {
-          setBuddies(savedBuddies);
-        }
-        
-        if (Array.isArray(savedRequests)) {
-          setPendingRequests(savedRequests);
-        }
-        
-        if (Array.isArray(savedMessages)) {
-          setMessages(savedMessages);
-        }
-        
-        if (savedPrivacy) {
-          setPrivacyLevel(savedPrivacy);
-        }
-      } catch (error) {
-        console.error("Error loading saved buddy data:", error);
-      }
-    }
+    // Clear any existing localStorage buddy data since we're now using Supabase
+    localStorage.removeItem(BUDDY_STORAGE_KEY);
+    console.log('Cleared localStorage buddy data - now using Supabase database');
   }, []);
 
-  // Save data to localStorage whenever it changes
+  // Save data to localStorage whenever it changes (keeping for backward compatibility)
   useEffect(() => {
+    // We'll keep this minimal since we're transitioning to Supabase
     localStorage.setItem(BUDDY_STORAGE_KEY, JSON.stringify({ 
-      buddies, 
-      pendingRequests, 
-      messages,
+      buddies: [], // Keep empty since we use Supabase now
+      pendingRequests: [], 
+      messages: [],
       privacyLevel
     }));
   }, [buddies, pendingRequests, messages, privacyLevel]);
