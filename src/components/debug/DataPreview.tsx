@@ -1,9 +1,7 @@
 
 import React from 'react';
-import { DataStatsCard } from './DataStatsCard';
-import { DataFeatureList } from './DataFeatureList';
-import { AlertTriangle } from 'lucide-react';
-import { AnimatedProfilePicture } from './AnimatedProfilePicture';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, Sprout, Trophy, Users, MessageCircle } from 'lucide-react';
 
 interface DataStats {
   habits: number;
@@ -18,46 +16,67 @@ interface DataPreviewProps {
 }
 
 export const DataPreview: React.FC<DataPreviewProps> = ({ stats }) => {
-  // Demo avatars for preview
-  const demoAvatars = [
-    { name: "Alex Chen", src: "/images/avatars/alex.jpg" },
-    { name: "Jordan Smith", src: "/images/avatars/jordan.jpg" },
-    { name: "Taylor Kim", src: "" }, // This will use the fallback
+  const items = [
+    { 
+      label: 'Habits', 
+      count: stats.habits, 
+      icon: CheckCircle2,
+      color: 'bg-blue-500/10 text-blue-600'
+    },
+    { 
+      label: 'Badges', 
+      count: stats.badges, 
+      icon: Trophy,
+      color: 'bg-yellow-500/10 text-yellow-600'
+    },
+    { 
+      label: 'Plants', 
+      count: stats.plants, 
+      icon: Sprout,
+      color: 'bg-green-500/10 text-green-600'
+    },
+    { 
+      label: 'Buddy Connections', 
+      count: stats.buddies, 
+      icon: Users,
+      color: 'bg-purple-500/10 text-purple-600'
+    },
+    { 
+      label: 'Messages', 
+      count: stats.messages, 
+      icon: MessageCircle,
+      color: 'bg-orange-500/10 text-orange-600'
+    }
   ];
 
   return (
-    <>
-      <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-300 dark:border-amber-900 rounded-md">
-        <div className="flex items-start gap-2">
-          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
-          <div>
-            <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">Demo Mode</p>
-            <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-              This will generate comprehensive sample data to showcase all app features. You can generate new data multiple times.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Profile Pictures Preview */}
-      <div className="mb-6">
-        <p className="text-sm font-medium mb-3">Demo User Profiles:</p>
-        <div className="flex items-center gap-4 mb-4">
-          {demoAvatars.map((avatar, index) => (
-            <div key={index} className="flex flex-col items-center gap-2 group">
-              <AnimatedProfilePicture 
-                src={avatar.src} 
-                alt={avatar.name} 
-                className="h-16 w-16 border-2 border-primary/20 hover:border-primary/50 transition-all" 
-              />
-              <span className="text-xs text-muted-foreground">{avatar.name.split(' ')[0]}</span>
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">
+        Current data in your app:
+      </p>
+      
+      <div className="grid grid-cols-2 gap-2">
+        {items.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.label} className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+              <div className={`p-1.5 rounded-md ${item.color}`}>
+                <Icon className="h-3.5 w-3.5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium truncate">{item.label}</p>
+                <Badge variant="secondary" className="text-xs h-5 px-1.5">
+                  {item.count}
+                </Badge>
+              </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      <DataStatsCard stats={stats} />
-      <DataFeatureList />
-    </>
+      <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded">
+        💡 Demo data includes realistic habits, garden plants, achievements, and buddy connections to showcase all features.
+      </div>
+    </div>
   );
 };

@@ -53,7 +53,7 @@ export const DataGeneratorActions: React.FC<DataGeneratorActionsProps> = ({
         onClick={() => navigate('/dashboard')}
       >
         <Sparkles className="h-3.5 w-3.5" />
-        After generating data, go to Dashboard to see all features
+        Creates habits, plants, badges, and buddy connections - go to Dashboard to explore
       </Button>
     </>
   );
