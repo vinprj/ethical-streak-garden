@@ -45,59 +45,113 @@ export const useBuddyData = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchConnections = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found, skipping connection fetch');
+      return;
+    }
 
     try {
+      console.log('Fetching connections for user:', user.id);
+      
       const { data, error } = await supabase
         .from('user_connections')
         .select(`
-          *,
-          requester:profiles!user_connections_requester_id_fkey(id, email, full_name, avatar_url, created_at, updated_at),
-          addressee:profiles!user_connections_addressee_id_fkey(id, email, full_name, avatar_url, created_at, updated_at)
+          id,
+          requester_id,
+          addressee_id,
+          status,
+          created_at,
+          updated_at,
+          requester:profiles!requester_id(id, email, full_name, avatar_url, created_at, updated_at),
+          addressee:profiles!addressee_id(id, email, full_name, avatar_url, created_at, updated_at)
         `)
         .eq('status', 'accepted')
         .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching connections:', error);
+        throw error;
+      }
 
-      // Type assertion to ensure status matches our interface
-      const typedConnections = (data || []).map(conn => ({
+      console.log('Raw connections data:', data);
+
+      // Type assertion and validation
+      const validConnections = (data || []).filter(conn => {
+        const hasValidRequester = conn.requester && typeof conn.requester === 'object';
+        const hasValidAddressee = conn.addressee && typeof conn.addressee === 'object';
+        
+        if (!hasValidRequester || !hasValidAddressee) {
+          console.warn('Connection missing profile data:', conn);
+          return false;
+        }
+        
+        return true;
+      }).map(conn => ({
         ...conn,
         status: conn.status as 'pending' | 'accepted' | 'declined' | 'blocked'
       })) as Connection[];
 
-      setConnections(typedConnections);
+      console.log('Processed connections:', validConnections);
+      setConnections(validConnections);
     } catch (error) {
-      console.error('Error fetching connections:', error);
+      console.error('Error in fetchConnections:', error);
       toast.error('Failed to load connections');
     }
   };
 
   const fetchPendingRequests = async () => {
-    if (!user) return;
+    if (!user || !user.email) {
+      console.log('No user email found, skipping pending requests fetch');
+      return;
+    }
 
     try {
+      console.log('Fetching pending requests for email:', user.email);
+      
       const { data, error } = await supabase
         .from('connection_requests')
         .select(`
-          *,
-          sender:profiles!connection_requests_sender_id_fkey(id, email, full_name, avatar_url, created_at, updated_at)
+          id,
+          sender_id,
+          recipient_email,
+          invite_token,
+          message,
+          status,
+          expires_at,
+          created_at,
+          updated_at,
+          sender:profiles!sender_id(id, email, full_name, avatar_url, created_at, updated_at)
         `)
-        .eq('recipient_email', user.email)
+        .eq('recipient_email', user.email.toLowerCase())
         .eq('status', 'pending')
         .gt('expires_at', new Date().toISOString());
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching pending requests:', error);
+        throw error;
+      }
 
-      // Type assertion to ensure status matches our interface
-      const typedRequests = (data || []).map(req => ({
+      console.log('Raw pending requests data:', data);
+
+      // Type assertion and validation
+      const validRequests = (data || []).filter(req => {
+        const hasValidSender = req.sender && typeof req.sender === 'object';
+        
+        if (!hasValidSender) {
+          console.warn('Request missing sender profile data:', req);
+          return false;
+        }
+        
+        return true;
+      }).map(req => ({
         ...req,
         status: req.status as 'pending' | 'accepted' | 'declined' | 'expired'
       })) as ConnectionRequest[];
 
-      setPendingRequests(typedRequests);
+      console.log('Processed pending requests:', validRequests);
+      setPendingRequests(validRequests);
     } catch (error) {
-      console.error('Error fetching pending requests:', error);
+      console.error('Error in fetchPendingRequests:', error);
       toast.error('Failed to load connection requests');
     }
   };
@@ -106,14 +160,21 @@ export const useBuddyData = () => {
     if (!user) return { error: 'User not authenticated' };
 
     try {
+      console.log('Sending connection request to:', email);
+      
       // Check if the recipient has a profile
       const { data: recipientProfile, error: profileError } = await supabase
         .from('profiles')
         .select('id, email')
         .eq('email', email.toLowerCase())
-        .single();
+        .maybeSingle();
 
-      if (profileError || !recipientProfile) {
+      if (profileError) {
+        console.error('Error checking recipient profile:', profileError);
+        throw profileError;
+      }
+
+      if (!recipientProfile) {
         return { error: 'No user found with this email address. Please check the email or ask them to sign up first.' };
       }
 
@@ -122,7 +183,7 @@ export const useBuddyData = () => {
         .from('user_connections')
         .select('id')
         .or(`and(requester_id.eq.${user.id},addressee_id.eq.${recipientProfile.id}),and(requester_id.eq.${recipientProfile.id},addressee_id.eq.${user.id})`)
-        .single();
+        .maybeSingle();
 
       if (existingConnection) {
         return { error: 'You are already connected to this user' };
@@ -135,7 +196,7 @@ export const useBuddyData = () => {
         .eq('sender_id', user.id)
         .eq('recipient_email', email.toLowerCase())
         .eq('status', 'pending')
-        .single();
+        .maybeSingle();
 
       if (existingRequest) {
         return { error: 'A connection request is already pending for this email' };
@@ -145,7 +206,10 @@ export const useBuddyData = () => {
       const { data: tokenData, error: tokenError } = await supabase
         .rpc('generate_invite_token');
 
-      if (tokenError) throw tokenError;
+      if (tokenError) {
+        console.error('Error generating invite token:', tokenError);
+        throw tokenError;
+      }
 
       const { error } = await supabase
         .from('connection_requests')
@@ -156,7 +220,12 @@ export const useBuddyData = () => {
           message: message || null
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting connection request:', error);
+        throw error;
+      }
+      
+      console.log('Connection request sent successfully');
       return { error: null };
     } catch (error) {
       console.error('Error sending connection request:', error);
@@ -168,6 +237,8 @@ export const useBuddyData = () => {
     if (!user) return;
 
     try {
+      console.log('Accepting connection request:', requestId);
+      
       // First get the request details
       const { data: request, error: fetchError } = await supabase
         .from('connection_requests')
@@ -175,7 +246,10 @@ export const useBuddyData = () => {
         .eq('id', requestId)
         .single();
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error('Error fetching request details:', fetchError);
+        throw fetchError;
+      }
 
       // Create the connection
       const { error: connectionError } = await supabase
@@ -186,7 +260,10 @@ export const useBuddyData = () => {
           status: 'accepted'
         });
 
-      if (connectionError) throw connectionError;
+      if (connectionError) {
+        console.error('Error creating connection:', connectionError);
+        throw connectionError;
+      }
 
       // Update the request status
       const { error: updateError } = await supabase
@@ -194,7 +271,10 @@ export const useBuddyData = () => {
         .update({ status: 'accepted' })
         .eq('id', requestId);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating request status:', updateError);
+        throw updateError;
+      }
 
       // Refresh data
       await Promise.all([fetchConnections(), fetchPendingRequests()]);
@@ -207,12 +287,18 @@ export const useBuddyData = () => {
 
   const removeConnection = async (connectionId: string) => {
     try {
+      console.log('Removing connection:', connectionId);
+      
       const { error } = await supabase
         .from('user_connections')
         .delete()
         .eq('id', connectionId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error removing connection:', error);
+        throw error;
+      }
+      
       await fetchConnections();
       toast.success('Connection removed');
     } catch (error) {
@@ -223,14 +309,24 @@ export const useBuddyData = () => {
 
   useEffect(() => {
     const loadData = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      
       setLoading(true);
-      await Promise.all([fetchConnections(), fetchPendingRequests()]);
-      setLoading(false);
+      console.log('Loading buddy data for user:', user.id);
+      
+      try {
+        await Promise.all([fetchConnections(), fetchPendingRequests()]);
+      } catch (error) {
+        console.error('Error loading buddy data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (user) {
-      loadData();
-    }
+    loadData();
   }, [user]);
 
   return {
