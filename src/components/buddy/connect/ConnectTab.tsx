@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +12,7 @@ export const ConnectTab: React.FC = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const { pendingRequests, sendConnectionRequest, acceptConnectionRequest } = useBuddyData();
+  const { pendingRequests, sendConnectionRequest, acceptConnectionRequest, declineConnectionRequest } = useBuddyData();
   
   // Handle sending a connection request
   const handleSendRequest = async (e: React.FormEvent) => {
@@ -46,8 +45,7 @@ export const ConnectTab: React.FC = () => {
   };
 
   const handleDeclineRequest = async (requestId: string) => {
-    // For now, we'll just remove from UI - in a full implementation you'd update the database
-    toast.success("Connection request declined");
+    await declineConnectionRequest(requestId);
   };
 
   return (

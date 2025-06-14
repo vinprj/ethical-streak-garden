@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ export const BuddyConnect: React.FC = () => {
     pendingRequests,
     connections,
     acceptConnectionRequest,
+    declineConnectionRequest,
     sendConnectionRequest,
     refetch
   } = useBuddyData();
@@ -99,9 +99,7 @@ export const BuddyConnect: React.FC = () => {
   };
 
   const handleDeclineRequest = async (requestId: string) => {
-    // For now, we'll just show a toast - in a full implementation you'd update the database
-    toast.success("Connection request declined");
-    refetch();
+    await declineConnectionRequest(requestId);
   };
 
   return (

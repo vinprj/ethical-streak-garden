@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -301,6 +300,32 @@ export const useBuddyData = () => {
     }
   };
 
+  const declineConnectionRequest = async (requestId: string) => {
+    if (!user) return;
+
+    try {
+      console.log('Declining connection request:', requestId);
+      
+      const { error } = await supabase
+        .from('connection_requests')
+        .update({ status: 'declined' })
+        .eq('id', requestId);
+
+      if (error) {
+        console.error('Error declining request status:', error);
+        toast.error(`Failed to decline request: ${error.message}`);
+        return;
+      }
+
+      // Refresh data
+      await fetchPendingRequests();
+      toast.success('Connection request declined');
+    } catch (error) {
+      console.error('Error declining connection request:', error);
+      toast.error('Failed to decline connection request');
+    }
+  };
+
   const removeConnection = async (connectionId: string) => {
     try {
       console.log('Removing connection:', connectionId);
@@ -354,6 +379,7 @@ export const useBuddyData = () => {
     loading,
     sendConnectionRequest,
     acceptConnectionRequest,
+    declineConnectionRequest,
     removeConnection,
     refetch: () => Promise.all([fetchConnections(), fetchPendingRequests()])
   };
