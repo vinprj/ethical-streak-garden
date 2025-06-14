@@ -70,40 +70,35 @@ export const TestDataGenerator: React.FC = () => {
   const createDemoUsers = async () => {
     if (!user) return [];
 
-    // Generate unique IDs for demo users to avoid conflicts
-    const demoUserIds = [
-      crypto.randomUUID(),
-      crypto.randomUUID(),
-      crypto.randomUUID()
-    ];
-
+    // Generate unique email addresses to avoid conflicts
+    const timestamp = Date.now();
     const demoUsers = [
       {
-        id: demoUserIds[0],
-        email: `demo.alex.${Date.now()}@habitflow.com`,
+        id: crypto.randomUUID(),
+        email: `demo.alex.${timestamp}@habitflow.demo`,
         full_name: 'Alex Chen',
         avatar_url: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=64&h=64&fit=crop&crop=face'
       },
       {
-        id: demoUserIds[1],
-        email: `demo.jordan.${Date.now()}@habitflow.com`,
+        id: crypto.randomUUID(),
+        email: `demo.jordan.${timestamp + 1}@habitflow.demo`,
         full_name: 'Jordan Smith',
         avatar_url: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=64&h=64&fit=crop&crop=face'
       },
       {
-        id: demoUserIds[2],
-        email: `demo.taylor.${Date.now()}@habitflow.com`,
+        id: crypto.randomUUID(),
+        email: `demo.taylor.${timestamp + 2}@habitflow.demo`,
         full_name: 'Taylor Kim',
         avatar_url: 'https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=64&h=64&fit=crop&crop=face'
       }
     ];
 
     try {
-      // First, clean up any existing demo profiles to avoid conflicts
+      // Clean up any existing demo profiles to avoid conflicts
       await supabase
         .from('profiles')
         .delete()
-        .like('email', '%@habitflow.com');
+        .like('email', '%@habitflow.demo');
 
       // Insert new demo profiles
       const { data, error } = await supabase
@@ -113,7 +108,7 @@ export const TestDataGenerator: React.FC = () => {
 
       if (error) {
         console.error('Error creating demo users:', error);
-        throw error;
+        return [];
       }
 
       console.log('Created demo users:', data);
@@ -129,10 +124,11 @@ export const TestDataGenerator: React.FC = () => {
 
     try {
       // Clean up existing demo connections
+      const demoUserIds = demoUsers.map(u => u.id);
       await supabase
         .from('user_connections')
         .delete()
-        .or(`requester_id.in.(${demoUsers.map(u => u.id).join(',')}),addressee_id.in.(${demoUsers.map(u => u.id).join(',')})`);
+        .or(`requester_id.in.(${demoUserIds.join(',')}),addressee_id.in.(${demoUserIds.join(',')})`);
 
       // Create connections with 2 demo users
       const connections = [
@@ -164,14 +160,15 @@ export const TestDataGenerator: React.FC = () => {
   };
 
   const createDemoRequests = async (demoUsers: any[]) => {
-    if (!user || demoUsers.length < 3) return;
+    if (!user || demoUsers.length < 3 || !user.email) return;
 
     try {
       // Clean up existing demo requests
+      const demoUserIds = demoUsers.map(u => u.id);
       await supabase
         .from('connection_requests')
         .delete()
-        .in('sender_id', demoUsers.map(u => u.id));
+        .in('sender_id', demoUserIds);
 
       // Generate invite token
       const { data: tokenData, error: tokenError } = await supabase
@@ -298,7 +295,7 @@ export const TestDataGenerator: React.FC = () => {
         await supabase
           .from('profiles')
           .delete()
-          .like('email', '%@habitflow.com');
+          .like('email', '%@habitflow.demo');
       }
       
       setDataStats({

@@ -8,6 +8,7 @@ import { ConnectionRequest } from './types';
 export const useConnectionRequests = () => {
   const { user } = useAuth();
   const [pendingRequests, setPendingRequests] = useState<ConnectionRequest[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchPendingRequests = async () => {
     if (!user || !user.email) {
@@ -16,6 +17,7 @@ export const useConnectionRequests = () => {
       return;
     }
 
+    setLoading(true);
     try {
       console.log('Fetching pending requests for email:', user.email);
       
@@ -64,6 +66,8 @@ export const useConnectionRequests = () => {
       console.error('Error in fetchPendingRequests:', error);
       toast.error('Failed to load connection requests');
       setPendingRequests([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -150,6 +154,7 @@ export const useConnectionRequests = () => {
     pendingRequests,
     fetchPendingRequests,
     acceptConnectionRequest,
-    declineConnectionRequest
+    declineConnectionRequest,
+    loading
   };
 };

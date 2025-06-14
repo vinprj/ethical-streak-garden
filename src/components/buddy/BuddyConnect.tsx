@@ -1,9 +1,10 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { UserRoundPlus, UserX, UserCheck, Mail, Send, AlertCircle } from "lucide-react";
+import { UserRoundPlus, UserX, UserCheck, Mail, Send, AlertCircle, Loader2 } from "lucide-react";
 import { useBuddyData } from "@/hooks/useBuddyData";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -17,7 +18,9 @@ export const BuddyConnect: React.FC = () => {
     acceptConnectionRequest,
     declineConnectionRequest,
     sendConnectionRequest,
-    refetch
+    refetch,
+    loading: dataLoading,
+    error: dataError
   } = useBuddyData();
   
   const [inviteEmail, setInviteEmail] = useState("");
@@ -102,6 +105,33 @@ export const BuddyConnect: React.FC = () => {
     await declineConnectionRequest(requestId);
   };
 
+  if (dataLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Loading buddy data...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (dataError) {
+    return (
+      <div className="space-y-6">
+        <Alert className="border-destructive bg-destructive/10">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-destructive">
+            {dataError}
+          </AlertDescription>
+        </Alert>
+        <Button onClick={refetch} variant="outline" className="w-full">
+          Try Again
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6">
@@ -155,8 +185,17 @@ export const BuddyConnect: React.FC = () => {
                 onClick={handleSendInvitation} 
                 className="w-full"
               >
-                <Send className="h-4 w-4 mr-2" />
-                {sending ? 'Sending...' : 'Send Invitation'}
+                {sending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Send Invitation
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>

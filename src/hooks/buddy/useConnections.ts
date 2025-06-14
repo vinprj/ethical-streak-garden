@@ -8,6 +8,7 @@ import { Connection } from './types';
 export const useConnections = () => {
   const { user } = useAuth();
   const [connections, setConnections] = useState<Connection[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchConnections = async () => {
     if (!user) {
@@ -16,6 +17,7 @@ export const useConnections = () => {
       return;
     }
 
+    setLoading(true);
     try {
       console.log('Fetching connections for user:', user.id);
       
@@ -62,6 +64,8 @@ export const useConnections = () => {
       console.error('Error in fetchConnections:', error);
       toast.error('Failed to load connections');
       setConnections([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,6 +95,7 @@ export const useConnections = () => {
   return {
     connections,
     fetchConnections,
-    removeConnection
+    removeConnection,
+    loading
   };
 };
