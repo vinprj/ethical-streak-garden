@@ -47,6 +47,7 @@ export const useBuddyData = () => {
   const fetchConnections = async () => {
     if (!user) {
       console.log('No user found, skipping connection fetch');
+      setConnections([]);
       return;
     }
 
@@ -62,20 +63,22 @@ export const useBuddyData = () => {
           status,
           created_at,
           updated_at,
-          requester:profiles!requester_id(id, email, full_name, avatar_url, created_at, updated_at),
-          addressee:profiles!addressee_id(id, email, full_name, avatar_url, created_at, updated_at)
+          requester:profiles!user_connections_requester_id_fkey(id, email, full_name, avatar_url, created_at, updated_at),
+          addressee:profiles!user_connections_addressee_id_fkey(id, email, full_name, avatar_url, created_at, updated_at)
         `)
         .eq('status', 'accepted')
         .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
       if (error) {
         console.error('Error fetching connections:', error);
-        throw error;
+        toast.error('Failed to load connections');
+        setConnections([]);
+        return;
       }
 
       console.log('Raw connections data:', data);
 
-      // Type assertion and validation
+      // Validate and process connections
       const validConnections = (data || []).filter(conn => {
         const hasValidRequester = conn.requester && typeof conn.requester === 'object';
         const hasValidAddressee = conn.addressee && typeof conn.addressee === 'object';
@@ -86,22 +89,21 @@ export const useBuddyData = () => {
         }
         
         return true;
-      }).map(conn => ({
-        ...conn,
-        status: conn.status as 'pending' | 'accepted' | 'declined' | 'blocked'
-      })) as Connection[];
+      }) as Connection[];
 
       console.log('Processed connections:', validConnections);
       setConnections(validConnections);
     } catch (error) {
       console.error('Error in fetchConnections:', error);
       toast.error('Failed to load connections');
+      setConnections([]);
     }
   };
 
   const fetchPendingRequests = async () => {
     if (!user || !user.email) {
       console.log('No user email found, skipping pending requests fetch');
+      setPendingRequests([]);
       return;
     }
 
@@ -120,7 +122,7 @@ export const useBuddyData = () => {
           expires_at,
           created_at,
           updated_at,
-          sender:profiles!sender_id(id, email, full_name, avatar_url, created_at, updated_at)
+          sender:profiles!connection_requests_sender_id_fkey(id, email, full_name, avatar_url, created_at, updated_at)
         `)
         .eq('recipient_email', user.email.toLowerCase())
         .eq('status', 'pending')
@@ -128,12 +130,14 @@ export const useBuddyData = () => {
 
       if (error) {
         console.error('Error fetching pending requests:', error);
-        throw error;
+        toast.error('Failed to load connection requests');
+        setPendingRequests([]);
+        return;
       }
 
       console.log('Raw pending requests data:', data);
 
-      // Type assertion and validation
+      // Validate and process requests
       const validRequests = (data || []).filter(req => {
         const hasValidSender = req.sender && typeof req.sender === 'object';
         
@@ -143,16 +147,14 @@ export const useBuddyData = () => {
         }
         
         return true;
-      }).map(req => ({
-        ...req,
-        status: req.status as 'pending' | 'accepted' | 'declined' | 'expired'
-      })) as ConnectionRequest[];
+      }) as ConnectionRequest[];
 
       console.log('Processed pending requests:', validRequests);
       setPendingRequests(validRequests);
     } catch (error) {
       console.error('Error in fetchPendingRequests:', error);
       toast.error('Failed to load connection requests');
+      setPendingRequests([]);
     }
   };
 
@@ -171,7 +173,7 @@ export const useBuddyData = () => {
 
       if (profileError) {
         console.error('Error checking recipient profile:', profileError);
-        throw profileError;
+        return { error: `Database error: ${profileError.message}` };
       }
 
       if (!recipientProfile) {
@@ -179,24 +181,34 @@ export const useBuddyData = () => {
       }
 
       // Check if already connected
-      const { data: existingConnection } = await supabase
+      const { data: existingConnection, error: connectionCheckError } = await supabase
         .from('user_connections')
         .select('id')
         .or(`and(requester_id.eq.${user.id},addressee_id.eq.${recipientProfile.id}),and(requester_id.eq.${recipientProfile.id},addressee_id.eq.${user.id})`)
         .maybeSingle();
+
+      if (connectionCheckError) {
+        console.error('Error checking existing connection:', connectionCheckError);
+        return { error: `Error checking existing connections: ${connectionCheckError.message}` };
+      }
 
       if (existingConnection) {
         return { error: 'You are already connected to this user' };
       }
 
       // Check if request already exists
-      const { data: existingRequest } = await supabase
+      const { data: existingRequest, error: requestCheckError } = await supabase
         .from('connection_requests')
         .select('id')
         .eq('sender_id', user.id)
         .eq('recipient_email', email.toLowerCase())
         .eq('status', 'pending')
         .maybeSingle();
+
+      if (requestCheckError) {
+        console.error('Error checking existing request:', requestCheckError);
+        return { error: `Error checking existing requests: ${requestCheckError.message}` };
+      }
 
       if (existingRequest) {
         return { error: 'A connection request is already pending for this email' };
@@ -208,10 +220,11 @@ export const useBuddyData = () => {
 
       if (tokenError) {
         console.error('Error generating invite token:', tokenError);
-        throw tokenError;
+        return { error: `Error generating invite token: ${tokenError.message}` };
       }
 
-      const { error } = await supabase
+      // Insert the connection request
+      const { error: insertError } = await supabase
         .from('connection_requests')
         .insert({
           sender_id: user.id,
@@ -220,9 +233,9 @@ export const useBuddyData = () => {
           message: message || null
         });
 
-      if (error) {
-        console.error('Error inserting connection request:', error);
-        throw error;
+      if (insertError) {
+        console.error('Error inserting connection request:', insertError);
+        return { error: `Failed to send request: ${insertError.message}` };
       }
       
       console.log('Connection request sent successfully');
@@ -248,7 +261,8 @@ export const useBuddyData = () => {
 
       if (fetchError) {
         console.error('Error fetching request details:', fetchError);
-        throw fetchError;
+        toast.error(`Failed to fetch request: ${fetchError.message}`);
+        return;
       }
 
       // Create the connection
@@ -262,7 +276,8 @@ export const useBuddyData = () => {
 
       if (connectionError) {
         console.error('Error creating connection:', connectionError);
-        throw connectionError;
+        toast.error(`Failed to create connection: ${connectionError.message}`);
+        return;
       }
 
       // Update the request status
@@ -273,7 +288,8 @@ export const useBuddyData = () => {
 
       if (updateError) {
         console.error('Error updating request status:', updateError);
-        throw updateError;
+        toast.error(`Failed to update request: ${updateError.message}`);
+        return;
       }
 
       // Refresh data
@@ -296,7 +312,8 @@ export const useBuddyData = () => {
 
       if (error) {
         console.error('Error removing connection:', error);
-        throw error;
+        toast.error(`Failed to remove connection: ${error.message}`);
+        return;
       }
       
       await fetchConnections();
@@ -310,6 +327,8 @@ export const useBuddyData = () => {
   useEffect(() => {
     const loadData = async () => {
       if (!user) {
+        setConnections([]);
+        setPendingRequests([]);
         setLoading(false);
         return;
       }
