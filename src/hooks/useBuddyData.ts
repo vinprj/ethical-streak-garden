@@ -172,7 +172,7 @@ export const useBuddyData = () => {
 
       if (profileError) {
         console.error('Error checking recipient profile:', profileError);
-        return { error: `Database error: ${profileError.message}` };
+        return { error: 'Unable to verify email address. Please try again.' };
       }
 
       if (!recipientProfile) {
@@ -188,7 +188,7 @@ export const useBuddyData = () => {
 
       if (connectionCheckError) {
         console.error('Error checking existing connection:', connectionCheckError);
-        return { error: `Error checking existing connections: ${connectionCheckError.message}` };
+        return { error: 'Unable to check existing connections. Please try again.' };
       }
 
       if (existingConnection) {
@@ -206,7 +206,7 @@ export const useBuddyData = () => {
 
       if (requestCheckError) {
         console.error('Error checking existing request:', requestCheckError);
-        return { error: `Error checking existing requests: ${requestCheckError.message}` };
+        return { error: 'Unable to check existing requests. Please try again.' };
       }
 
       if (existingRequest) {
@@ -219,7 +219,7 @@ export const useBuddyData = () => {
 
       if (tokenError) {
         console.error('Error generating invite token:', tokenError);
-        return { error: `Error generating invite token: ${tokenError.message}` };
+        return { error: 'Unable to generate invitation. Please try again.' };
       }
 
       // Insert the connection request
@@ -234,14 +234,14 @@ export const useBuddyData = () => {
 
       if (insertError) {
         console.error('Error inserting connection request:', insertError);
-        return { error: `Failed to send request: ${insertError.message}` };
+        return { error: 'Failed to send connection request. Please try again.' };
       }
       
       console.log('Connection request sent successfully');
       return { error: null };
     } catch (error) {
       console.error('Error sending connection request:', error);
-      return { error: error instanceof Error ? error.message : 'Failed to send request' };
+      return { error: 'An unexpected error occurred. Please try again.' };
     }
   };
 
@@ -260,7 +260,7 @@ export const useBuddyData = () => {
 
       if (fetchError) {
         console.error('Error fetching request details:', fetchError);
-        toast.error(`Failed to fetch request: ${fetchError.message}`);
+        toast.error('Unable to process request. Please try again.');
         return;
       }
 
@@ -275,7 +275,7 @@ export const useBuddyData = () => {
 
       if (connectionError) {
         console.error('Error creating connection:', connectionError);
-        toast.error(`Failed to create connection: ${connectionError.message}`);
+        toast.error('Failed to create connection. Please try again.');
         return;
       }
 
@@ -287,7 +287,7 @@ export const useBuddyData = () => {
 
       if (updateError) {
         console.error('Error updating request status:', updateError);
-        toast.error(`Failed to update request: ${updateError.message}`);
+        toast.error('Connection created but failed to update request status.');
         return;
       }
 
@@ -296,7 +296,7 @@ export const useBuddyData = () => {
       toast.success('Connection accepted!');
     } catch (error) {
       console.error('Error accepting connection request:', error);
-      toast.error('Failed to accept connection request');
+      toast.error('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -312,8 +312,8 @@ export const useBuddyData = () => {
         .eq('id', requestId);
 
       if (error) {
-        console.error('Error declining request status:', error);
-        toast.error(`Failed to decline request: ${error.message}`);
+        console.error('Error declining request:', error);
+        toast.error('Failed to decline request. Please try again.');
         return;
       }
 
@@ -322,7 +322,7 @@ export const useBuddyData = () => {
       toast.success('Connection request declined');
     } catch (error) {
       console.error('Error declining connection request:', error);
-      toast.error('Failed to decline connection request');
+      toast.error('An unexpected error occurred. Please try again.');
     }
   };
 
