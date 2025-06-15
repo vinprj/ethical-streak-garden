@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -20,6 +19,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const ensureUserProfile = useCallback(async (userToEnsure: User) => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userToEnsure.id)
+        .maybeSingle();
+
+      if (!profile) {
+        console.log('Profile not found for user, creating one:', userToEnsure.id);
+        const { error: insertError } = await supabase.from('profiles').insert({
+          id: userToEnsure.id,
+          email: userToEnsure.email,
+          full_name: userToEnsure.user_metadata.full_name || 'New User',
+          avatar_url: userToEnsure.user_metadata.avatar_url,
+        });
+
+        if (insertError) {
+          throw insertError;
+        }
+        console.log('Profile created successfully for user:', userToEnsure.id);
+      }
+    } catch (error) {
+      console.error("Error ensuring user profile:", error);
+      toast.error("There was an issue setting up your profile.");
+    }
+  }, []);
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -27,6 +54,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Auth state changed:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+           setTimeout(() => {
+            ensureUserProfile(session.user);
+          }, 0);
+        }
+
         setLoading(false);
       }
     );
@@ -35,11 +69,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        setTimeout(() => {
+          ensureUserProfile(session.user);
+        }, 0);
+      }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [ensureUserProfile]);
 
   const getRedirectUrl = () => {
     // Check if we're on Vercel production
