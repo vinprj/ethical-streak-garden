@@ -1,17 +1,21 @@
 
-import React, { useState } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Users, Shield, MessageCircle } from "lucide-react";
+import { Users } from "lucide-react";
 import { useBuddyData } from "@/hooks/useBuddyData";
-import { ConnectTab } from "./connect/ConnectTab";
 import { BuddiesTab } from "./buddies/BuddiesTab";
 import { PrivacyTab } from "./privacy/PrivacyTab";
 
 export const BuddySettings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("connect");
+  const navigate = useNavigate();
   const { connections } = useBuddyData();
+
+  const handleNavigateToConnect = () => {
+    navigate('/buddies', { state: { activeTab: 'connect' } });
+  };
 
   return (
     <Card className="border border-border">
@@ -21,14 +25,13 @@ export const BuddySettings: React.FC = () => {
           Habit Buddy
         </CardTitle>
         <CardDescription>
-          Connect with friends for mutual encouragement and accountability
+          Manage your connections and privacy settings
         </CardDescription>
       </CardHeader>
 
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="connect">Connect</TabsTrigger>
+        <Tabs defaultValue="buddies" className="space-y-4">
+          <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="buddies">
               Buddies
               {connections.length > 0 && (
@@ -40,14 +43,9 @@ export const BuddySettings: React.FC = () => {
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
           </TabsList>
           
-          {/* Connect Tab */}
-          <TabsContent value="connect" className="space-y-4">
-            <ConnectTab />
-          </TabsContent>
-          
           {/* Buddies Tab */}
           <TabsContent value="buddies" className="space-y-4">
-            <BuddiesTab onNavigateToConnect={() => setActiveTab("connect")} />
+            <BuddiesTab onNavigateToConnect={handleNavigateToConnect} />
           </TabsContent>
           
           {/* Privacy Tab */}
