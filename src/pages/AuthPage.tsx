@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,10 +11,11 @@ import { useNavigate } from 'react-router-dom';
 
 const AuthPage = () => {
   const [signInData, setSignInData] = useState({ email: '', password: '' });
-  const [signUpData, setSignUpData] = useState({ email: '', password: '', fullName: '', confirmPassword: '' });
+  const [signUpData, setSignUpData] = useState({ email: '', password: '', fullName: '', confirmPassword: '', username: '' });
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
+  const [usernameError, setUsernameError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -22,22 +23,48 @@ const AuthPage = () => {
     }
   }, [user, navigate]);
 
+  const handleSignInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSignInData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     await signIn(signInData.email, signInData.password);
     setLoading(false);
   };
+  
+  const validateUsername = (username: string) => {
+    if (!username) {
+      setUsernameError(null);
+      return false;
+    }
+    const regex = /^[a-z0-9_]{3,20}$/;
+    if (!regex.test(username)) {
+      setUsernameError('Must be 3-20 lowercase letters, numbers, or underscores.');
+      return true;
+    }
+    setUsernameError(null);
+    return false;
+  };
+
+  const handleSignUpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === 'username') {
+      validateUsername(value);
+    }
+    setSignUpData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (signUpData.password !== signUpData.confirmPassword) {
+    if (signUpData.password !== signUpData.confirmPassword || validateUsername(signUpData.username)) {
       return;
     }
 
     setLoading(true);
-    await signUp(signUpData.email, signUpData.password, signUpData.fullName);
+    await signUp(signUpData.email, signUpData.password, signUpData.fullName, signUpData.username);
     setLoading(false);
   };
 
@@ -74,10 +101,11 @@ const AuthPage = () => {
                     <Label htmlFor="signin-email">Email</Label>
                     <Input
                       id="signin-email"
+                      name="email"
                       type="email"
                       placeholder="Enter your email"
                       value={signInData.email}
-                      onChange={(e) => setSignInData(prev => ({ ...prev, email: e.target.value }))}
+                      onChange={handleSignInChange}
                       required
                     />
                   </div>
@@ -85,10 +113,11 @@ const AuthPage = () => {
                     <Label htmlFor="signin-password">Password</Label>
                     <Input
                       id="signin-password"
+                      name="password"
                       type="password"
                       placeholder="Enter your password"
                       value={signInData.password}
-                      onChange={(e) => setSignInData(prev => ({ ...prev, password: e.target.value }))}
+                      onChange={handleSignInChange}
                       required
                     />
                   </div>
@@ -101,24 +130,41 @@ const AuthPage = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-fullName">Full Name</Label>
                     <Input
-                      id="signup-name"
+                      id="signup-fullName"
+                      name="fullName"
                       type="text"
                       placeholder="Enter your full name"
                       value={signUpData.fullName}
-                      onChange={(e) => setSignUpData(prev => ({ ...prev, fullName: e.target.value }))}
+                      onChange={handleSignUpChange}
                       required
                     />
+                  </div>
+                   <div className="space-y-2">
+                    <Label htmlFor="signup-username">Username</Label>
+                    <Input
+                      id="signup-username"
+                      name="username"
+                      type="text"
+                      placeholder="Choose a unique username"
+                      value={signUpData.username}
+                      onChange={handleSignUpChange}
+                      required
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                    />
+                    {usernameError && <p className="text-sm text-destructive">{usernameError}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input
                       id="signup-email"
+                      name="email"
                       type="email"
                       placeholder="Enter your email"
                       value={signUpData.email}
-                      onChange={(e) => setSignUpData(prev => ({ ...prev, email: e.target.value }))}
+                      onChange={handleSignUpChange}
                       required
                     />
                   </div>
@@ -126,10 +172,11 @@ const AuthPage = () => {
                     <Label htmlFor="signup-password">Password</Label>
                     <Input
                       id="signup-password"
+                      name="password"
                       type="password"
                       placeholder="Create a password"
                       value={signUpData.password}
-                      onChange={(e) => setSignUpData(prev => ({ ...prev, password: e.target.value }))}
+                      onChange={handleSignUpChange}
                       required
                     />
                   </div>
@@ -137,17 +184,18 @@ const AuthPage = () => {
                     <Label htmlFor="confirm-password">Confirm Password</Label>
                     <Input
                       id="confirm-password"
+                      name="confirmPassword"
                       type="password"
                       placeholder="Confirm your password"
                       value={signUpData.confirmPassword}
-                      onChange={(e) => setSignUpData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                      onChange={handleSignUpChange}
                       required
                     />
                   </div>
                   {signUpData.password !== signUpData.confirmPassword && signUpData.confirmPassword && (
                     <p className="text-sm text-destructive">Passwords do not match</p>
                   )}
-                  <Button type="submit" className="w-full" disabled={loading || signUpData.password !== signUpData.confirmPassword}>
+                  <Button type="submit" className="w-full" disabled={loading || !!usernameError || signUpData.password !== signUpData.confirmPassword}>
                     {loading ? 'Creating account...' : 'Create Account'}
                   </Button>
                 </form>

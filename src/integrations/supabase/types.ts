@@ -66,7 +66,7 @@ export type Database = {
           message: string | null
           recipient_email: string
           sender_id: string
-          status: string
+          status: Database["public"]["Enums"]["request_status"]
           updated_at: string
         }
         Insert: {
@@ -77,7 +77,7 @@ export type Database = {
           message?: string | null
           recipient_email: string
           sender_id: string
-          status?: string
+          status?: Database["public"]["Enums"]["request_status"]
           updated_at?: string
         }
         Update: {
@@ -88,7 +88,7 @@ export type Database = {
           message?: string | null
           recipient_email?: string
           sender_id?: string
-          status?: string
+          status?: Database["public"]["Enums"]["request_status"]
           updated_at?: string
         }
         Relationships: [
@@ -105,26 +105,32 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          display_name: string | null
           email: string | null
           full_name: string | null
           id: string
           updated_at: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string | null
           full_name?: string | null
           id: string
           updated_at?: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -161,7 +167,7 @@ export type Database = {
           created_at: string
           id: string
           requester_id: string
-          status: string
+          status: Database["public"]["Enums"]["user_connection_status"]
           updated_at: string
         }
         Insert: {
@@ -169,7 +175,7 @@ export type Database = {
           created_at?: string
           id?: string
           requester_id: string
-          status: string
+          status?: Database["public"]["Enums"]["user_connection_status"]
           updated_at?: string
         }
         Update: {
@@ -177,7 +183,7 @@ export type Database = {
           created_at?: string
           id?: string
           requester_id?: string
-          status?: string
+          status?: Database["public"]["Enums"]["user_connection_status"]
           updated_at?: string
         }
         Relationships: [
@@ -208,7 +214,8 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      request_status: "pending" | "accepted" | "declined" | "expired"
+      user_connection_status: "pending" | "accepted" | "declined" | "blocked"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -323,6 +330,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      request_status: ["pending", "accepted", "declined", "expired"],
+      user_connection_status: ["pending", "accepted", "declined", "blocked"],
+    },
   },
 } as const

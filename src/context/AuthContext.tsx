@@ -2,14 +2,17 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Tables } from '@/integrations/supabase/types';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, username: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  profile: Tables<'profiles'>['Row'] | null;
+  refetchProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,29 +20,70 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Tables<'profiles'>['Row'] | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const fetchProfile = useCallback(async (userToFetch: User | null) => {
+    if (!userToFetch) {
+      setProfile(null);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userToFetch.id)
+        .single();
+      
+      if (error) {
+        console.warn("Could not fetch profile, will try to ensure it exists.", error.message);
+        setProfile(null);
+        return;
+      }
+      
+      setProfile(data);
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+      toast.error("Could not load your profile.");
+      setProfile(null);
+    }
+  }, []);
 
   const ensureUserProfile = useCallback(async (userToEnsure: User) => {
     try {
-      const { data: profile } = await supabase
+      const { data: dbProfile, error: profileError } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, username')
         .eq('id', userToEnsure.id)
         .maybeSingle();
 
-      if (!profile) {
-        console.log('Profile not found for user, creating one:', userToEnsure.id);
+      if (profileError) throw profileError;
+
+      const metadata = userToEnsure.user_metadata;
+      
+      // Profile is created by trigger, but username/display_name might be missing.
+      if (dbProfile && !dbProfile.username && metadata.username) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            username: metadata.username,
+            display_name: metadata.full_name,
+          })
+          .eq('id', userToEnsure.id);
+
+        if (updateError) throw updateError;
+      } else if (!dbProfile) {
+        // Fallback in case trigger failed.
         const { error: insertError } = await supabase.from('profiles').insert({
           id: userToEnsure.id,
           email: userToEnsure.email,
-          full_name: userToEnsure.user_metadata.full_name || 'New User',
-          avatar_url: userToEnsure.user_metadata.avatar_url,
+          full_name: metadata.full_name || 'New User',
+          avatar_url: metadata.avatar_url,
+          username: metadata.username,
+          display_name: metadata.full_name,
         });
 
-        if (insertError) {
-          throw insertError;
-        }
-        console.log('Profile created successfully for user:', userToEnsure.id);
+        if (insertError) throw insertError;
       }
     } catch (error) {
       console.error("Error ensuring user profile:", error);
@@ -48,37 +92,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    // Set up auth state listener
+    setLoading(true);
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, session);
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
         setSession(session);
-        setUser(session?.user ?? null);
         
-        if (event === 'SIGNED_IN' && session?.user) {
-           setTimeout(() => {
-            ensureUserProfile(session.user);
+        if (currentUser) {
+          setTimeout(async () => {
+            await ensureUserProfile(currentUser);
+            await fetchProfile(currentUser);
+            setLoading(false);
           }, 0);
+        } else {
+          setProfile(null);
+          setLoading(false);
         }
-
-        setLoading(false);
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      const currentUser = session?.user ?? null;
       setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setTimeout(() => {
-          ensureUserProfile(session.user);
-        }, 0);
+      setUser(currentUser);
+      if (currentUser) {
+         setTimeout(async () => {
+            await ensureUserProfile(currentUser);
+            await fetchProfile(currentUser);
+            setLoading(false);
+          }, 0);
+      } else {
+        setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [ensureUserProfile]);
+  }, [ensureUserProfile, fetchProfile]);
 
   const getRedirectUrl = () => {
     // Check if we're on Vercel production
@@ -93,7 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return `${window.location.origin}/`;
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, username: string) => {
     const redirectUrl = getRedirectUrl();
     console.log('Sign up redirect URL:', redirectUrl);
     
@@ -103,7 +154,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          full_name: fullName
+          full_name: fullName,
+          username: username.toLowerCase()
         }
       }
     });
@@ -141,14 +193,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refetchProfile = useCallback(async () => {
+    if(user) {
+      await fetchProfile(user);
+    }
+  }, [user, fetchProfile]);
+
   return (
     <AuthContext.Provider value={{
       user,
       session,
+      profile,
       loading,
       signUp,
       signIn,
-      signOut
+      signOut,
+      refetchProfile
     }}>
       {children}
     </AuthContext.Provider>
