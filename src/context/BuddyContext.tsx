@@ -1,162 +1,70 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+
+import React, { createContext, useContext, useMemo } from "react";
 import { toast } from "sonner";
-import { useHabits } from "./HabitContext";
-import { Buddy, BuddyContextType, Message, PrivacyLevel } from "@/types/buddy";
-import { 
-  BUDDY_STORAGE_KEY, 
-  createMessage, 
-  getRandomEncouragement,
-  countUnreadMessages
-} from "@/utils/buddyUtils";
+import { useBuddyData } from "@/hooks/useBuddyData";
+import { useAuth } from "@/context/AuthContext";
+import { Buddy, BuddyContextType, PrivacyLevel, Message } from "@/types/buddy";
 
 const BuddyContext = createContext<BuddyContextType | undefined>(undefined);
 
 export const BuddyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [buddies, setBuddies] = useState<Buddy[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<Buddy[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inviteCode, setInviteCode] = useState<string | null>(null);
-  const [privacyLevel, setPrivacyLevel] = useState<PrivacyLevel>('moderate');
-  
-  const { habits } = useHabits();
+  const { user } = useAuth();
+  const { connections, pendingRequests: rawPendingRequests, removeConnection, acceptConnectionRequest, declineConnectionRequest } = useBuddyData();
 
-  // Clear localStorage buddy data on initialization to prevent conflicts with Supabase
-  useEffect(() => {
-    // Clear any existing localStorage buddy data since we're now using Supabase
-    localStorage.removeItem(BUDDY_STORAGE_KEY);
-    console.log('Cleared localStorage buddy data - now using Supabase database');
-  }, []);
-
-  // Save data to localStorage whenever it changes (keeping for backward compatibility)
-  useEffect(() => {
-    // We'll keep this minimal since we're transitioning to Supabase
-    localStorage.setItem(BUDDY_STORAGE_KEY, JSON.stringify({ 
-      buddies: [], // Keep empty since we use Supabase now
-      pendingRequests: [], 
-      messages: [],
-      privacyLevel
-    }));
-  }, [buddies, pendingRequests, messages, privacyLevel]);
-
-  // Generate a new invite code
-  const generateInviteCode = () => {
-    const newCode = Math.random().toString(36).substring(2, 10).toUpperCase();
-    setInviteCode(newCode);
-    toast.success("New invite code generated", {
-      description: `Your code: ${newCode}`,
+  const buddies: Buddy[] = useMemo(() => {
+    if (!user) return [];
+    return connections.map(connection => {
+      const buddyProfile = connection.requester_id === user.id ? connection.addressee : connection.requester;
+      return {
+        id: connection.id,
+        name: buddyProfile.full_name || 'Unknown Buddy',
+        avatar: buddyProfile.avatar_url || undefined,
+        connectionDate: connection.created_at,
+        lastActive: connection.updated_at,
+        isAnonymous: false,
+        sharedHabits: [],
+      };
     });
-  };
+  }, [connections, user]);
 
-  // Accept a buddy request
-  const acceptBuddyRequest = (id: string) => {
-    const request = pendingRequests.find(req => req.id === id);
-    
-    if (request) {
-      // Move from pending to buddies
-      setBuddies(prev => [...prev, {
-        ...request,
-        connectionDate: new Date().toISOString(),
-        lastActive: new Date().toISOString()
-      }]);
-      
-      setPendingRequests(prev => prev.filter(req => req.id !== id));
-      
-      toast.success("Buddy request accepted", {
-        description: `You're now connected with ${request.name}`,
-      });
-    }
-  };
+  const pendingRequests: Buddy[] = useMemo(() => {
+    return rawPendingRequests.map(request => {
+      return {
+        id: request.id,
+        name: request.sender.full_name || 'Unknown',
+        avatar: request.sender.avatar_url || undefined,
+        connectionDate: request.created_at,
+        lastActive: request.created_at,
+        isAnonymous: false,
+        sharedHabits: [],
+      };
+    });
+  }, [rawPendingRequests]);
 
-  // Decline a buddy request
-  const declineBuddyRequest = (id: string) => {
-    setPendingRequests(prev => prev.filter(req => req.id !== id));
-    toast.info("Request declined");
-  };
-
-  // Remove a buddy connection
-  const removeBuddy = (id: string) => {
-    const buddy = buddies.find(b => b.id === id);
-    
-    if (buddy) {
-      setBuddies(prev => prev.filter(b => b.id !== id));
-      toast.success("Connection removed", {
-        description: `You've disconnected from ${buddy.name}`,
-      });
-    }
-  };
-
-  // Send encouragement to a buddy
-  const sendEncouragement = (buddyId: string, type: 'text' | 'encouragement' | 'reward', content: string) => {
-    const buddy = buddies.find(b => b.id === buddyId);
-    
-    if (buddy) {
-      const newMessage = createMessage(
-        "me", 
-        buddyId, 
-        content || getRandomEncouragement(),
-        type
-      );
-      
-      setMessages(prev => [...prev, newMessage]);
-      toast.success("Encouragement sent", {
-        description: `Your message was sent to ${buddy.name}`,
-      });
-    }
-  };
-
-  // Update which habits are shared with a buddy
-  const updateSharedHabits = (buddyId: string, habitIds: string[]) => {
-    setBuddies(prev => prev.map(buddy => 
-      buddy.id === buddyId ? { ...buddy, sharedHabits: habitIds } : buddy
-    ));
-    
-    toast.success("Sharing preferences updated");
-  };
-
-  // Mark messages as read
-  const markMessagesAsRead = (messageIds: string[]) => {
-    setMessages(prev => prev.map(message => 
-      messageIds.includes(message.id) ? { ...message, read: true } : message
-    ));
-  };
-
-  // Toggle anonymous mode for a buddy
-  const toggleAnonymous = (buddyId: string) => {
-    setBuddies(prev => prev.map(buddy => 
-      buddy.id === buddyId ? { ...buddy, isAnonymous: !buddy.isAnonymous } : buddy
-    ));
-    
-    toast.success("Privacy setting updated");
-  };
-
-  // Get unread message count
-  const getUnreadMessageCount = () => {
-    return countUnreadMessages(messages);
+  // Deprecating most functions as they are now handled by hooks directly.
+  const value: BuddyContextType = {
+    buddies,
+    setBuddies: () => {},
+    pendingRequests,
+    setPendingRequests: () => {},
+    messages: [], // Messages are now handled by useMessages hook
+    setMessages: () => {},
+    inviteCode: null,
+    generateInviteCode: () => toast.info("Please use the 'Connect' tab to invite buddies."),
+    acceptBuddyRequest: (id: string) => acceptConnectionRequest(id),
+    declineBuddyRequest: (id: string) => declineConnectionRequest(id),
+    removeBuddy: (id: string) => removeConnection(id),
+    sendEncouragement: () => toast.info("Please use the message input to send encouragements."),
+    updateSharedHabits: () => {},
+    markMessagesAsRead: () => {},
+    toggleAnonymous: () => {},
+    getUnreadMessageCount: () => 0,
+    privacyLevel: 'moderate',
+    setPrivacyLevel: () => {},
   };
 
   return (
-    <BuddyContext.Provider
-      value={{
-        buddies,
-        setBuddies,
-        pendingRequests,
-        setPendingRequests,
-        messages,
-        setMessages,
-        inviteCode,
-        generateInviteCode,
-        acceptBuddyRequest,
-        declineBuddyRequest,
-        removeBuddy,
-        sendEncouragement,
-        updateSharedHabits,
-        markMessagesAsRead,
-        toggleAnonymous,
-        getUnreadMessageCount,
-        privacyLevel,
-        setPrivacyLevel
-      }}
-    >
+    <BuddyContext.Provider value={value}>
       {children}
     </BuddyContext.Provider>
   );

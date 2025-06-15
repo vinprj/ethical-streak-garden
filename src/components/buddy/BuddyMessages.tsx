@@ -1,11 +1,13 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { UserRound, Send, Clock } from "lucide-react";
+import { UserRound, Send, Clock, Loader2 } from "lucide-react";
 import { useBuddy } from "@/context/BuddyContext";
+import { useAuth } from "@/context/AuthContext";
+import { useMessages } from "@/hooks/buddy/useMessages";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { EncouragementActions } from "./messages/EncouragementActions";
@@ -15,48 +17,41 @@ interface BuddyMessagesProps {
 }
 
 export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId }) => {
-  const { buddies, messages, sendEncouragement, markMessagesAsRead } = useBuddy();
+  const { user } = useAuth();
+  const { buddies } = useBuddy();
   const [selectedBuddy, setSelectedBuddy] = useState(selectedBuddyId || buddies[0]?.id || "");
   const [newMessage, setNewMessage] = useState("");
   const [showEncouragementActions, setShowEncouragementActions] = useState(false);
   
-  // Update selected buddy if prop changes
+  const { messages, loading, sendMessage } = useMessages(selectedBuddy);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (selectedBuddyId) {
       setSelectedBuddy(selectedBuddyId);
+    } else if (buddies.length > 0 && !selectedBuddy) {
+      setSelectedBuddy(buddies[0].id);
     }
-  }, [selectedBuddyId]);
+  }, [selectedBuddyId, buddies, selectedBuddy]);
 
-  const buddyMessages = messages.filter(
-    msg => (msg.fromId === "me" && msg.toId === selectedBuddy) || 
-           (msg.toId === "me" && msg.fromId === selectedBuddy)
-  );
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+    }
+  }, [messages]);
   
   const selectedBuddyInfo = buddies.find(b => b.id === selectedBuddy);
   
-  // Mark messages as read when viewing them
-  useEffect(() => {
-    if (selectedBuddy) {
-      const unreadMessages = buddyMessages
-        .filter(msg => !msg.read && msg.toId === "me")
-        .map(msg => msg.id);
-      
-      if (unreadMessages.length > 0) {
-        markMessagesAsRead(unreadMessages);
-      }
-    }
-  }, [selectedBuddy, buddyMessages, markMessagesAsRead]);
-  
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (newMessage.trim() && selectedBuddy) {
-      sendEncouragement(selectedBuddy, "text", newMessage);
+      await sendMessage(newMessage, "text");
       setNewMessage("");
     }
   };
 
-  const handleSendEncouragement = (message: string) => {
+  const handleSendEncouragement = async (message: string) => {
     if (selectedBuddy) {
-      sendEncouragement(selectedBuddy, "encouragement", message);
+      await sendMessage(message, "encouragement");
       setShowEncouragementActions(false);
     }
   };
@@ -84,12 +79,7 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
             <h3 className="px-4 py-2 text-sm font-medium border-b">Your Buddies</h3>
             <ScrollArea className="h-[400px]">
               <div className="space-y-1 p-2">
-                {buddies.map(buddy => {
-                  const unreadCount = messages.filter(
-                    msg => msg.fromId === buddy.id && msg.toId === "me" && !msg.read
-                  ).length;
-                  
-                  return (
+                {buddies.map(buddy => (
                     <button
                       key={buddy.id}
                       className={`w-full flex items-center gap-3 p-3 rounded-md transition-colors ${
@@ -111,14 +101,8 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
                           {formatDistanceToNow(new Date(buddy.lastActive), { addSuffix: true })}
                         </p>
                       </div>
-                      {unreadCount > 0 && (
-                        <span className="bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center shrink-0">
-                          {unreadCount}
-                        </span>
-                      )}
                     </button>
-                  );
-                })}
+                  ))}
               </div>
             </ScrollArea>
           </div>
@@ -170,24 +154,29 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
               )}
               
               {/* Messages Area */}
-              <ScrollArea className="flex-1 p-4">
+              <ScrollArea className="flex-1 p-4" ref={scrollAreaRef as React.RefObject<HTMLDivElement>}>
+                {loading ? (
+                    <div className="flex items-center justify-center h-full">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                ) : (
                 <div className="space-y-4">
-                  {buddyMessages.length > 0 ? (
-                    buddyMessages.map(msg => (
+                  {messages.length > 0 ? (
+                    messages.map(msg => (
                       <div
                         key={msg.id}
-                        className={`flex ${msg.fromId === "me" ? "justify-end" : "justify-start"}`}
+                        className={`flex ${msg.sender_id === user?.id ? "justify-end" : "justify-start"}`}
                       >
                         <div
                           className={`max-w-[80%] p-3 rounded-lg text-sm ${
-                            msg.fromId === "me"
+                            msg.sender_id === user?.id
                               ? "bg-primary text-primary-foreground"
                               : "bg-muted"
                           }`}
                         >
                           {msg.content}
                           <div className={`text-xs mt-1 opacity-70`}>
-                            {formatDistanceToNow(new Date(msg.timestamp), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
                           </div>
                         </div>
                       </div>
@@ -201,6 +190,7 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
                     </div>
                   )}
                 </div>
+                )}
               </ScrollArea>
               
               {/* Message Input */}

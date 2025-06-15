@@ -4,14 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Users, Shield, MessageCircle } from "lucide-react";
-import { useBuddy } from "@/context/BuddyContext";
+import { useBuddyData } from "@/hooks/useBuddyData";
 import { ConnectTab } from "./connect/ConnectTab";
 import { BuddiesTab } from "./buddies/BuddiesTab";
 import { PrivacyTab } from "./privacy/PrivacyTab";
 
 export const BuddySettings: React.FC = () => {
   const [activeTab, setActiveTab] = useState("connect");
-  const { buddies } = useBuddy();
+  const { connections } = useBuddyData();
 
   return (
     <Card className="border border-border">
@@ -31,9 +31,9 @@ export const BuddySettings: React.FC = () => {
             <TabsTrigger value="connect">Connect</TabsTrigger>
             <TabsTrigger value="buddies">
               Buddies
-              {buddies.length > 0 && (
+              {connections.length > 0 && (
                 <Badge variant="secondary" className="ml-1.5 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
-                  {buddies.length}
+                  {connections.length}
                 </Badge>
               )}
             </TabsTrigger>

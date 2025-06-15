@@ -73,7 +73,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
-          invite_token: string
+          invite_token?: string
           message?: string | null
           recipient_email: string
           sender_id: string
