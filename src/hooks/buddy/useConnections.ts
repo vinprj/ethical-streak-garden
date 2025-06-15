@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
@@ -8,20 +8,22 @@ import { Connection } from './types';
 export const useConnections = () => {
   const { user } = useAuth();
   const [connections, setConnections] = useState<Connection[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchConnections = async () => {
+  const fetchConnections = useCallback(async () => {
     if (!user) {
-      console.log('No user found, skipping connection fetch');
       setConnections([]);
+      setLoading(false);
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
       console.log('Fetching connections for user:', user.id);
       
-      const { data, error } = await supabase
+      const { data, error: dbError } = await supabase
         .from('user_connections')
         .select(`
           id,
@@ -36,16 +38,14 @@ export const useConnections = () => {
         .eq('status', 'accepted')
         .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
-      if (error) {
-        console.error('Error fetching connections:', error);
+      if (dbError) {
+        console.error('Error fetching connections:', dbError);
         toast.error('Failed to load connections');
+        setError(dbError.message);
         setConnections([]);
         return;
       }
 
-      console.log('Raw connections data:', data);
-
-      // Validate and process connections
       const validConnections = (data || []).filter(conn => {
         const hasValidRequester = conn.requester && typeof conn.requester === 'object';
         const hasValidAddressee = conn.addressee && typeof conn.addressee === 'object';
@@ -58,44 +58,48 @@ export const useConnections = () => {
         return true;
       }) as Connection[];
 
-      console.log('Processed connections:', validConnections);
       setConnections(validConnections);
-    } catch (error) {
-      console.error('Error in fetchConnections:', error);
+    } catch (err) {
+      console.error('Error in fetchConnections:', err);
       toast.error('Failed to load connections');
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
       setConnections([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchConnections();
+  }, [fetchConnections]);
 
   const removeConnection = async (connectionId: string) => {
     try {
       console.log('Removing connection:', connectionId);
       
-      const { error } = await supabase
+      const { error: deleteError } = await supabase
         .from('user_connections')
         .delete()
         .eq('id', connectionId);
 
-      if (error) {
-        console.error('Error removing connection:', error);
-        toast.error(`Failed to remove connection: ${error.message}`);
-        return;
+      if (deleteError) {
+        throw deleteError;
       }
       
-      await fetchConnections();
       toast.success('Connection removed');
-    } catch (error) {
-      console.error('Error removing connection:', error);
-      toast.error('Failed to remove connection');
+      await fetchConnections();
+    } catch (err) {
+      console.error('Error removing connection:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      toast.error(`Failed to remove connection: ${errorMessage}`);
     }
   };
 
   return {
     connections,
-    fetchConnections,
     removeConnection,
-    loading
+    loading,
+    error,
+    refetchConnections: fetchConnections,
   };
 };

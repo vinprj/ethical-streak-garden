@@ -1,73 +1,45 @@
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useCallback } from 'react';
 import { useConnections } from './buddy/useConnections';
 import { useConnectionRequests } from './buddy/useConnectionRequests';
 import { useSendConnectionRequest } from './buddy/useSendConnectionRequest';
+import { toast } from 'sonner';
 
 export const useBuddyData = () => {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const {
     connections,
-    fetchConnections,
     removeConnection,
-    loading: connectionsLoading
+    loading: connectionsLoading,
+    error: connectionsError,
+    refetchConnections
   } = useConnections();
 
   const {
     pendingRequests,
-    fetchPendingRequests,
     acceptConnectionRequest,
     declineConnectionRequest,
-    loading: requestsLoading
+    loading: requestsLoading,
+    error: requestsError,
+    refetchPendingRequests
   } = useConnectionRequests();
 
   const { sendConnectionRequest } = useSendConnectionRequest();
 
-  useEffect(() => {
-    const loadData = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-      
-      setLoading(true);
-      setError(null);
-      console.log('Loading buddy data for user:', user.id);
-      
-      try {
-        await Promise.all([fetchConnections(), fetchPendingRequests()]);
-      } catch (error) {
-        console.error('Error loading buddy data:', error);
-        setError(error instanceof Error ? error.message : 'Failed to load buddy data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [user, fetchConnections, fetchPendingRequests]);
-
-  const refetch = async () => {
-    if (!user) return;
-    
-    setError(null);
+  const refetch = useCallback(async () => {
+    toast.info("Refreshing buddy data...");
     try {
-      await Promise.all([fetchConnections(), fetchPendingRequests()]);
+      await Promise.all([refetchConnections(), refetchPendingRequests()]);
     } catch (error) {
       console.error('Error refetching buddy data:', error);
-      setError(error instanceof Error ? error.message : 'Failed to refresh data');
+      toast.error("Failed to refresh all data.");
     }
-  };
+  }, [refetchConnections, refetchPendingRequests]);
 
   return {
     connections,
     pendingRequests,
-    loading: loading || connectionsLoading || requestsLoading,
-    error,
+    loading: connectionsLoading || requestsLoading,
+    error: connectionsError || requestsError,
     sendConnectionRequest,
     acceptConnectionRequest,
     declineConnectionRequest,

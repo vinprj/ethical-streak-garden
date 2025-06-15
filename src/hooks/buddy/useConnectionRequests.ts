@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
@@ -8,20 +8,22 @@ import { ConnectionRequest } from './types';
 export const useConnectionRequests = () => {
   const { user } = useAuth();
   const [pendingRequests, setPendingRequests] = useState<ConnectionRequest[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchPendingRequests = async () => {
+  const fetchPendingRequests = useCallback(async () => {
     if (!user || !user.email) {
-      console.log('No user email found, skipping pending requests fetch');
       setPendingRequests([]);
+      setLoading(false);
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
       console.log('Fetching pending requests for email:', user.email);
       
-      const { data, error } = await supabase
+      const { data, error: dbError } = await supabase
         .from('connection_requests')
         .select(`
           id,
@@ -39,58 +41,46 @@ export const useConnectionRequests = () => {
         .eq('status', 'pending')
         .gt('expires_at', new Date().toISOString());
 
-      if (error) {
-        console.error('Error fetching pending requests:', error);
-        toast.error('Failed to load connection requests');
-        setPendingRequests([]);
-        return;
+      if (dbError) {
+        throw dbError;
       }
 
-      console.log('Raw pending requests data:', data);
-
-      // Validate and process requests
       const validRequests = (data || []).filter(req => {
         const hasValidSender = req.sender && typeof req.sender === 'object';
-        
         if (!hasValidSender) {
           console.warn('Request missing sender profile data:', req);
           return false;
         }
-        
         return true;
       }) as ConnectionRequest[];
 
-      console.log('Processed pending requests:', validRequests);
       setPendingRequests(validRequests);
-    } catch (error) {
-      console.error('Error in fetchPendingRequests:', error);
+    } catch (err) {
+      console.error('Error in fetchPendingRequests:', err);
       toast.error('Failed to load connection requests');
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
       setPendingRequests([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchPendingRequests();
+  }, [fetchPendingRequests]);
 
   const acceptConnectionRequest = async (requestId: string) => {
     if (!user) return;
 
     try {
-      console.log('Accepting connection request:', requestId);
-      
-      // First get the request details
       const { data: request, error: fetchError } = await supabase
         .from('connection_requests')
         .select('*')
         .eq('id', requestId)
         .single();
 
-      if (fetchError) {
-        console.error('Error fetching request details:', fetchError);
-        toast.error('Unable to process request. Please try again.');
-        return;
-      }
+      if (fetchError) throw fetchError;
 
-      // Create the connection
       const { error: connectionError } = await supabase
         .from('user_connections')
         .insert({
@@ -99,29 +89,21 @@ export const useConnectionRequests = () => {
           status: 'accepted'
         });
 
-      if (connectionError) {
-        console.error('Error creating connection:', connectionError);
-        toast.error('Failed to create connection. Please try again.');
-        return;
-      }
+      if (connectionError) throw connectionError;
 
-      // Update the request status
       const { error: updateError } = await supabase
         .from('connection_requests')
         .update({ status: 'accepted' })
         .eq('id', requestId);
 
-      if (updateError) {
-        console.error('Error updating request status:', updateError);
-        toast.error('Connection created but failed to update request status.');
-        return;
-      }
-
-      await fetchPendingRequests();
+      if (updateError) throw updateError;
+      
       toast.success('Connection accepted!');
-    } catch (error) {
-      console.error('Error accepting connection request:', error);
-      toast.error('An unexpected error occurred. Please try again.');
+      await fetchPendingRequests();
+    } catch (err) {
+      console.error('Error accepting connection request:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      toast.error(`Failed to accept request: ${errorMessage}`);
     }
   };
 
@@ -129,32 +111,28 @@ export const useConnectionRequests = () => {
     if (!user) return;
 
     try {
-      console.log('Declining connection request:', requestId);
-      
-      const { error } = await supabase
+      const { error: declineError } = await supabase
         .from('connection_requests')
         .update({ status: 'declined' })
         .eq('id', requestId);
 
-      if (error) {
-        console.error('Error declining request:', error);
-        toast.error('Failed to decline request. Please try again.');
-        return;
-      }
+      if (declineError) throw declineError;
 
+      toast.info('Connection request declined.');
       await fetchPendingRequests();
-      toast.success('Connection request declined');
-    } catch (error) {
-      console.error('Error declining connection request:', error);
-      toast.error('An unexpected error occurred. Please try again.');
+    } catch (err) {
+      console.error('Error declining connection request:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      toast.error(`Failed to decline request: ${errorMessage}`);
     }
   };
 
   return {
     pendingRequests,
-    fetchPendingRequests,
     acceptConnectionRequest,
     declineConnectionRequest,
-    loading
+    loading,
+    error,
+    refetchPendingRequests: fetchPendingRequests,
   };
 };
