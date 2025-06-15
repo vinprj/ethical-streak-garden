@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data: dbProfile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, username')
+        .select('id, username, display_name, full_name')
         .eq('id', userToEnsure.id)
         .maybeSingle();
 
@@ -68,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .from('profiles')
           .update({
             username: dbProfile.username || initialUsername,
-            display_name: dbProfile.display_name || metadata.full_name,
+            display_name: dbProfile.display_name || dbProfile.full_name || metadata.full_name,
           })
           .eq('id', userToEnsure.id);
 
