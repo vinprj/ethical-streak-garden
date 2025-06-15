@@ -11,7 +11,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string, username: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  profile: Tables<'profiles'>['Row'] | null;
+  profile: Tables<'profiles'> | null;
   refetchProfile: () => Promise<void>;
 }
 
@@ -20,7 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Tables<'profiles'>['Row'] | null>(null);
+  const [profile, setProfile] = useState<Tables<'profiles'> | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async (userToFetch: User | null) => {
@@ -60,14 +60,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (profileError) throw profileError;
 
       const metadata = userToEnsure.user_metadata;
-      
+      const initialUsername = metadata.username || (userToEnsure.email?.split('@')[0]);
+
       // Profile is created by trigger, but username/display_name might be missing.
-      if (dbProfile && !dbProfile.username && metadata.username) {
+      if (dbProfile && (!dbProfile.username || !dbProfile.display_name)) {
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
-            username: metadata.username,
-            display_name: metadata.full_name,
+            username: dbProfile.username || initialUsername,
+            display_name: dbProfile.display_name || metadata.full_name,
           })
           .eq('id', userToEnsure.id);
 
@@ -79,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: userToEnsure.email,
           full_name: metadata.full_name || 'New User',
           avatar_url: metadata.avatar_url,
-          username: metadata.username,
+          username: initialUsername,
           display_name: metadata.full_name,
         });
 
@@ -148,6 +149,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const redirectUrl = getRedirectUrl();
     console.log('Sign up redirect URL:', redirectUrl);
     
+    // Check if username is already taken
+    const { data: existingProfile, error: checkError } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', username.toLowerCase())
+      .single();
+
+    if (checkError && checkError.code !== 'PGRST116') { // 'PGRST116' is 'not found'
+      toast.error(checkError.message);
+      return { error: checkError };
+    }
+    if (existingProfile) {
+      const err = { name: 'UsernameTaken', message: 'This username is already taken.' };
+      toast.error(err.message);
+      return { error: err };
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,

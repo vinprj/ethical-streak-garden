@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Database } from 'lucide-react';
@@ -11,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { DataGeneratorCard } from './DataGeneratorCard';
 import { DataGeneratorActions } from './DataGeneratorActions';
 import { DataPreview } from './DataPreview';
+import { Tables } from '@/integrations/supabase/types';
 
 export const TestDataGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -72,24 +72,36 @@ export const TestDataGenerator: React.FC = () => {
 
     // Generate unique email addresses to avoid conflicts
     const timestamp = Date.now();
-    const demoUsers = [
+    const demoUsers: Tables<'profiles'>[] = [
       {
         id: crypto.randomUUID(),
         email: `demo.alex.${timestamp}@habitflow.demo`,
         full_name: 'Alex Chen',
-        avatar_url: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=64&h=64&fit=crop&crop=face'
+        username: `alex_chen_${timestamp}`,
+        display_name: 'Alex Chen',
+        avatar_url: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=64&h=64&fit=crop&crop=face',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       },
       {
         id: crypto.randomUUID(),
         email: `demo.jordan.${timestamp + 1}@habitflow.demo`,
         full_name: 'Jordan Smith',
-        avatar_url: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=64&h=64&fit=crop&crop=face'
+        username: `jordan_smith_${timestamp + 1}`,
+        display_name: 'Jordan S.',
+        avatar_url: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=64&h=64&fit=crop&crop=face',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       },
       {
         id: crypto.randomUUID(),
         email: `demo.taylor.${timestamp + 2}@habitflow.demo`,
         full_name: 'Taylor Kim',
-        avatar_url: 'https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=64&h=64&fit=crop&crop=face'
+        username: `taylor_kim_${timestamp + 2}`,
+        display_name: 'Taylor Kim',
+        avatar_url: 'https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=64&h=64&fit=crop&crop=face',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
     ];
 
@@ -119,7 +131,7 @@ export const TestDataGenerator: React.FC = () => {
     }
   };
 
-  const createDemoConnections = async (demoUsers: any[]) => {
+  const createDemoConnections = async (demoUsers: Tables<'profiles'>[]) => {
     if (!user || demoUsers.length === 0) return;
 
     try {
@@ -135,12 +147,12 @@ export const TestDataGenerator: React.FC = () => {
         {
           requester_id: demoUsers[0].id,
           addressee_id: user.id,
-          status: 'accepted'
+          status: 'accepted' as const
         },
         {
           requester_id: user.id,
           addressee_id: demoUsers[1].id,
-          status: 'accepted'
+          status: 'accepted' as const
         }
       ];
 
@@ -159,7 +171,7 @@ export const TestDataGenerator: React.FC = () => {
     }
   };
 
-  const createDemoRequests = async (demoUsers: any[]) => {
+  const createDemoRequests = async (demoUsers: Tables<'profiles'>[]) => {
     if (!user || demoUsers.length < 3 || !user.email) return;
 
     try {
@@ -185,7 +197,7 @@ export const TestDataGenerator: React.FC = () => {
         recipient_email: user.email,
         invite_token: tokenData,
         message: 'Hey! Want to be habit buddies? Let\'s support each other on our journey!',
-        status: 'pending'
+        status: 'pending' as const
       };
 
       const { error } = await supabase
@@ -235,10 +247,10 @@ export const TestDataGenerator: React.FC = () => {
       
       if (demoUsers.length > 0) {
         console.log('Creating demo connections...');
-        await createDemoConnections(demoUsers);
+        await createDemoConnections(demoUsers as Tables<'profiles'>[]);
         
         console.log('Creating demo requests...');
-        await createDemoRequests(demoUsers);
+        await createDemoRequests(demoUsers as Tables<'profiles'>[]);
       }
       
       // Update stats
@@ -278,7 +290,7 @@ export const TestDataGenerator: React.FC = () => {
       setPlants([]);
 
       // Clear Supabase buddy data if user is logged in
-      if (user) {
+      if (user && user.email) {
         // Remove demo connections
         await supabase
           .from('user_connections')

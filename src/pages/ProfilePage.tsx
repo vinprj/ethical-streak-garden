@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { User, Calendar, Mail, Crown, Edit3 } from "lucide-react";
@@ -15,11 +14,11 @@ import { RecentActivity } from "@/components/garden/RecentActivity";
 import { ProfileEditDialog } from "@/components/profile/ProfileEditDialog";
 
 const ProfilePage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { stats, habits } = useHabits();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  if (!user) {
+  if (!user || !profile) {
     return null;
   }
 
@@ -75,16 +74,16 @@ const ProfilePage: React.FC = () => {
           <CardContent className="p-6">
             <div className="flex items-center gap-6">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={user.user_metadata?.avatar_url} />
+                <AvatarImage src={profile.avatar_url || undefined} />
                 <AvatarFallback className="text-2xl">
-                  {getInitials(user.user_metadata?.full_name || user.email || 'User')}
+                  {getInitials(profile.display_name || profile.full_name || user.email || 'User')}
                 </AvatarFallback>
               </Avatar>
               
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <h1 className="text-3xl font-bold">
-                    {user.user_metadata?.full_name || 'User'}
+                    {profile.display_name || profile.full_name || 'User'}
                   </h1>
                   <Button
                     variant="outline"
@@ -189,7 +188,6 @@ const ProfilePage: React.FC = () => {
         <ProfileEditDialog 
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
-          user={user}
         />
       </div>
     </AppLayout>
