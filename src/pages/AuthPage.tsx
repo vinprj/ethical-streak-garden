@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, LogIn, Users } from 'lucide-react';
+import { UserPlus, LogIn, Leaf, Flower, Sprout } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -69,27 +69,64 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-stone-100 p-4 relative overflow-hidden">
+      {/* Subtle garden background elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Top left corner - subtle leaf */}
+        <div className="absolute top-8 left-8 opacity-[0.08] text-slate-400">
+          <Leaf className="h-32 w-32 rotate-12 transform" />
+        </div>
+        
+        {/* Top right corner - delicate flower */}
+        <div className="absolute top-12 right-16 opacity-[0.06] text-slate-400">
+          <Flower className="h-24 w-24 -rotate-12 transform" />
+        </div>
+        
+        {/* Bottom left - small sprout */}
+        <div className="absolute bottom-20 left-20 opacity-[0.05] text-slate-400">
+          <Sprout className="h-20 w-20 rotate-6 transform" />
+        </div>
+        
+        {/* Bottom right - larger leaf */}
+        <div className="absolute bottom-8 right-8 opacity-[0.07] text-slate-400">
+          <Leaf className="h-28 w-28 -rotate-6 transform" />
+        </div>
+        
+        {/* Center background - very subtle */}
+        <div className="absolute top-1/3 left-1/4 opacity-[0.03] text-slate-400">
+          <Flower className="h-40 w-40 rotate-45 transform" />
+        </div>
+        
+        {/* Scattered small elements */}
+        <div className="absolute top-1/4 right-1/3 opacity-[0.04] text-slate-400">
+          <Sprout className="h-16 w-16 rotate-12 transform" />
+        </div>
+        
+        <div className="absolute bottom-1/3 left-1/3 opacity-[0.05] text-slate-400">
+          <Leaf className="h-18 w-18 -rotate-24 transform" />
+        </div>
+      </div>
+
+      <div className="w-full max-w-md space-y-6 relative z-10">
         <div className="text-center space-y-2">
           <div className="flex justify-center">
-            <div className="p-3 rounded-full bg-primary/10">
-              <Users className="h-8 w-8 text-primary" />
+            <div className="p-3 rounded-full bg-primary/10 backdrop-blur-sm">
+              <Leaf className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold">Welcome to HabitFlow</h1>
-          <p className="text-muted-foreground">Connect with friends and build habits together</p>
+          <h1 className="text-2xl font-bold text-slate-800">Welcome to RoutineGarden</h1>
+          <p className="text-muted-foreground">Cultivate your habits and watch your routine bloom</p>
         </div>
 
-        <Card>
+        <Card className="backdrop-blur-sm bg-white/90 border-slate-200/60 shadow-xl shadow-slate-200/50">
           <CardContent className="p-6">
             <Tabs defaultValue="signin" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin" className="flex items-center gap-2">
+              <TabsList className="grid w-full grid-cols-2 bg-slate-100/80">
+                <TabsTrigger value="signin" className="flex items-center gap-2 data-[state=active]:bg-white/90">
                   <LogIn className="h-4 w-4" />
                   Sign In
                 </TabsTrigger>
-                <TabsTrigger value="signup" className="flex items-center gap-2">
+                <TabsTrigger value="signup" className="flex items-center gap-2 data-[state=active]:bg-white/90">
                   <UserPlus className="h-4 w-4" />
                   Sign Up
                 </TabsTrigger>
@@ -107,6 +144,7 @@ const AuthPage = () => {
                       value={signInData.email}
                       onChange={handleSignInChange}
                       required
+                      className="bg-white/70 border-slate-200 focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -119,9 +157,10 @@ const AuthPage = () => {
                       value={signInData.password}
                       onChange={handleSignInChange}
                       required
+                      className="bg-white/70 border-slate-200 focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full bg-primary/90 hover:bg-primary" disabled={loading}>
                     {loading ? 'Signing in...' : 'Sign In'}
                   </Button>
                 </form>
@@ -139,6 +178,7 @@ const AuthPage = () => {
                       value={signUpData.fullName}
                       onChange={handleSignUpChange}
                       required
+                      className="bg-white/70 border-slate-200 focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
                    <div className="space-y-2">
@@ -153,6 +193,7 @@ const AuthPage = () => {
                       required
                       autoCapitalize="none"
                       autoCorrect="off"
+                      className="bg-white/70 border-slate-200 focus:border-primary/50 focus:ring-primary/20"
                     />
                     {usernameError && <p className="text-sm text-destructive">{usernameError}</p>}
                   </div>
@@ -166,6 +207,7 @@ const AuthPage = () => {
                       value={signUpData.email}
                       onChange={handleSignUpChange}
                       required
+                      className="bg-white/70 border-slate-200 focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -178,6 +220,7 @@ const AuthPage = () => {
                       value={signUpData.password}
                       onChange={handleSignUpChange}
                       required
+                      className="bg-white/70 border-slate-200 focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -190,12 +233,13 @@ const AuthPage = () => {
                       value={signUpData.confirmPassword}
                       onChange={handleSignUpChange}
                       required
+                      className="bg-white/70 border-slate-200 focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
                   {signUpData.password !== signUpData.confirmPassword && signUpData.confirmPassword && (
                     <p className="text-sm text-destructive">Passwords do not match</p>
                   )}
-                  <Button type="submit" className="w-full" disabled={loading || !!usernameError || signUpData.password !== signUpData.confirmPassword}>
+                  <Button type="submit" className="w-full bg-primary/90 hover:bg-primary" disabled={loading || !!usernameError || signUpData.password !== signUpData.confirmPassword}>
                     {loading ? 'Creating account...' : 'Create Account'}
                   </Button>
                 </form>

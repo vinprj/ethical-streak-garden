@@ -4,8 +4,8 @@ import { toast } from 'sonner';
 
 const getRedirectUrl = () => {
   // Check if we're on Vercel production
-  if (window.location.hostname === 'habitflow-wine.vercel.app') {
-    return 'https://habitflow-wine.vercel.app/';
+  if (window.location.hostname === 'routinegarden-wine.vercel.app') {
+    return 'https://routinegarden-wine.vercel.app/';
   }
   // Check if we're on any vercel deployment
   if (window.location.hostname.includes('vercel.app')) {

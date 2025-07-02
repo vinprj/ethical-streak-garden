@@ -23,7 +23,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
       <div className="flex h-14 items-center border-b px-4" onClick={onLogoClick}>
         <div className="flex items-center gap-2">
           <GanttChartSquare className="h-6 w-6 text-primary" />
-          <span className="font-semibold">HabitFlow</span>
+          <span className="font-semibold">RoutineGarden</span>
         </div>
         {isOfflineMode && (
           <div className="ml-2 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs text-amber-600">
