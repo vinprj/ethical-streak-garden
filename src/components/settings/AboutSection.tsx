@@ -8,7 +8,7 @@ export const AboutSection: React.FC = () => {
         <h3 className="font-medium">RoutineGarden</h3>
         <p className="text-sm text-muted-foreground">Version 1.0.0</p>
         <p className="text-sm text-muted-foreground mt-2">
-          An ethical habit tracking application designed to help you build consistent habits without manipulative design patterns.
+          An ethical routine tracking application designed to help you build consistent routines without manipulative design patterns.
         </p>
       </div>
       
