@@ -36,7 +36,7 @@ export const useAuthActions = () => {
       return { error: err };
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -50,8 +50,48 @@ export const useAuthActions = () => {
 
     if (error) {
       toast.error(error.message);
-    } else {
+      return { error };
+    }
+
+    // If user is immediately confirmed (no email confirmation required), 
+    // ensure profile is created properly
+    if (data.user && !data.user.email_confirmed_at) {
+      console.log('User created, waiting for email confirmation');
       toast.success('Check your email to confirm your account');
+    } else if (data.user) {
+      console.log('User created and confirmed, checking profile creation');
+      // Small delay to allow trigger to execute
+      setTimeout(async () => {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+        
+        if (profileError || !profile) {
+          console.log('Profile not found, creating manually');
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              email: data.user.email,
+              full_name: fullName,
+              username: username.toLowerCase(),
+              display_name: fullName
+            });
+          
+          if (insertError) {
+            console.error('Failed to create profile manually:', insertError);
+            toast.error('Account created but profile setup failed. Please contact support.');
+          } else {
+            console.log('Profile created manually');
+            toast.success('Account created successfully!');
+          }
+        } else {
+          console.log('Profile found:', profile);
+          toast.success('Account created successfully!');
+        }
+      }, 1000);
     }
 
     return { error };
