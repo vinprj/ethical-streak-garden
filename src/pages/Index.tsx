@@ -8,8 +8,8 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-secondary/20">
       <div className="text-center max-w-2xl px-4">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Routine Garden</h1>
-        <p className="text-xl text-muted-foreground mb-8">Track your routines and watch your garden grow</p>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Habit Garden</h1>
+        <p className="text-xl text-muted-foreground mb-8">Track your habits and watch your garden grow</p>
         
         <div className="space-y-4">
           <Button 
@@ -26,13 +26,13 @@ const Index = () => {
             className="w-full md:w-auto px-8"
             onClick={() => navigate('/today')}
           >
-            Today's Routines
+            Today's Habits
           </Button>
         </div>
       </div>
       
       <div className="mt-16 text-center text-sm text-muted-foreground">
-        <p>Build healthy routines and grow your virtual garden</p>
+        <p>Build healthy habits and grow your virtual garden</p>
       </div>
     </div>
   );
