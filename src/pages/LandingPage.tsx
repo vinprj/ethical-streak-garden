@@ -118,7 +118,10 @@ const LandingPage = () => {
           <div className="animate-fade-in" style={{animationDelay: '0.6s'}}>
             <Button
               size="lg"
-              onClick={handleStartJourney}
+              onClick={() => {
+                console.log('Button clicked - navigating to /auth');
+                navigate('/auth');
+              }}
               className="px-12 py-6 text-lg font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
             >
               Start Your Journey
