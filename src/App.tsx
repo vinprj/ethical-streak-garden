@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { useEffect } from "react";
 
 // Pages
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import TodayPage from "./pages/TodayPage";
@@ -62,14 +63,14 @@ function App() {
           <BuddyProvider>
             <GardenProvider>
               <Routes>
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/welcome" element={<Index />} />
-                <Route path="/" element={
+                <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />
                   </ProtectedRoute>
                 } />
-                <Route path="/dashboard" element={<Navigate to="/" replace />} />
                 <Route path="/today" element={
                   <ProtectedRoute>
                     <TodayPage />
