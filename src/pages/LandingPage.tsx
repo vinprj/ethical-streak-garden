@@ -1,11 +1,13 @@
 
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Leaf, Target, Users, Award, TrendingUp, Calendar } from "lucide-react";
+import { Leaf, Target, Users, Award, TrendingUp, Calendar, User, LogOut } from "lucide-react";
 import { useCallback } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const features = [
     {
@@ -40,8 +42,44 @@ const LandingPage = () => {
     navigate('/auth');
   }, [navigate]);
 
+  const handleDashboard = useCallback(() => {
+    console.log('Navigating to /dashboard');
+    navigate('/dashboard');
+  }, [navigate]);
+
+  const handleSignOut = useCallback(async () => {
+    console.log('Signing out user');
+    await signOut();
+  }, [signOut]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 overflow-hidden">
+      {/* User Status Bar - Top Left */}
+      {user && (
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg px-4 py-2">
+          <User className="h-4 w-4 text-primary" />
+          <span className="text-sm text-foreground">Welcome back!</span>
+          <div className="flex gap-2 ml-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleDashboard}
+              className="h-8 px-3 text-xs"
+            >
+              Dashboard
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleSignOut}
+              className="h-8 px-2 text-xs"
+            >
+              <LogOut className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 text-muted-foreground/10 animate-float">
@@ -116,16 +154,23 @@ const LandingPage = () => {
 
           {/* CTA Button */}
           <div className="animate-fade-in" style={{animationDelay: '0.6s'}}>
-            <Button
-              size="lg"
-              onClick={() => {
-                console.log('Button clicked - navigating to /auth');
-                navigate('/auth');
-              }}
-              className="px-12 py-6 text-lg font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
-            >
-              Start Your Journey
-            </Button>
+            {user ? (
+              <Button
+                size="lg"
+                onClick={handleDashboard}
+                className="px-12 py-6 text-lg font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                Go to Dashboard
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                onClick={handleStartJourney}
+                className="px-12 py-6 text-lg font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                Start Your Journey
+              </Button>
+            )}
             <p className="text-sm text-muted-foreground mt-4">
               Free to use • No credit card required
             </p>
