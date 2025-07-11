@@ -70,8 +70,9 @@ const LandingPage = () => {
           </div>
 
           {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-16 animate-fade-in" style={{animationDelay: '0.3s'}}>
-            {features.map((feature, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-16 max-w-4xl mx-auto animate-fade-in" style={{animationDelay: '0.3s'}}>
+            {/* First row - 3 items */}
+            {features.slice(0, 3).map((feature, index) => (
               <div 
                 key={feature.title}
                 className="p-6 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl hover:bg-card/70 transition-all duration-300 hover:scale-105 hover:shadow-lg"
@@ -86,6 +87,25 @@ const LandingPage = () => {
                 </div>
               </div>
             ))}
+            
+            {/* Second row - 2 items centered */}
+            <div className="md:col-span-3 flex justify-center gap-6">
+              {features.slice(3, 5).map((feature, index) => (
+                <div 
+                  key={feature.title}
+                  className="p-6 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl hover:bg-card/70 transition-all duration-300 hover:scale-105 hover:shadow-lg w-full max-w-sm"
+                  style={{animationDelay: `${0.1 * (index + 3)}s`}}
+                >
+                  <div className="flex flex-col items-center text-center space-y-3">
+                    <div className="p-3 bg-primary/10 rounded-xl">
+                      <feature.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-foreground">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* CTA Button */}
