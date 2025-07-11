@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Leaf, Target, Users, Award, TrendingUp, Calendar } from "lucide-react";
+import { useCallback } from "react";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -33,6 +34,11 @@ const LandingPage = () => {
       description: "Organize routines that fit your lifestyle"
     }
   ];
+
+  const handleStartJourney = useCallback(() => {
+    console.log('Navigating to /auth');
+    navigate('/auth');
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 overflow-hidden">
@@ -112,7 +118,7 @@ const LandingPage = () => {
           <div className="animate-fade-in" style={{animationDelay: '0.6s'}}>
             <Button
               size="lg"
-              onClick={() => navigate('/auth')}
+              onClick={handleStartJourney}
               className="px-12 py-6 text-lg font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
             >
               Start Your Journey
