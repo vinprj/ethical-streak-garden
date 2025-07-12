@@ -2,7 +2,7 @@
 import { PlantGrowthStage, PlantType } from "@/context/GardenContext";
 import { Habit } from "@/types/habit";
 
-// Plant type mapping based on habit category
+// Plant type mapping based on routine category
 export const getPlantTypeForCategory = (category: string): PlantType => {
   switch(category) {
     case 'health': return 'vegetable';
@@ -26,7 +26,7 @@ export const getNextGrowthStage = (current: PlantGrowthStage, streak: number): P
   return 'fruiting';
 };
 
-// Get a color based on habit category
+// Get a color based on routine category
 export const getColorForHabit = (category: string): string => {
   switch(category) {
     case 'health': return 'emerald';

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useGardenContext } from "@/context/GardenContext";
 import { toast } from "sonner";
 import { RefreshCcw, Leaf } from "lucide-react";
+
 export const GardenSettings: React.FC = () => {
   const {
     isGardenEnabled,
@@ -17,12 +19,14 @@ export const GardenSettings: React.FC = () => {
     highContrastGarden,
     setHighContrastGarden
   } = useGardenContext();
+
   const handleToggleGarden = (checked: boolean) => {
     setIsGardenEnabled(checked);
     toast(checked ? "Garden Enabled" : "Garden Disabled", {
-      description: checked ? "Your habit garden is now active" : "Your garden will be hidden but your plants will still grow"
+      description: checked ? "Your routine garden is now active" : "Your garden will be hidden but your plants will still grow"
     });
   };
+
   const handleEcoModeToggle = (checked: boolean) => {
     setEcoMode(checked);
     if (checked) {
@@ -37,6 +41,7 @@ export const GardenSettings: React.FC = () => {
       });
     }
   };
+
   const handleResetGarden = () => {
     if (confirm("This will reset all your plants to their initial state. Are you sure?")) {
       // Clear garden plants from localStorage
@@ -48,6 +53,7 @@ export const GardenSettings: React.FC = () => {
       window.location.reload();
     }
   };
+
   return <div className="space-y-4 bg-card rounded-lg border p-4 transition-all hover:border-primary/30">
       {/* Enable/disable garden feature */}
       <div className="flex items-center justify-between space-x-2">

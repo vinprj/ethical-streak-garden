@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Habit } from "@/types/habit";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,7 +25,7 @@ export const GardenAchievements: React.FC<GardenAchievementsProps> = ({ habits }
     {
       id: "first-plant",
       name: "First Sprout",
-      description: "Complete your first habit streak of 3 days",
+      description: "Complete your first routine streak of 3 days",
       icon: <Sprout className="h-5 w-5" />,
       condition: (habits) => habits.some(h => h.currentStreak >= 3),
       progress: (habits) => {
@@ -36,7 +37,7 @@ export const GardenAchievements: React.FC<GardenAchievementsProps> = ({ habits }
     {
       id: "butterfly-garden",
       name: "Butterfly Garden",
-      description: "Maintain any habit for 15 days",
+      description: "Maintain any routine for 15 days",
       icon: <span className="text-lg">🦋</span>,
       condition: (habits) => habits.some(h => h.currentStreak >= 15),
       progress: (habits) => {
@@ -48,7 +49,7 @@ export const GardenAchievements: React.FC<GardenAchievementsProps> = ({ habits }
     {
       id: "bird-sanctuary",
       name: "Bird Sanctuary",
-      description: "Maintain any habit for 21 days",
+      description: "Maintain any routine for 21 days",
       icon: <Bird className="h-5 w-5" />,
       condition: (habits) => habits.some(h => h.currentStreak >= 21),
       progress: (habits) => {
@@ -60,7 +61,7 @@ export const GardenAchievements: React.FC<GardenAchievementsProps> = ({ habits }
     {
       id: "diverse-garden",
       name: "Diverse Garden",
-      description: "Maintain habits across 4 different categories",
+      description: "Maintain routines across 4 different categories",
       icon: <Flower className="h-5 w-5" />,
       condition: (habits) => {
         const categories = new Set(habits.filter(h => h.currentStreak > 0).map(h => h.category));
@@ -139,7 +140,7 @@ export const GardenAchievements: React.FC<GardenAchievementsProps> = ({ habits }
       
       {achievementStatus.every(a => !a.isUnlocked) && (
         <div className="text-center text-muted-foreground p-4 italic">
-          Complete your habits consistently to unlock garden achievements!
+          Complete your routines consistently to unlock garden achievements!
         </div>
       )}
     </div>

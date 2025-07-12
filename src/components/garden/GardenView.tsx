@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Habit } from "@/types/habit";
 import { PlantDisplay } from "./PlantDisplay";
@@ -9,9 +10,11 @@ import { Card } from "@/components/ui/card";
 import { HabitCategory } from "@/types/habit";
 import { cn } from "@/lib/utils";
 import { RecentActivity } from "./RecentActivity";
+
 interface GardenViewProps {
   habits: Habit[];
 }
+
 export const GardenView: React.FC<GardenViewProps> = ({
   habits
 }) => {
@@ -28,12 +31,14 @@ export const GardenView: React.FC<GardenViewProps> = ({
 
   // Categories present in active habits
   const categories = Array.from(new Set(habits.map(h => h.category))) as HabitCategory[];
+  
   if (habits.length === 0) {
     return <Card className="p-8 text-center">
         <h2 className="text-xl font-semibold mb-4">Your Garden Awaits</h2>
         <p className="text-muted-foreground mb-6">Create and complete your routine to start growing plants in your garden!</p>
       </Card>;
   }
+  
   return <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <Tabs value={viewType} onValueChange={v => setViewType(v as "garden" | "recent")} className="w-full sm:w-auto">
@@ -68,7 +73,7 @@ export const GardenView: React.FC<GardenViewProps> = ({
         </div> : <RecentActivity habits={habits} />}
       
       <div className="text-sm text-muted-foreground text-center italic">
-        Complete your habits daily to help your plants grow and flourish!
+        Complete your routines daily to help your plants grow and flourish!
       </div>
     </div>;
 };

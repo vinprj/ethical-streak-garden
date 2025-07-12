@@ -23,11 +23,10 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
   const [newMessage, setNewMessage] = useState("");
   const [showEncouragementActions, setShowEncouragementActions] = useState(false);
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   
   const { messages, loading, sendMessage } = useMessages(selectedBuddy);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const previousMessagesLength = useRef(messages.length);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (selectedBuddyId) {
@@ -37,33 +36,12 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
     }
   }, [selectedBuddyId, buddies, selectedBuddy]);
 
-  // Handle scrolling logic
+  // Handle scrolling to bottom when messages change
   useEffect(() => {
-    if (!scrollAreaRef.current) return;
-
-    const scrollElement = scrollAreaRef.current;
-    const messagesChanged = messages.length !== previousMessagesLength.current;
-    const isInitialLoad = previousMessagesLength.current === 0 && messages.length > 0;
-    
-    if (messagesChanged) {
-      const newMessagesCount = messages.length - previousMessagesLength.current;
-      const lastMessage = messages[messages.length - 1];
-      const isMyMessage = lastMessage && user && lastMessage.sender_id === user.id;
-      
-      // Auto-scroll conditions:
-      // 1. Initial load of messages
-      // 2. User sent the message
-      // 3. User is at the bottom and new message arrives
-      if (isInitialLoad || isMyMessage || (shouldAutoScroll && isUserAtBottom && newMessagesCount > 0)) {
-        scrollElement.scrollTo({ 
-          top: scrollElement.scrollHeight, 
-          behavior: isInitialLoad ? 'auto' : 'smooth' 
-        });
-      }
+    if (messages.length > 0 && isUserAtBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-    
-    previousMessagesLength.current = messages.length;
-  }, [messages, user, isUserAtBottom, shouldAutoScroll]);
+  }, [messages, isUserAtBottom]);
 
   // Track if user is at bottom of chat
   useEffect(() => {
@@ -73,11 +51,10 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
     
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = scrollElement;
-      const threshold = 50; // pixels from bottom
+      const threshold = 50;
       const atBottom = scrollHeight - scrollTop - clientHeight < threshold;
       
       setIsUserAtBottom(atBottom);
-      setShouldAutoScroll(atBottom);
     };
 
     scrollElement.addEventListener('scroll', handleScroll);
@@ -94,7 +71,7 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
   
   const handleSendMessage = async () => {
     if (newMessage.trim() && selectedBuddy) {
-      setShouldAutoScroll(true); // Always scroll when user sends message
+      setIsUserAtBottom(true); // Always scroll when user sends message
       await sendMessage(newMessage, "text");
       setNewMessage("");
     }
@@ -102,7 +79,7 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
 
   const handleSendEncouragement = async (message: string) => {
     if (selectedBuddy) {
-      setShouldAutoScroll(true); // Always scroll when user sends encouragement
+      setIsUserAtBottom(true); // Always scroll when user sends encouragement
       await sendMessage(message, "encouragement");
       setShowEncouragementActions(false);
     }
@@ -131,9 +108,9 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
             <h3 className="px-4 py-2 text-sm font-medium border-b">Your Buddies</h3>
             <ScrollArea className="h-[400px]">
               <div className="space-y-1 p-2">
-                {buddies.map(buddy => (
+                {buddies.map((buddy, index) => (
                     <button
-                      key={buddy.id}
+                      key={`buddy-${buddy.id}-${index}`}
                       className={`w-full flex items-center gap-3 p-3 rounded-md transition-colors ${
                         selectedBuddy === buddy.id 
                           ? "bg-primary/10 text-primary border border-primary/20"
@@ -214,25 +191,28 @@ export const BuddyMessages: React.FC<BuddyMessagesProps> = ({ selectedBuddyId })
                 ) : (
                 <div className="space-y-4">
                   {messages.length > 0 ? (
-                    messages.map(msg => (
-                      <div
-                        key={msg.id}
-                        className={`flex ${msg.sender_id === user?.id ? "justify-end" : "justify-start"}`}
-                      >
+                    <>
+                      {messages.map((msg, index) => (
                         <div
-                          className={`max-w-[80%] p-3 rounded-lg text-sm ${
-                            msg.sender_id === user?.id
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
-                          }`}
+                          key={`message-${msg.id}-${index}`}
+                          className={`flex ${msg.sender_id === user?.id ? "justify-end" : "justify-start"}`}
                         >
-                          {msg.content}
-                          <div className={`text-xs mt-1 opacity-70`}>
-                            {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                          <div
+                            className={`max-w-[80%] p-3 rounded-lg text-sm ${
+                              msg.sender_id === user?.id
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted"
+                            }`}
+                          >
+                            {msg.content}
+                            <div className={`text-xs mt-1 opacity-70`}>
+                              {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      ))}
+                      <div ref={messagesEndRef} />
+                    </>
                   ) : (
                     <div className="flex flex-col items-center justify-center p-8 text-center h-full">
                       <p className="text-muted-foreground mb-2">No messages yet</p>

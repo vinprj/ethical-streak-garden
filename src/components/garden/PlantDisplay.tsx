@@ -76,7 +76,7 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({ habit, viewType }) =
       )}>
         <Leaf className="h-12 w-12 text-muted-foreground/40 mb-3" />
         <p className="text-sm font-medium">Plant will grow here</p>
-        <p className="text-xs text-muted-foreground mt-1">Complete habit to start growing</p>
+        <p className="text-xs text-muted-foreground mt-1">Complete routine to start growing</p>
       </Card>
     );
   }
