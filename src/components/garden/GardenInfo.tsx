@@ -1,12 +1,9 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Leaf, Sprout, Flower, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 export const GardenInfo: React.FC = () => {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <Card>
         <CardContent className="p-6">
           <h3 className="text-lg font-medium flex items-center gap-2 mb-4">
@@ -15,17 +12,10 @@ export const GardenInfo: React.FC = () => {
           </h3>
           
           <div className="space-y-4">
-            <p>
-              The Habit Garden visualizes your habits as plants that grow and flourish 
-              as you maintain your streaks. This provides a calming, rewarding way to 
-              track your progress.
-            </p>
+            <p>The Routine Garden visualizes your habits as plants that grow and flourish as you maintain your streaks. This provides a calming, rewarding way to track your progress.</p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              <div className={cn(
-                "p-4 rounded-lg bg-secondary/50",
-                "border border-border transition-all duration-200"
-              )}>
+              <div className={cn("p-4 rounded-lg bg-secondary/50", "border border-border transition-all duration-200")}>
                 <h4 className="font-medium flex items-center gap-2 mb-2">
                   <Sprout className="h-4 w-4 text-emerald-500" />
                   Growth Stages
@@ -36,10 +26,7 @@ export const GardenInfo: React.FC = () => {
                 </p>
               </div>
               
-              <div className={cn(
-                "p-4 rounded-lg bg-secondary/50",
-                "border border-border transition-all duration-200"
-              )}>
+              <div className={cn("p-4 rounded-lg bg-secondary/50", "border border-border transition-all duration-200")}>
                 <h4 className="font-medium flex items-center gap-2 mb-2">
                   <Flower className="h-4 w-4 text-pink-500" />
                   Plant Types
@@ -50,10 +37,7 @@ export const GardenInfo: React.FC = () => {
                 </p>
               </div>
               
-              <div className={cn(
-                "p-4 rounded-lg bg-secondary/50",
-                "border border-border transition-all duration-200"
-              )}>
+              <div className={cn("p-4 rounded-lg bg-secondary/50", "border border-border transition-all duration-200")}>
                 <h4 className="font-medium flex items-center gap-2 mb-2">
                   <Award className="h-4 w-4 text-amber-500" />
                   Special Rewards
@@ -80,6 +64,5 @@ export const GardenInfo: React.FC = () => {
           <li>You can completely disable animations while still enjoying the garden</li>
         </ul>
       </div>
-    </div>
-  );
+    </div>;
 };
