@@ -31,7 +31,7 @@ const GardenPage: React.FC = () => {
               <Leaf className="h-6 w-6 text-primary" />
               <div>
                 <h1 className="text-2xl font-bold">Routine Garden</h1>
-                <p className="text-muted-foreground">Watch your habits grow into plants</p>
+                <p className="text-muted-foreground">Watch your routine grow into plants</p>
               </div>
             </div>
           </div>
