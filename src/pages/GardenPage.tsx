@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { GardenView } from "@/components/garden/GardenView";
@@ -13,35 +12,32 @@ import { useHabits } from "@/context/HabitContext";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useGardenContext } from "@/context/GardenContext";
-
 const GardenPage: React.FC = () => {
-  const { habits } = useHabits();
-  const { isGardenEnabled } = useGardenContext();
+  const {
+    habits
+  } = useHabits();
+  const {
+    isGardenEnabled
+  } = useGardenContext();
   const [selectedTab, setSelectedTab] = useState<string>("garden");
 
   // Filter out only active habits
   const activeHabits = habits.filter(h => !h.isArchived);
-  
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="flex flex-col gap-6 pb-6">
         <section>
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
               <Leaf className="h-6 w-6 text-primary" />
               <div>
-                <h1 className="text-2xl font-bold">Habit Garden</h1>
+                <h1 className="text-2xl font-bold">Routine Garden</h1>
                 <p className="text-muted-foreground">Watch your habits grow into plants</p>
               </div>
             </div>
           </div>
         </section>
 
-        <Tabs 
-          value={selectedTab} 
-          onValueChange={setSelectedTab}
-          className="w-full"
-        >
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
           <TabsList className="grid grid-cols-4 mb-6">
             <TabsTrigger value="garden" className="flex items-center gap-2">
               <Leaf className="h-4 w-4" />
@@ -62,10 +58,7 @@ const GardenPage: React.FC = () => {
           </TabsList>
           
           <TabsContent value="garden" className="space-y-6">
-            {isGardenEnabled ? (
-              <GardenView habits={activeHabits} />
-            ) : (
-              <Card className="p-8 text-center">
+            {isGardenEnabled ? <GardenView habits={activeHabits} /> : <Card className="p-8 text-center">
                 <h2 className="text-xl font-semibold mb-4">Habit Garden is disabled</h2>
                 <p className="text-muted-foreground mb-6">
                   Enable the Habit Garden in the settings tab to see your habits grow as plants!
@@ -74,40 +67,25 @@ const GardenPage: React.FC = () => {
                   <Settings className="h-4 w-4 mr-2" />
                   Garden Settings
                 </Button>
-              </Card>
-            )}
+              </Card>}
           </TabsContent>
           
           <TabsContent value="achievements" className="space-y-4">
-            <SectionHeader 
-              icon={Award}
-              title="Garden Achievements"
-              description="Special rewards for your garden progress"
-            />
+            <SectionHeader icon={Award} title="Garden Achievements" description="Special rewards for your garden progress" />
             <GardenAchievements habits={activeHabits} />
           </TabsContent>
           
           <TabsContent value="settings" className="space-y-4">
-            <SectionHeader 
-              icon={Settings}
-              title="Garden Settings"
-              description="Customize your garden experience"
-            />
+            <SectionHeader icon={Settings} title="Garden Settings" description="Customize your garden experience" />
             <GardenSettings />
           </TabsContent>
           
           <TabsContent value="info" className="space-y-4">
-            <SectionHeader 
-              icon={Info}
-              title="About the Habit Garden"
-              description="Learn how the garden grows with your habits"
-            />
+            <SectionHeader icon={Info} title="About the Habit Garden" description="Learn how the garden grows with your habits" />
             <GardenInfo />
           </TabsContent>
         </Tabs>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 };
-
 export default GardenPage;
