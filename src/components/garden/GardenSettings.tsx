@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -7,10 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useGardenContext } from "@/context/GardenContext";
 import { toast } from "sonner";
 import { RefreshCcw, Leaf } from "lucide-react";
-
 export const GardenSettings: React.FC = () => {
-  const { 
-    isGardenEnabled, 
+  const {
+    isGardenEnabled,
     setIsGardenEnabled,
     gardenAnimationsLevel,
     setGardenAnimationsLevel,
@@ -19,68 +17,51 @@ export const GardenSettings: React.FC = () => {
     highContrastGarden,
     setHighContrastGarden
   } = useGardenContext();
-  
   const handleToggleGarden = (checked: boolean) => {
     setIsGardenEnabled(checked);
     toast(checked ? "Garden Enabled" : "Garden Disabled", {
-      description: checked 
-        ? "Your habit garden is now active" 
-        : "Your garden will be hidden but your plants will still grow",
+      description: checked ? "Your habit garden is now active" : "Your garden will be hidden but your plants will still grow"
     });
   };
-  
   const handleEcoModeToggle = (checked: boolean) => {
     setEcoMode(checked);
     if (checked) {
       // If eco mode is on, also reduce animations
       setGardenAnimationsLevel('minimal');
       toast("Eco-Mode Enabled", {
-        description: "Reduced animations to save energy",
+        description: "Reduced animations to save energy"
       });
     } else {
       toast("Eco-Mode Disabled", {
-        description: "Standard garden experience restored",
+        description: "Standard garden experience restored"
       });
     }
   };
-  
   const handleResetGarden = () => {
     if (confirm("This will reset all your plants to their initial state. Are you sure?")) {
       // Clear garden plants from localStorage
       localStorage.removeItem('garden-plants');
       toast("Garden Reset", {
-        description: "Your garden has been reset to its initial state",
+        description: "Your garden has been reset to its initial state"
       });
       // Reload page to apply changes
       window.location.reload();
     }
   };
-
-  return (
-    <div className="space-y-4 bg-card rounded-lg border p-4 transition-all hover:border-primary/30">
+  return <div className="space-y-4 bg-card rounded-lg border p-4 transition-all hover:border-primary/30">
       {/* Enable/disable garden feature */}
       <div className="flex items-center justify-between space-x-2">
         <div>
-          <Label htmlFor="enable-garden">Enable Habit Garden</Label>
-          <p className="text-sm text-muted-foreground">
-            Visualize your habits as growing plants
-          </p>
+          <Label htmlFor="enable-garden">Enable/Disable Routine Garden</Label>
+          <p className="text-sm text-muted-foreground">Visualize your routine as growing plants</p>
         </div>
-        <Switch 
-          id="enable-garden" 
-          checked={isGardenEnabled}
-          onCheckedChange={handleToggleGarden}
-        />
+        <Switch id="enable-garden" checked={isGardenEnabled} onCheckedChange={handleToggleGarden} />
       </div>
       
       {/* Animation level settings */}
       <div className="space-y-2 pt-2">
         <Label>Animation Level</Label>
-        <RadioGroup 
-          value={gardenAnimationsLevel} 
-          onValueChange={(value) => setGardenAnimationsLevel(value as 'none' | 'minimal' | 'standard')}
-          className="flex flex-col space-y-1"
-        >
+        <RadioGroup value={gardenAnimationsLevel} onValueChange={value => setGardenAnimationsLevel(value as 'none' | 'minimal' | 'standard')} className="flex flex-col space-y-1">
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="standard" id="animations-standard" disabled={ecoMode} />
             <Label htmlFor="animations-standard" className={ecoMode ? "text-muted-foreground" : ""}>
@@ -110,11 +91,7 @@ export const GardenSettings: React.FC = () => {
             Optimize for energy efficiency
           </p>
         </div>
-        <Switch 
-          id="eco-mode" 
-          checked={ecoMode}
-          onCheckedChange={handleEcoModeToggle}
-        />
+        <Switch id="eco-mode" checked={ecoMode} onCheckedChange={handleEcoModeToggle} />
       </div>
       
       {/* High contrast option */}
@@ -125,11 +102,7 @@ export const GardenSettings: React.FC = () => {
             Increase visibility of garden elements
           </p>
         </div>
-        <Switch 
-          id="high-contrast" 
-          checked={highContrastGarden}
-          onCheckedChange={setHighContrastGarden}
-        />
+        <Switch id="high-contrast" checked={highContrastGarden} onCheckedChange={setHighContrastGarden} />
       </div>
       
       {/* Reset garden button */}
@@ -146,6 +119,5 @@ export const GardenSettings: React.FC = () => {
           Energy conscious settings help reduce the environmental impact of animations
         </p>
       </div>
-    </div>
-  );
+    </div>;
 };
